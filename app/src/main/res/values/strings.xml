@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PayMe</string>
+    <!--MainActivity-->
+    <string name="pending">Pending</string>
+    <string name="completed">Completed</string>
+    <string name="name">Name</string>
+    <string name="debit">Dr(-)</string>
+    <string name="credit">Cr(+)</string>
+
+
+</resources>
