@@ -9,23 +9,24 @@
 
     <Button
         android:id="@+id/loginBtn"
-        android:layout_width="266dp"
-        android:layout_height="37dp"
+        android:layout_width="285dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:background="#19959F"
         android:text="Login"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.506"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/pwdTxtField" />
+        app:layout_constraintTop_toBottomOf="@+id/forgotPwdLink" />
 
     <Button
         android:id="@+id/signUpBtn"
-        android:layout_width="264dp"
-        android:layout_height="37dp"
+        android:layout_width="285dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="12dp"
@@ -40,11 +41,11 @@
 
     <EditText
         android:id="@+id/emailTxtField"
-        android:layout_width="270dp"
-        android:layout_height="41dp"
+        android:layout_width="285dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="52dp"
         android:background="@drawable/txtbackground"
         android:drawableLeft="@mipmap/mail_icon"
         android:drawablePadding="10dp"
@@ -52,15 +53,15 @@
         android:hint="Email Address"
         android:inputType="textEmailAddress"
         android:paddingLeft="10dp"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
+        app:layout_constraintTop_toBottomOf="@+id/appLbl" />
 
     <EditText
         android:id="@+id/pwdTxtField"
-        android:layout_width="268dp"
-        android:layout_height="40dp"
+        android:layout_width="285dp"
+        android:layout_height="45dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
@@ -71,14 +72,14 @@
         android:hint="Password"
         android:inputType="textPassword"
         android:paddingLeft="10dp"
-        android:textSize="12sp"
+        android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.504"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailTxtField" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/appLbl"
         android:layout_width="177dp"
         android:layout_height="80dp"
         android:layout_marginEnd="8dp"
@@ -92,5 +93,19 @@
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/forgotPwdLink"
+        android:layout_width="wrap_content"
+        android:layout_height="18dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:text="Forgot your password?"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pwdTxtField" />
 
 </android.support.constraint.ConstraintLayout>
