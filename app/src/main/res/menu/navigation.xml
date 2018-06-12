@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@mipmap/home"
+        android:title="@string/title_home" />
+
+    <item
+        android:id="@+id/navigation_history"
+        android:icon="@mipmap/history"
+        android:title="@string/title_history" />
+
+    <item
+        android:id="@+id/navigation_addNewReceipt"
+        android:icon="@mipmap/add"
+        android:title="@string/title_addNewReceipt"
+        android:checked="true"/>
+
+    <item
+        android:id="@+id/navigation_contacts"
+        android:icon="@mipmap/contacts"
+        android:title="@string/title_contacts" />
+
+    <item
+        android:id="@+id/navigation_account"
+        android:icon="@mipmap/account"
+        android:title="@string/title_account" />
+
+</menu>
