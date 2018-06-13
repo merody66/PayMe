@@ -18,7 +18,11 @@
                                 <PersistentState>
                                   <option name="values">
                                     <map>
+<<<<<<< HEAD
                                       <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/communication/ic_mail_outline_black_24dp.xml" />
+=======
+                                      <entry key="url" value="jar:file:/C:/Program%20Files/Android/Android%20Studio/plugins/android/lib/android.jar!/images/material_design_icons/action/ic_home_black_24dp.xml" />
+>>>>>>> ocr
                                     </map>
                                   </option>
                                 </PersistentState>
@@ -29,8 +33,13 @@
                         <option name="values">
                           <map>
                             <entry key="color" value="ffffff" />
+<<<<<<< HEAD
                             <entry key="outputName" value="ic_mail_outline_black_24dp" />
                             <entry key="sourceFile" value="C:\Users\PewPew" />
+=======
+                            <entry key="outputName" value="ic_home_white_24dp" />
+                            <entry key="sourceFile" value="C:\Users\User" />
+>>>>>>> ocr
                           </map>
                         </option>
                       </PersistentState>
