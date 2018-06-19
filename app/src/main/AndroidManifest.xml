@@ -3,14 +3,12 @@
     package="com.example.user.payme">
 
     <uses-permission android:name="android.permission.INTERNET" />
-<<<<<<< HEAD
-=======
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <uses-feature android:name="android.hardware.camera2.full" />
->>>>>>> ocr
 
     <application
         android:allowBackup="true"
@@ -29,22 +27,23 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<<<<<<< HEAD
-        <activity android:name=".SignupActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ResetPasswordActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-=======
         <activity
-            android:name=".AddReceipt"
-            android:label="@string/title_activity_add_receipt" />
+            android:name=".SignupActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".ResetPasswordActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <!-- <activity -->
+        <!-- android:name=".AddReceipt" -->
+        <!-- android:label="@string/title_activity_add_receipt" /> -->
 
-        <activity android:name=".ShowActivity" android:label="@string/title_activity_show_receipt" />
+
+        <!-- <activity android:name=".ShowActivity" android:label="@string/title_activity_show_receipt" /> -->
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="text" />
         <!-- To use multiple models: android:value="text,model2,model3" -->
->>>>>>> ocr
+        <activity android:name=".Backup"></activity>
     </application>
 
 </manifest>

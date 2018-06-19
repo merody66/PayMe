@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- "Mark Favorite", should appear as action button if possible -->
+    <item
+        android:id="@+id/friend"
+        android:title="@string/add_friend" />
+
+    <item
+        android:id="@+id/group"
+        android:title="@string/add_group" />
+</menu>

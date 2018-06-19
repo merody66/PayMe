@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PayMe</string>
+
     <!--MainActivity-->
     <string name="pending">Pending</string>
     <string name="completed">Completed</string>
@@ -7,6 +8,7 @@
     <string name="debit">Dr(-)</string>
     <string name="credit">Cr(+)</string>
     <string name="title_activity_add_receipt">AddReceipt</string>
+
     <!--BottonNavigationView-->
     <string name="title_home">Home</string>
     <string name="title_history">History</string>
@@ -17,7 +19,9 @@
     <!--AddReceipt-->
     <string name="desc_camera">Camera</string>
     <string name="desc_gallery">Gallery</string>
-
     <string name="title_activity_show_receipt">ShowReceipt</string>
 
+    <!--ContactsFragment-->
+    <string name="add_friend">Add Friend</string>
+    <string name="add_group">Add Group</string>
 </resources>
