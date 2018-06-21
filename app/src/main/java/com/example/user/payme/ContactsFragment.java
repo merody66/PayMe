@@ -14,6 +14,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -104,7 +105,7 @@ public class ContactsFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        getActivity().getMenuInflater().inflate(R.menu.contacts_bar, menu);
+        inflater.inflate(R.menu.contacts_bar, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 

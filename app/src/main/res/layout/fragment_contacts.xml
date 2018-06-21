@@ -5,16 +5,32 @@
     android:layout_height="match_parent"
     tools:context=".ContactsFragment">
 
+    <EditText
+        android:id="@+id/searchContact"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@drawable/searchbar"
+        android:drawableLeft="@mipmap/search"
+        android:drawablePadding="10dp"
+        android:ems="10"
+        android:inputType="text"
+        android:paddingLeft="10dp"
+        android:hint="Search"
+        android:textSize="16sp"
+        android:textColorHint="@android:color/white"
+        android:textColor="@android:color/white"/>
 
     <TextView
         android:id="@+id/text1"
         android:layout_width="match_parent"
-        android:layout_height="381dp" />
+        android:layout_height="381dp"
+        android:layout_marginTop="60dp"/>
 
     <ListView
         android:id="@+id/contactList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp">
 
     </ListView>
 
