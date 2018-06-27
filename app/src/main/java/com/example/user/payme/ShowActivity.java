@@ -36,16 +36,27 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.example.user.payme.Objects.ReceiptItem;
+import com.example.user.payme.Objects.Receipt;
+
+
+
 public class ShowActivity extends AppCompatActivity {
     private static final String TAG = "ShowActivity";
     private static final int readPermissionID = 103;
     private ArrayList<String[]> menuList = new ArrayList<>();
     private ListView mListView;
-    private TextView mShopname;
-    private TextView mDate;
-    private TextView mGstAmt;
-    private TextView mServiceChargeAmt;
-    private TextView mSubtotalAmt;
+    private TextView tvShopname;
+    private TextView tvDate;
+    private TextView tvGstAmt;
+    private TextView tvServiceChargeAmt;
+    private TextView tvSubtotalAmt;
+
+    private String mShopname;
+    private String mDate;
+    private String mGstAmt;
+    private String mServiceChargeAmt;
+    private String mSubtotalAmt;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -85,11 +96,11 @@ public class ShowActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate: Started.");
         mListView = (ListView) findViewById(R.id.listView);
-        mShopname = (TextView) findViewById(R.id.shopname);
-        mDate = (TextView) findViewById(R.id.date);
-        mGstAmt = (TextView) findViewById(R.id.gstAmt);
-        mServiceChargeAmt= (TextView) findViewById(R.id.serviceChargeAmt);
-        mSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
+        tvShopname = (TextView) findViewById(R.id.shopname);
+        tvDate = (TextView) findViewById(R.id.date);
+        tvGstAmt = (TextView) findViewById(R.id.gstAmt);
+        tvServiceChargeAmt = (TextView) findViewById(R.id.serviceChargeAmt);
+        tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
 
         // taken from previous activity
         String imagePath = getIntent().getStringExtra("imagePath");
@@ -133,7 +144,6 @@ public class ShowActivity extends AppCompatActivity {
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
-                Log.d(TAG, "onOptionsItemSelected: default aosdnaksjndkjansd");
                 return super.onOptionsItemSelected(item);
 
         }
@@ -177,7 +187,7 @@ public class ShowActivity extends AppCompatActivity {
         Context context = getApplicationContext();
 
         // TODO: REMOVE SAMPLE IMAGE LATER
-        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_patbingsoo.jpg";
+        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
         Bitmap myBitmap = rotateImage(imagePath);
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
         // Create the TextRecognizer
@@ -202,6 +212,9 @@ public class ShowActivity extends AppCompatActivity {
         ArrayList<Text> priceArray = new ArrayList<>();
         String[] menuArray = new String[2];
 
+        ArrayList<ReceiptItem> mItemList = new ArrayList<>();
+        ReceiptItem receiptItem;
+
         Pattern datePattern = Pattern.compile("(0[1-9]|[12][0-9]|3[01])[- \\/.](0[1-9]|1[012])[- \\/.](19|20)\\d\\d");
         final Text[] resturantText = new Text[1];
         String dateText = "";
@@ -215,7 +228,10 @@ public class ShowActivity extends AppCompatActivity {
                 List<? extends Text> textComponents = item.getComponents();
                 for (Text currentText : textComponents) {
                     Matcher dateMatcher = datePattern.matcher(currentText.getValue());
+
+                    // Find and add all price format [Text]
                     if (currentText.getValue().matches("[o0-9]{1,2}.[o0-9]{2}")) {
+//                        Log.d(TAG, "ProcessOCR: found a price match "+currentText.getValue());
                         priceArray.add(currentText);
                     } else if (dateMatcher.find()) {
 //                        Log.d(TAG, "run: time " + currentText.getValue());
@@ -237,13 +253,17 @@ public class ShowActivity extends AppCompatActivity {
                         float itemLeft = currentText.getBoundingBox().left;
                         float itemBottom = currentText.getBoundingBox().bottom;
 
+
                         if (priceItem != currentText && (priceLeft - itemLeft) > 0) { //skip itself and those in roughly around the same column
                             if (priceBottom <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
-//                                Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
+                                Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
                                 menuArray[0] = currentText.getValue();
                                 menuArray[1] = priceItem.getValue();
                                 menuList.add(menuArray);
                                 menuArray = new String[2];
+                                
+                                receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
+                                mItemList.add(receiptItem);
                                 break;
                             }
                         }
@@ -255,41 +275,62 @@ public class ShowActivity extends AppCompatActivity {
 //            textView.setText(stringBuilder.toString());
 //            Log.d(TAG, "ProcessOCR: everything matched " + stringBuilder.toString());
 
-            ArrayList<String[]> updatedMenuList = new ArrayList<>();
+            ArrayList<ReceiptItem> updatedItemList = new ArrayList<>();
             boolean foundGST = false;
             Pattern gstPattern = Pattern.compile("(GST).+", Pattern.CASE_INSENSITIVE);
             Pattern serviceChargePattern = Pattern.compile("(service charge).+", Pattern.CASE_INSENSITIVE);
 
-            for (int i = 0; i < menuList.size(); i++) {
-                String menuItem = menuList.get(i)[0];
-//                Log.d(TAG, "ProcessOCR: menulist " + menuList.get(i)[0] + "   " + menuList.get(i)[1] + "\n");
+            for (int i = 0; i < mItemList.size(); i++) {
+                String mName = mItemList.get(i).getmName();
 
                 // TODO to a non hardcoded way
-                switch (menuItem) {
+                switch (mName) {
                     case "SUBTTL":
-                        mSubtotalAmt.setText(menuList.get(i)[1]);
+                        mSubtotalAmt = mItemList.get(i).getmPrice();
+                        tvSubtotalAmt.setText(mSubtotalAmt);
                         continue;
                 }
 
-                if (gstPattern.matcher(menuItem).find()) {
+                if (gstPattern.matcher(mName).find()) {
                     foundGST = true;
-                    mGstAmt.setText(menuList.get(i)[1]);
+                    mGstAmt = mItemList.get(i).getmPrice();
+                    tvGstAmt.setText(mGstAmt);
                     continue;
-                } else if (serviceChargePattern.matcher(menuItem).find()) {
-                    mServiceChargeAmt.setText(menuList.get(i)[1]);
+                } else if (serviceChargePattern.matcher(mName).find()) {
+                    mServiceChargeAmt = mItemList.get(i).getmPrice();
+                    tvServiceChargeAmt.setText(mServiceChargeAmt);
                     continue;
                 }
 
                 if (!foundGST ) {
-                    updatedMenuList.add(menuList.get(i));
+                    updatedItemList.add(mItemList.get(i));
                 }
             }
 
             Log.d(TAG, "ProcessOCR: set all the information and adapter");
-            mShopname.setText(resturantText[0].getValue().replaceAll("\\s+","").toUpperCase());
-            mDate.setText(dateText);
+            mShopname = resturantText[0].getValue().replaceAll("\\s+","").toUpperCase();
+            tvShopname.setText(mShopname);
+            mDate = dateText;
+            tvDate.setText(mDate);
 
-            ReceiptArrayAdapter adapter = new ReceiptArrayAdapter(this, updatedMenuList);
+//            TODO REMOVE HARDCODED VALUE
+            mShopname = "YA HUA BAK KUT TEH";
+            tvShopname.setText(mShopname);
+            mDate = "17/05/2018";
+            tvDate.setText(mDate);
+            updatedItemList = new ArrayList<>();
+            updatedItemList.add(new ReceiptItem("3 RICE", "2.40"));
+            updatedItemList.add(new ReceiptItem("1 CHINESE TEA (GLASS)", "1.80"));
+            updatedItemList.add(new ReceiptItem("1 COKE", "1.80"));
+            updatedItemList.add(new ReceiptItem("1 PRIME CUT RIBS", "11.50"));
+            updatedItemList.add(new ReceiptItem("1 RIBS", "8.50"));
+            updatedItemList.add(new ReceiptItem("2 WET TOWEL", "0.60"));
+            updatedItemList.add(new ReceiptItem("1 FRAGRANT FRIED CHICKEN WI", "6.80"));
+
+
+            Receipt receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
+
+            ReceiptArrayAdapter adapter = new ReceiptArrayAdapter(this, updatedItemList);
             mListView.setAdapter(adapter);
         }
     }

@@ -8,7 +8,7 @@
     android:weightSum="100">
 
     <TextView
-        android:id="@+id/foodView"
+        android:id="@+id/nameView"
         android:layout_width="159dp"
         android:layout_height="18dp"
         android:layout_marginStart="16dp"

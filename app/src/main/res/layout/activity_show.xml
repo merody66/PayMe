@@ -58,15 +58,49 @@
         app:layout_constraintStart_toEndOf="@+id/shopname" />
 
     <TextView
-        android:id="@+id/gst"
+        android:id="@+id/subtotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="36dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito"
-        android:text="@string/_7_gst"
+        android:text="@string/subtotal"
         app:layout_constraintStart_toStartOf="@+id/listView"
         app:layout_constraintTop_toBottomOf="@+id/listView" />
+
+    <TextView
+        android:id="@+id/subtotalAmt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/nunito"
+        android:text="TextView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/subtotal"
+        app:layout_constraintEnd_toEndOf="@+id/serviceChargeAmt"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="@+id/serviceChargeAmt" />
+
+    <TextView
+        android:id="@+id/serviceCharge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/nunito"
+        android:text="@string/_service_charge"
+        app:layout_constraintStart_toStartOf="@+id/subtotal"
+        app:layout_constraintTop_toBottomOf="@+id/subtotal" />
+
+    <TextView
+        android:id="@+id/serviceChargeAmt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/nunito"
+        android:text="TextView"
+        app:layout_constraintBaseline_toBaselineOf="@+id/serviceCharge"
+        app:layout_constraintEnd_toEndOf="@+id/gstAmt"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/gstAmt" />
 
     <TextView
         android:id="@+id/gstAmt"
@@ -82,53 +116,19 @@
         app:layout_constraintStart_toEndOf="@+id/gst" />
 
     <TextView
-        android:id="@+id/serviceCharge"
+        android:id="@+id/gst"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:fontFamily="@font/nunito"
-        android:text="@string/_service_charge"
-        app:layout_constraintStart_toStartOf="@+id/gst"
-        app:layout_constraintTop_toBottomOf="@+id/gst" />
-
-    <TextView
-        android:id="@+id/serviceChargeAmt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:fontFamily="@font/nunito"
-        android:text="TextView"
-        app:layout_constraintBaseline_toBaselineOf="@+id/serviceCharge"
-        app:layout_constraintEnd_toEndOf="@+id/gstAmt"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/gstAmt" />
-
-    <TextView
-        android:id="@+id/subtotal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/nunito"
-        android:text="@string/subtotal"
+        android:text="@string/_7_gst"
         app:layout_constraintStart_toStartOf="@+id/serviceCharge"
         app:layout_constraintTop_toBottomOf="@+id/serviceCharge" />
-
-    <TextView
-        android:id="@+id/subtotalAmt"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:fontFamily="@font/nunito"
-        android:text="TextView"
-        app:layout_constraintBaseline_toBaselineOf="@+id/subtotal"
-        app:layout_constraintEnd_toEndOf="@+id/serviceChargeAmt"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/serviceChargeAmt" />
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
-        android:layout_height="254dp"
+        android:layout_height="296dp"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="@+id/shopname"
         app:layout_constraintHorizontal_bias="0.05"
@@ -148,10 +148,10 @@
         android:textAllCaps="false"
         android:textColor="@android:color/white"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/subtotalAmt"
-        app:layout_constraintHorizontal_bias="0.588"
-        app:layout_constraintStart_toStartOf="@+id/subtotal"
-        app:layout_constraintTop_toBottomOf="@+id/subtotal" />
+        app:layout_constraintEnd_toEndOf="@+id/gstAmt"
+        app:layout_constraintHorizontal_bias="0.584"
+        app:layout_constraintStart_toStartOf="@+id/gst"
+        app:layout_constraintTop_toBottomOf="@+id/gst" />
 
 
     <!--<ImageView-->
