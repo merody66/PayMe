@@ -1,10 +1,20 @@
 package com.example.user.payme.Objects;
 
+/**
+ * Contact class to contain the following contact information:
+ *  - Name
+ *  - Profile Image Drawable
+ *  - Phone Number (From Phone Directory)
+ */
 public class Contact {
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;
 
+    public Contact() {
+        // Default constructor needed
+    }
+    
     public Contact(int mImageDrawable, String mName, String mPhoneNumber) {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
@@ -18,5 +28,23 @@ public class Contact {
     public void setmName(String mName) { this.mName = mName; }
 
     public String getmPhoneNumber() { return this.mPhoneNumber; }
-    public void setmPhoneNumber(String mPhoneNumber) { this.mPhoneNumber = mPhoneNumber; }
+    public void setmPhoneNumber(String mPhoneNumber) { this.mPhoneNumber = mPhoneNumber.trim(); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Contact)) {
+            return false;
+        }
+
+        Contact con = (Contact) o;
+        return con.mName.equals(mName);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + mName.hashCode();
+        return hash;
+    }
 }

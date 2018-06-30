@@ -11,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.Objects.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -20,6 +21,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+import java.util.HashMap;
 
 
 public class SignupActivity extends AppCompatActivity {
@@ -76,6 +80,7 @@ public class SignupActivity extends AppCompatActivity {
 
                             // Save other user details into database
                             User newUser = new User(name, phone, email);
+                            System.out.println(newUser);
                             ref.child("users").child(user.getUid()).setValue(newUser);
 
 //                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
@@ -110,7 +115,6 @@ public class SignupActivity extends AppCompatActivity {
                                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
-                                            finish();
                                         }
                                     });
                             AlertDialog alert = builder.create();

@@ -21,7 +21,17 @@
     <string name="desc_gallery">Gallery</string>
     <string name="title_activity_show_receipt">ShowReceipt</string>
 
-    <!--ContactsFragment-->
+    <!--AddFriendFragment & AddGroupFragment-->
     <string name="add_friend">Add Friend</string>
     <string name="add_group">Add Group</string>
+    <string name="contact_name">Contact Name</string>
+    <string name="text_hint_name">Name</string>
+    <string name="paylah_number">PayLah! Number</string>
+    <string name="group_members_msg">Add friends to the group</string>
+    <string name="add_group_btn">Done</string>
+
+    <!-- AccountSettingsFragment -->
+    <string name="chng_profile_pic">Change Profile Picture</string>
+    <string name="push_notify">Push notifications</string>
+    <string name="log_out">Log out</string>
 </resources>

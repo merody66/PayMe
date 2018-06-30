@@ -1,34 +1,36 @@
-package com.example.user.payme;
+package com.example.user.payme.Fragments;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.provider.ContactsContract;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
 
+import com.example.user.payme.Adapters.ContactAdapter;
+import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
+import com.example.user.payme.R;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 
 
 /**
@@ -51,13 +53,12 @@ public class ContactsFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-
-    final int REQUEST_READ_CONTACTS = 101;
+    final int PERMISSION_ALL = 1;
     private ListView listView;
     private ArrayList<Contact> contactsList;
     private ContactAdapter mAdapter;
+    private EditText searchContact;
     Cursor cursor;
-    String name, phoneNumber;
 
 
     // Empty public constructor, required by the system
@@ -100,7 +101,40 @@ public class ContactsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_contacts, container, false);
+        View view = inflater.inflate(R.layout.fragment_contacts, container, false);
+
+        String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
+
+        if (!hasPermissions(getActivity(), PERMISSIONS)) {
+            requestPermissions(PERMISSIONS, PERMISSION_ALL);
+        } else {
+
+            listView = view.findViewById(R.id.contactList);
+            searchContact = view.findViewById(R.id.searchContact);
+            contactsList = new ArrayList<>();
+
+            GetContactsIntoArrayList();
+            mAdapter = new ContactAdapter(getActivity(), contactsList);
+            listView.setAdapter(mAdapter);
+
+            searchContact.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                    // When user changed the Text
+                    mAdapter.getFilter().filter(cs);
+                }
+
+                @Override
+                public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                }
+
+                @Override
+                public void afterTextChanged(Editable arg0) {
+                }
+            });
+        }
+
+        return view;
     }
 
     @Override
@@ -109,49 +143,25 @@ public class ContactsFragment extends Fragment {
         super.onCreateOptionsMenu(menu, inflater);
     }
 
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+            case R.id.add_friend:
+                addFriend();
+                return true;
+            case R.id.add_group:
+                addGroup();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
             mListener.onFragmentInteraction();
         }
-    }
-
-    public void onActivityCreated(Bundle savedInstanceState) {
-        // Always call the super method first
-        super.onActivityCreated(savedInstanceState);
-
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {  // permission not granted
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(),
-                    Manifest.permission.READ_CONTACTS)) {
-                Log.d("TEST", "Code1");
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
-                // No explanation needed; request the permission
-                Log.d("TEST", "Code2");
-                ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.READ_CONTACTS},
-                        REQUEST_READ_CONTACTS);
-
-                // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
-        } else {  // permission already granted prior
-
-            Log.d("TEST", "Code3");
-
-
-        }
-
-        listView = (ListView) getActivity().findViewById(R.id.contactList);
-        contactsList = new ArrayList<>();
-        GetContactsIntoArrayList();
-        mAdapter = new ContactAdapter(getActivity(), contactsList);
-        listView.setAdapter(mAdapter);
     }
 
     @Override
@@ -171,16 +181,19 @@ public class ContactsFragment extends Fragment {
         mListener = null;
     }
 
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
                                            int[] grantResults) {
         switch (requestCode) {
-            case REQUEST_READ_CONTACTS: {
+            case PERMISSION_ALL: {
                 Log.d("PERMISSION", "Permission Granted.");
+
+                GetContactsIntoArrayList();
+                mAdapter = new ContactAdapter(getActivity(), contactsList);
+                listView.setAdapter(mAdapter);
+
                 return;
             }
-
         }
     }
 
@@ -200,26 +213,56 @@ public class ContactsFragment extends Fragment {
         void onFragmentInteraction();
     }
 
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     public void GetContactsIntoArrayList(){
 
         cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null, null);
 
         while (cursor.moveToNext()) {
-
-            name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
-
-            phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
-
+            String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
             Contact contact = new Contact(0, name, phoneNumber);
-
-            contactsList.add(contact);
-
-            // contactsArray.add(name + " "  + ":" + " " + phoneNumber);
-
+            if (!contactsList.contains(contact)) {  // to avoid adding duplicates
+                contactsList.add(contact);
+            }
         }
 
+        Collections.sort(contactsList, (o1, o2) -> o1.getmName().compareTo(o2.getmName()));
         cursor.close();
+    }
 
+
+    private void addFriend() {
+        Fragment friendFragment = new AddFriendFragment();
+
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_container, friendFragment);
+        // previous state will be added to the backstack, allowing you to go back with the back button.
+        // must be done before commit.
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
+
+    private void addGroup() {
+        Fragment groupFragment = new AddGroupFragment();
+
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_container, groupFragment);
+        // previous state will be added to the backstack, allowing you to go back with the back button.
+        // must be done before commit.
+        transaction.addToBackStack(null);
+        transaction.commit();
     }
 }

@@ -9,11 +9,19 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener {
+import com.example.user.payme.Fragments.AccountSettingsFragment;
+import com.example.user.payme.Fragments.AddFriendFragment;
+import com.example.user.payme.Fragments.AddGroupFragment;
+import com.example.user.payme.Fragments.ContactsFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+public class MainActivity extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener, AddFriendFragment.OnFragmentInteractionListener,
+        AddGroupFragment.OnFragmentInteractionListener, AccountSettingsFragment.OnFragmentInteractionListener {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+    private FirebaseAuth auth;
     private Fragment fragment;
 
     @Override
@@ -22,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        auth = FirebaseAuth.getInstance();
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         BottomNavigationViewHelper.disableShiftMode(navigation);
 
@@ -41,6 +51,7 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
                     fragment = new ContactsFragment();
                     break;
                 case R.id.navigation_account:
+                    fragment = new AccountSettingsFragment();
                     break;
             }
             final FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -52,6 +63,18 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
     };
 
     @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Check if user is signed in
+        FirebaseUser currentUser = auth.getCurrentUser();
+        System.out.println(currentUser);
+        if (currentUser == null) {
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+        }
+    }
+
+    @Override
     public void onFragmentInteraction() {
         // can ignore at the moment
     }
@@ -59,4 +82,5 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
     public void setActionBarTitle(String title) {
         getSupportActionBar().setTitle(title);
     }
+
 }
