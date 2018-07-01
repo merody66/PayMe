@@ -19,7 +19,17 @@
     <!--AddReceipt-->
     <string name="desc_camera">Camera</string>
     <string name="desc_gallery">Gallery</string>
+
+    <!--ShowReceipt-->
     <string name="title_activity_show_receipt">ShowReceipt</string>
+    <string name="_7_gst">7% GST</string>
+    <string name="_service_charge">10% Service Charge</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="done">Done</string>
+
+    <!--AppBar-->
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
 
     <!--AddFriendFragment & AddGroupFragment-->
     <string name="add_friend">Add Friend</string>

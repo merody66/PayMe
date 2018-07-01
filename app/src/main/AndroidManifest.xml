@@ -34,16 +34,18 @@
         <activity
             android:name=".ResetPasswordActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <!-- <activity -->
-        <!-- android:name=".AddReceipt" -->
-        <!-- android:label="@string/title_activity_add_receipt" /> -->
-
-
-        <!-- <activity android:name=".ShowActivity" android:label="@string/title_activity_show_receipt" /> -->
+        <activity
+            android:name=".AddReceipt"
+            android:label="@string/title_activity_add_receipt"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".ShowActivity"
+            android:label="@string/title_activity_show_receipt"
+            android:theme="@style/AppTheme.NoActionBar" />
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="text" />
-        <!-- To use multiple models: android:value="text,model2,model3" -->
+
         <activity android:name=".Backup"></activity>
     </application>
 

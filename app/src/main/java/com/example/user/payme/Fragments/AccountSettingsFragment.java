@@ -15,6 +15,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.User;
 import com.example.user.payme.R;
 import com.example.user.payme.SignupActivity;
@@ -91,6 +92,8 @@ public class AccountSettingsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        ((MainActivity) getActivity())
+                .setActionBarTitle("Account Settings");
     }
 
     @Override

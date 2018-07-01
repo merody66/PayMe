@@ -45,8 +45,9 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
                 case R.id.navigation_history:
                     break;
                 case R.id.navigation_addNewReceipt:
-                    //Intent intent = new Intent(MainActivity.this, AddReceipt.class);
-                    //startActivity(intent);
+                    Intent intent = new Intent(MainActivity.this, AddReceipt.class);
+                    startActivity(intent);
+                    return true;
                 case R.id.navigation_contacts:
                     fragment = new ContactsFragment();
                     break;
