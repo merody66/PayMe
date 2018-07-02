@@ -6,6 +6,17 @@
     android:layout_height="match_parent"
     tools:context=".ShowActivity">
 
+    <!--<android.support.v7.widget.Toolbar-->
+        <!--android:id="@+id/toolbarTop"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?android:attr/actionBarSize"-->
+        <!--android:background="@color/colorPrimary"-->
+        <!--android:elevation="4dp"-->
+        <!--android:theme="@style/AppTheme"-->
+        <!--app:layout_constraintEnd_toEndOf="parent"-->
+        <!--app:layout_constraintStart_toStartOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent" />-->
+
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbarTop"
         android:layout_width="match_parent"
@@ -13,36 +24,88 @@
         android:background="@color/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/AppTheme"
+        app:menu="@menu/manual_appbar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <android.support.design.widget.BottomNavigationView
-        android:id="@+id/navigation"
-        android:layout_width="0dp"
+    <!--TODO change this to horizontal listview-->
+    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image_user"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="20dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:src="@mipmap/pikachu"
+        app:civ_border_color="#6EB26E"
+        app:civ_border_width="1.5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbarTop" />
+
+    <TextView
+        android:id="@+id/user_text"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?android:attr/windowBackground"
-        android:fontFamily="@font/nunito"
-        app:itemIconTint="@color/colourIcon"
-        app:itemTextColor="@color/colourIcon"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/navigation" />
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="You"
+        app:layout_constraintEnd_toEndOf="@+id/profile_image_user"
+        app:layout_constraintHorizontal_bias="0.55"
+        app:layout_constraintStart_toStartOf="@+id/profile_image_user"
+        app:layout_constraintTop_toBottomOf="@+id/profile_image_user" />
+
+    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/profile_image_contact1"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/profile"
+        app:civ_border_color="#a5a5a5"
+        app:civ_border_width="1dp"
+        app:layout_constraintBottom_toTopOf="@+id/user_text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.062"
+        app:layout_constraintStart_toEndOf="@+id/profile_image_user"
+        app:layout_constraintTop_toTopOf="@+id/profile_image_user"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/contact1_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Hui Chun"
+        app:layout_constraintEnd_toEndOf="@+id/profile_image_contact1"
+        app:layout_constraintHorizontal_bias="0.51"
+        app:layout_constraintStart_toStartOf="@+id/profile_image_contact1"
+        app:layout_constraintTop_toBottomOf="@+id/profile_image_contact1" />
 
     <TextView
         android:id="@+id/shopname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
+        android:paddingStart="16dp"
         android:fontFamily="@font/nunito"
         android:text="TextView"
         android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="normal"
-        app:layout_constraintStart_toStartOf="@+id/toolbarTop"
-        app:layout_constraintTop_toBottomOf="@+id/toolbarTop" />
+        app:layout_constraintEnd_toEndOf="@+id/profile_image_user"
+        app:layout_constraintHorizontal_bias="0.166"
+        app:layout_constraintStart_toStartOf="@+id/profile_image_user"
+        app:layout_constraintTop_toBottomOf="@+id/user_text" />
 
     <TextView
         android:id="@+id/date"
@@ -56,6 +119,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.055"
         app:layout_constraintStart_toEndOf="@+id/shopname" />
+
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="wrap_content"
+        android:layout_height="225dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintEnd_toEndOf="@+id/shopname"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toStartOf="@+id/shopname"
+        app:layout_constraintTop_toBottomOf="@+id/shopname" />
 
     <TextView
         android:id="@+id/subtotal"
@@ -84,7 +157,7 @@
         android:id="@+id/serviceCharge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito"
         android:text="@string/_service_charge"
         app:layout_constraintStart_toStartOf="@+id/subtotal"
@@ -119,29 +192,19 @@
         android:id="@+id/gst"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito"
         android:text="@string/_7_gst"
         app:layout_constraintStart_toStartOf="@+id/serviceCharge"
         app:layout_constraintTop_toBottomOf="@+id/serviceCharge" />
 
-    <ListView
-        android:id="@+id/listView"
-        android:layout_width="wrap_content"
-        android:layout_height="296dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="@+id/shopname"
-        app:layout_constraintHorizontal_bias="0.05"
-        app:layout_constraintStart_toStartOf="@+id/shopname"
-        app:layout_constraintTop_toBottomOf="@+id/shopname" />
-
     <Button
-        android:id="@+id/button"
+        android:id="@+id/done_button"
         android:layout_width="98dp"
         android:layout_height="29dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="@color/colorPrimary"
         android:fontFamily="@font/nunito"
         android:text="@string/done"
@@ -149,9 +212,22 @@
         android:textColor="@android:color/white"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/gstAmt"
-        app:layout_constraintHorizontal_bias="0.584"
+        app:layout_constraintHorizontal_bias="0.588"
         app:layout_constraintStart_toStartOf="@+id/gst"
         app:layout_constraintTop_toBottomOf="@+id/gst" />
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/windowBackground"
+        android:fontFamily="@font/nunito"
+        app:itemIconTint="@color/colourIcon"
+        app:itemTextColor="@color/colourIcon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/navigation" />
 
 
     <!--<ImageView-->

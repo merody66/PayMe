@@ -38,10 +38,12 @@ public class AddReceipt extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int requestPermissionID = 101;
     private static final int writePermissionID = 102;
+    private static final int PICK_IMAGE = 100;
 
     private SurfaceView mCameraView;
     private CameraSource mCameraSource;
     private ImageButton mTakePicture;
+    private ImageButton mGallery;
     private String imagePath = "do not exist";
 
 
@@ -205,9 +207,16 @@ public class AddReceipt extends AppCompatActivity {
                 bundle.putString("imagepath", captureFile.toString());
                 imagePath = captureFile.toString();
 
-                Intent intent = new Intent(AddReceipt.this, ShowActivity.class);
+                // TODO pass the intent correctly from addreceipt to choosecontact to showactivity
+//                Intent intent = new Intent(AddReceipt.this, ShowActivity.class);
+//                intent.putExtra("imagePath", captureFile.toString());
+//                startActivity(intent);
+                Intent intent = new Intent(AddReceipt.this, ChooseContact.class);
+                Log.d(TAG, "onPictureTaken: imagepath "+captureFile.toString());
                 intent.putExtra("imagePath", captureFile.toString());
                 startActivity(intent);
+
+
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -219,6 +228,34 @@ public class AddReceipt extends AppCompatActivity {
 
     public String getImagePath() {
         return imagePath;
+    }
+
+    private void openGallery() {
+        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(AddReceipt.this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    PICK_IMAGE);
+            return;
+        }
+
+        Intent gallery =
+                new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        startActivityForResult(gallery, PICK_IMAGE);
+    }
+
+    //todo need to fix data.getData()
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
+            Intent intent = new Intent(AddReceipt.this, ChooseContact.class);
+            Log.d(TAG, "onActivityResult: result uri "+data.getData().toString());
+            intent.putExtra("imagePath", data.getData().toString());
+            startActivity(intent);
+        }
     }
 
     @Override
@@ -258,7 +295,7 @@ public class AddReceipt extends AppCompatActivity {
 
         mCameraView = (SurfaceView) findViewById(R.id.surfaceView);
         mTakePicture = (ImageButton) findViewById(R.id.cameraButton);
-
+        mGallery = (ImageButton) findViewById(R.id.galleryButton);
 
         startCameraSource();
         mTakePicture.setOnClickListener(new View.OnClickListener() {
@@ -267,6 +304,13 @@ public class AddReceipt extends AppCompatActivity {
                 mCameraSource.takePicture(null, pictureCallback);
 //                mCameraSource.stop();
 
+            }
+        });
+
+        mGallery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openGallery();
             }
         });
     }

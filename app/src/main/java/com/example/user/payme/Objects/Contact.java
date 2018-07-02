@@ -1,12 +1,14 @@
 package com.example.user.payme.Objects;
 
+import java.io.Serializable;
+
 /**
  * Contact class to contain the following contact information:
  *  - Name
  *  - Profile Image Drawable
  *  - Phone Number (From Phone Directory)
  */
-public class Contact {
+public class Contact implements Serializable{
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;

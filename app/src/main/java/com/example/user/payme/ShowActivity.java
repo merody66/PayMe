@@ -7,6 +7,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.os.Bundle;
 import android.os.Environment;
@@ -21,6 +22,9 @@ import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,12 +55,14 @@ public class ShowActivity extends AppCompatActivity {
     private TextView tvGstAmt;
     private TextView tvServiceChargeAmt;
     private TextView tvSubtotalAmt;
+    private Button mDone_button;
 
     private String mShopname;
     private String mDate;
     private String mGstAmt;
     private String mServiceChargeAmt;
     private String mSubtotalAmt;
+
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -86,8 +92,10 @@ public class ShowActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show);
 
+        // TODO redo the toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbarTop);
         setSupportActionBar(myToolbar);
+        myToolbar.setTitleTextColor(Color.WHITE);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setSelectedItemId(R.id.navigation_addNewReceipt);
@@ -101,6 +109,7 @@ public class ShowActivity extends AppCompatActivity {
         tvGstAmt = (TextView) findViewById(R.id.gstAmt);
         tvServiceChargeAmt = (TextView) findViewById(R.id.serviceChargeAmt);
         tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
+        mDone_button = (Button) findViewById(R.id.done_button);
 
         // taken from previous activity
         String imagePath = getIntent().getStringExtra("imagePath");
@@ -130,8 +139,8 @@ public class ShowActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.back_appbar, menu);
-//        super.onCreateOptionsMenu(menu);
+//        inflater.inflate(R.menu.back_appbar, menu);
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 
@@ -313,7 +322,7 @@ public class ShowActivity extends AppCompatActivity {
             mDate = dateText;
             tvDate.setText(mDate);
 
-//            TODO REMOVE HARDCODED VALUE
+            // TODO REMOVE HARDCODED VALUE
             mShopname = "YA HUA BAK KUT TEH";
             tvShopname.setText(mShopname);
             mDate = "17/05/2018";
@@ -332,6 +341,15 @@ public class ShowActivity extends AppCompatActivity {
 
             ReceiptArrayAdapter adapter = new ReceiptArrayAdapter(this, updatedItemList);
             mListView.setAdapter(adapter);
+
+            //todo pass the clicked item
+            mDone_button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(ShowActivity.this, RequestPayment.class);
+                    startActivity(intent);
+                }
+            });
         }
     }
 }

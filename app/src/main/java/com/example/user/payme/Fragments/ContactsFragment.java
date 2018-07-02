@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.example.user.payme.Adapters.ContactAdapter;
+import com.example.user.payme.ChooseContact;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.R;
@@ -93,8 +94,13 @@ public class ContactsFragment extends Fragment {
         setHasOptionsMenu(true);
 
         // Set title bar
-        ((MainActivity) getActivity())
-                .setActionBarTitle("Contacts");
+
+        if (getActivity().getClass().equals(MainActivity.class)) {
+            ((MainActivity) getActivity())
+                    .setActionBarTitle("Contacts");
+        } else {
+            ((ChooseContact) getActivity()).setActionBarTitle("Choose");
+        }
     }
 
     @Override
