@@ -207,7 +207,7 @@
             android:backgroundTint="@android:color/white"
             android:ems="10"
             android:hint="xxxx xxxx"
-            android:inputType="textPersonName"
+            android:inputType="number|numberSigned"
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
             android:textSize="16sp"

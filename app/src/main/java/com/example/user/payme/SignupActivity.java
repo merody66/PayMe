@@ -1,6 +1,7 @@
 package com.example.user.payme;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -115,6 +116,7 @@ public class SignupActivity extends AppCompatActivity {
                                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             dialog.cancel();
+                                            finish();
                                         }
                                     });
                             AlertDialog alert = builder.create();

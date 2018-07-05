@@ -90,6 +90,7 @@ public class ContactsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        contactsList = new ArrayList<>();
         setHasOptionsMenu(true);
 
         // Set title bar
@@ -105,13 +106,12 @@ public class ContactsFragment extends Fragment {
 
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
+        listView = view.findViewById(R.id.contactList);
+        searchContact = view.findViewById(R.id.searchContact);
+
         if (!hasPermissions(getActivity(), PERMISSIONS)) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
         } else {
-
-            listView = view.findViewById(R.id.contactList);
-            searchContact = view.findViewById(R.id.searchContact);
-            contactsList = new ArrayList<>();
 
             GetContactsIntoArrayList();
             mAdapter = new ContactAdapter(getActivity(), contactsList);
