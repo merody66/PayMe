@@ -11,23 +11,23 @@
 
     <TextView
         android:id="@+id/nameView"
-        android:layout_width="159dp"
-        android:layout_height="18dp"
-        android:layout_marginStart="16dp"
+        android:layout_width="222dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="10dp"
         android:layout_weight="20"
         android:fontFamily="@font/nunito"
         android:text="TextView"
-        android:textSize="14sp" />
+        android:textSize="15sp" />
 
     <TextView
         android:id="@+id/priceView"
-        android:layout_width="67dp"
+        android:layout_width="50dp"
         android:layout_height="22dp"
-        android:layout_marginStart="40dp"
+        android:layout_marginStart="30dp"
         android:layout_weight="30"
         android:fontFamily="@font/nunito"
-        android:text="TextView"
-        android:textSize="14sp" />
+        android:text="XX.XX"
+        android:textSize="15sp" />
 
     <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/sharedButton"

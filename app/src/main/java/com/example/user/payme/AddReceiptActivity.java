@@ -1,11 +1,14 @@
 package com.example.user.payme;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -33,7 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 
-public class AddReceipt extends AppCompatActivity {
+public class AddReceiptActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int requestPermissionID = 101;
@@ -44,7 +47,9 @@ public class AddReceipt extends AppCompatActivity {
     private CameraSource mCameraSource;
     private ImageButton mTakePicture;
     private ImageButton mGallery;
-    private String imagePath = "do not exist";
+    private SharedPreferences mSharedPreferences;
+    private SharedPreferences.Editor mEditor;
+
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -54,7 +59,7 @@ public class AddReceipt extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent intent = new Intent(AddReceipt.this, MainActivity.class);
+                    Intent intent = new Intent(AddReceiptActivity.this, MainActivity.class);
                     startActivity(intent);
                     return true;
                 case R.id.navigation_history:
@@ -118,7 +123,7 @@ public class AddReceipt extends AppCompatActivity {
                         if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
 
-                            ActivityCompat.requestPermissions(AddReceipt.this,
+                            ActivityCompat.requestPermissions(AddReceiptActivity.this,
                                     new String[]{Manifest.permission.CAMERA},
                                     requestPermissionID);
                             return;
@@ -182,7 +187,7 @@ public class AddReceipt extends AppCompatActivity {
         @Override
         public void onPictureTaken(byte[] bytes) {
 
-            ActivityCompat.requestPermissions(AddReceipt.this,
+            ActivityCompat.requestPermissions(AddReceiptActivity.this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     writePermissionID);
 
@@ -202,18 +207,17 @@ public class AddReceipt extends AppCompatActivity {
                 stream.close();
                 Toast.makeText(getApplicationContext(),"Successfully saved at: "+ captureFile.toString(),Toast.LENGTH_LONG).show();
 
-                // send image info to fragment AddShow
-                Bundle bundle = new Bundle();
-                bundle.putString("imagepath", captureFile.toString());
-                imagePath = captureFile.toString();
 
-                // TODO pass the intent correctly from addreceipt to choosecontact to showactivity
-//                Intent intent = new Intent(AddReceipt.this, ShowActivity.class);
-//                intent.putExtra("imagePath", captureFile.toString());
-//                startActivity(intent);
-                Intent intent = new Intent(AddReceipt.this, ChooseContact.class);
+                Intent intent = new Intent(AddReceiptActivity.this, ChooseContactActivity.class);
                 Log.d(TAG, "onPictureTaken: imagepath "+captureFile.toString());
-                intent.putExtra("imagePath", captureFile.toString());
+
+                // mSharedPreferences for camera
+                Context context = getApplicationContext();
+                mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                mEditor = mSharedPreferences.edit();
+                mEditor.putString("imagePath",captureFile.toString());
+                mEditor.commit();
+
                 startActivity(intent);
 
 
@@ -226,34 +230,35 @@ public class AddReceipt extends AppCompatActivity {
         }
     };
 
-    public String getImagePath() {
-        return imagePath;
-    }
-
     private void openGallery() {
         if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(AddReceipt.this,
+            ActivityCompat.requestPermissions(AddReceiptActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                     PICK_IMAGE);
             return;
         }
 
-        Intent gallery =
-                new Intent(Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
+        Intent gallery = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
         startActivityForResult(gallery, PICK_IMAGE);
     }
 
-    //todo need to fix data.getData()
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
-            Intent intent = new Intent(AddReceipt.this, ChooseContact.class);
-            Log.d(TAG, "onActivityResult: result uri "+data.getData().toString());
-            intent.putExtra("imagePath", data.getData().toString());
+            Intent intent = new Intent(AddReceiptActivity.this, ChooseContactActivity.class);
+//            Intent intent = new Intent(AddReceiptActivity.this, TestImage.class);
+
+            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mEditor = mSharedPreferences.edit();
+            mEditor.putString("imagePath", data.getData().toString());
+            mEditor.commit();
+
+//            Log.d(TAG, "onActivityResult: uri "+imageUri.getPath());
+//            Log.d(TAG, "onActivityResult: uri "+imageUri.toString());
             startActivity(intent);
         }
     }

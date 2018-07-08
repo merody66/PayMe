@@ -1,7 +1,5 @@
 package com.example.user.payme;
 
-import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -10,25 +8,13 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.ListView;
 
-import com.example.user.payme.Adapters.ContactAdapter;
 import com.example.user.payme.Fragments.AccountSettingsFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
-import com.example.user.payme.Objects.Contact;
 
-import java.util.ArrayList;
-
-public class ChooseContact extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener {
-    private static final int readContactPermissionID = 104;
-    private ListView listView;
-    private ArrayList<Contact> contactsList;
-    private ContactAdapter mAdapter;
-    private Cursor cursor;
-
+public class ChooseContactActivity extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener {
+    private static final String TAG = "ChooseContactActivity";
     private Fragment fragment;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +32,7 @@ public class ChooseContact extends AppCompatActivity implements ContactsFragment
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         BottomNavigationViewHelper.disableShiftMode(navigation);
 
+        //todo fix nav bar fragments at other view beside mainactivity
         navigation.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -58,10 +45,10 @@ public class ChooseContact extends AppCompatActivity implements ContactsFragment
                             case R.id.navigation_addNewReceipt:
                                 return true;
                             case R.id.navigation_contacts:
-//                                fragment = new ContactsFragment();
+                                fragment = new ContactsFragment();
                                 break;
                             case R.id.navigation_account:
-//                                fragment = new AccountSettingsFragment();
+                                fragment = new AccountSettingsFragment();
                                 break;
                         }
 //                        final FragmentTransaction transaction = fragmentManager.beginTransaction();

@@ -4,18 +4,18 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.os.Bundle;
-import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
@@ -23,26 +23,26 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.payme.Adapters.HorizontalRecyclerViewAdapter;
+import com.example.user.payme.Adapters.ReceiptArrayAdapter;
+import com.example.user.payme.Objects.Contact;
+import com.example.user.payme.Objects.Image;
+import com.example.user.payme.Objects.Receipt;
+import com.example.user.payme.Objects.ReceiptItem;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.example.user.payme.Objects.ReceiptItem;
-import com.example.user.payme.Objects.Receipt;
-
 
 
 public class ShowActivity extends AppCompatActivity {
@@ -56,12 +56,21 @@ public class ShowActivity extends AppCompatActivity {
     private TextView tvServiceChargeAmt;
     private TextView tvSubtotalAmt;
     private Button mDone_button;
-
     private String mShopname;
     private String mDate;
     private String mGstAmt;
     private String mServiceChargeAmt;
     private String mSubtotalAmt;
+
+    private SharedPreferences mSharedPreferences;
+    private SharedPreferences.Editor mEditor;
+    private Bitmap myBitmap;
+
+    // todo change to listview or something
+//    private CircleImageView profile_image_contact1;
+//    private TextView mContact1Text;
+
+    private ArrayList<Contact> mContacts = new ArrayList<>();
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -111,8 +120,19 @@ public class ShowActivity extends AppCompatActivity {
         tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
         mDone_button = (Button) findViewById(R.id.done_button);
 
-        // taken from previous activity
-        String imagePath = getIntent().getStringExtra("imagePath");
+        // Data taken from previous ChooseContactActivity
+        Contact mContact = (Contact) getIntent().getSerializableExtra("Contact");
+        // TODO retrieve current logged in user
+        mContacts.add(mContact);
+
+        // Data taken from shared preferences
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mEditor = mSharedPreferences.edit();
+        String imagePath = mSharedPreferences.getString("imagePath", "default nothing");
+        Log.d(TAG, "onCreate: from sp "+imagePath);
+        Context mContext = getApplicationContext();
+        myBitmap = new Image(mContext, imagePath).getmBitmap();
+
 
         if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -123,17 +143,20 @@ public class ShowActivity extends AppCompatActivity {
             return;
         }
 
-//        set imagepath and image
-//        textView = findViewById(R.id.textView5);
-//        textView.setText(imagePath);
-//        mShowPicture = (ImageView) findViewById(R.id.galleryView);
-
-//        Bitmap myBitmap = rotateImage(imagePath);
-//        mShowPicture.setImageBitmap(myBitmap);
-
         Log.d(TAG, "onCreate: started ProcessOCR");
         ProcessOCR();
 
+    }
+
+    // todo can do the same for receiptadapter
+    private void initRecyclerView() {
+        Log.d(TAG, "initRecyclerView: started");
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(layoutManager);
+        HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(this, mContacts);
+        recyclerView.setAdapter(adapter);
     }
 
     @Override
@@ -158,46 +181,12 @@ public class ShowActivity extends AppCompatActivity {
         }
     }
 
-    private Bitmap rotateImage(String imagePath) {
-        Bitmap myBitmap = null;
-        try {
-            ExifInterface exif = new ExifInterface(imagePath);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            Log.d(TAG, "onCreate: orientation "+orientation);
-
-            Matrix matrix = new Matrix();
-            switch (orientation){
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    matrix.postRotate(90);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    matrix.postRotate(180);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    matrix.postRotate(270);
-                    break;
-                default:
-                    break;
-            }
-
-            Log.d(TAG, "onCreate: matrix "+ matrix);
-            myBitmap = BitmapFactory.decodeFile(imagePath);
-            myBitmap = Bitmap.createBitmap(myBitmap, 0 ,0, myBitmap.getWidth(), myBitmap.getHeight(), matrix, true);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return myBitmap;
-    }
-
-
     private void ProcessOCR () {
         Context context = getApplicationContext();
 
         // TODO: REMOVE SAMPLE IMAGE LATER
-        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
-        Bitmap myBitmap = rotateImage(imagePath);
+//        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
+//        Bitmap myBitmap = rotateImage(imagePath);
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
         // Create the TextRecognizer
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
@@ -339,14 +328,17 @@ public class ShowActivity extends AppCompatActivity {
 
             Receipt receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
 
+            initRecyclerView();
+
             ReceiptArrayAdapter adapter = new ReceiptArrayAdapter(this, updatedItemList);
             mListView.setAdapter(adapter);
+
 
             //todo pass the clicked item
             mDone_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(ShowActivity.this, RequestPayment.class);
+                    Intent intent = new Intent(ShowActivity.this, RequestPaymentActivity.class);
                     startActivity(intent);
                 }
             });

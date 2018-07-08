@@ -1,6 +1,7 @@
-package com.example.user.payme;
+package com.example.user.payme.Adapters;
 
 import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.user.payme.Objects.ReceiptItem;
+import com.example.user.payme.R;
 
 import java.util.ArrayList;
 
@@ -27,7 +29,6 @@ public class ReceiptArrayAdapter extends ArrayAdapter<ReceiptItem> {
         TextView name;
         TextView price;
     }
-
 
     public ReceiptArrayAdapter(Context context, ArrayList<ReceiptItem> receiptItems) {
         super(context, R.layout.list_receipt_item, receiptItems);

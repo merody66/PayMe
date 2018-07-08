@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 
-public class RequestPayment extends AppCompatActivity {
+public class RequestPaymentActivity extends AppCompatActivity {
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -16,7 +16,7 @@ public class RequestPayment extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent intent = new Intent(RequestPayment.this, MainActivity.class);
+                    Intent intent = new Intent(RequestPaymentActivity.this, MainActivity.class);
                     startActivity(intent);
                     return true;
                 case R.id.navigation_history:

@@ -29,83 +29,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!--TODO change this to horizontal listview-->
-    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/profile_image_user"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="20dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:src="@mipmap/pikachu"
-        app:civ_border_color="#6EB26E"
-        app:civ_border_width="1.5dp"
+    <!--TODO put the entire thing inside a scrollview-->
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="111dp"
+        android:orientation="horizontal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolbarTop" />
-
-    <TextView
-        android:id="@+id/user_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="You"
-        app:layout_constraintEnd_toEndOf="@+id/profile_image_user"
-        app:layout_constraintHorizontal_bias="0.55"
-        app:layout_constraintStart_toStartOf="@+id/profile_image_user"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image_user" />
-
-    <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/profile_image_contact1"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:src="@drawable/profile"
-        app:civ_border_color="#a5a5a5"
-        app:civ_border_width="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/user_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.062"
-        app:layout_constraintStart_toEndOf="@+id/profile_image_user"
-        app:layout_constraintTop_toTopOf="@+id/profile_image_user"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <TextView
-        android:id="@+id/contact1_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Hui Chun"
-        app:layout_constraintEnd_toEndOf="@+id/profile_image_contact1"
-        app:layout_constraintHorizontal_bias="0.51"
-        app:layout_constraintStart_toStartOf="@+id/profile_image_contact1"
-        app:layout_constraintTop_toBottomOf="@+id/profile_image_contact1" />
 
     <TextView
         android:id="@+id/shopname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:paddingStart="16dp"
+        android:layout_marginStart="16dp"
         android:fontFamily="@font/nunito"
         android:text="TextView"
+        android:textAllCaps="false"
         android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="normal"
-        app:layout_constraintEnd_toEndOf="@+id/profile_image_user"
-        app:layout_constraintHorizontal_bias="0.166"
-        app:layout_constraintStart_toStartOf="@+id/profile_image_user"
-        app:layout_constraintTop_toBottomOf="@+id/user_text" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
 
     <TextView
         android:id="@+id/date"
@@ -123,10 +68,10 @@
     <ListView
         android:id="@+id/listView"
         android:layout_width="wrap_content"
-        android:layout_height="225dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="212dp"
+        android:layout_marginTop="4dp"
         app:layout_constraintEnd_toEndOf="@+id/shopname"
-        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintHorizontal_bias="0.048"
         app:layout_constraintStart_toStartOf="@+id/shopname"
         app:layout_constraintTop_toBottomOf="@+id/shopname" />
 
@@ -134,7 +79,7 @@
         android:id="@+id/subtotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito"
         android:text="@string/subtotal"
@@ -144,14 +89,13 @@
     <TextView
         android:id="@+id/subtotalAmt"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_height="19dp"
+        android:layout_marginEnd="52dp"
         android:fontFamily="@font/nunito"
         android:text="TextView"
+        android:textAlignment="viewStart"
         app:layout_constraintBaseline_toBaselineOf="@+id/subtotal"
-        app:layout_constraintEnd_toEndOf="@+id/serviceChargeAmt"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="@+id/serviceChargeAmt" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
         android:id="@+id/serviceCharge"
@@ -171,22 +115,22 @@
         android:fontFamily="@font/nunito"
         android:text="TextView"
         app:layout_constraintBaseline_toBaselineOf="@+id/serviceCharge"
-        app:layout_constraintEnd_toEndOf="@+id/gstAmt"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/gstAmt" />
+        app:layout_constraintStart_toStartOf="@+id/subtotalAmt" />
 
     <TextView
         android:id="@+id/gstAmt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginStart="228dp"
         android:fontFamily="@font/nunito"
         android:text="TextView"
+        android:textAlignment="viewStart"
         app:layout_constraintBaseline_toBaselineOf="@+id/gst"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/gst" />
+        app:layout_constraintStart_toStartOf="@+id/serviceChargeAmt" />
 
     <TextView
         android:id="@+id/gst"
@@ -200,11 +144,11 @@
 
     <Button
         android:id="@+id/done_button"
-        android:layout_width="98dp"
+        android:layout_width="wrap_content"
         android:layout_height="29dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="4dp"
         android:background="@color/colorPrimary"
         android:fontFamily="@font/nunito"
         android:text="@string/done"
@@ -212,7 +156,7 @@
         android:textColor="@android:color/white"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="@+id/gstAmt"
-        app:layout_constraintHorizontal_bias="0.588"
+        app:layout_constraintHorizontal_bias="0.584"
         app:layout_constraintStart_toStartOf="@+id/gst"
         app:layout_constraintTop_toBottomOf="@+id/gst" />
 
@@ -229,13 +173,6 @@
         app:layout_constraintRight_toRightOf="parent"
         app:menu="@menu/navigation" />
 
-
-    <!--<ImageView-->
-    <!--android:id="@+id/galleryView"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="234dp"-->
-    <!--android:contentDescription="@string/desc_gallery"-->
-    <!--app:layout_constraintBottom_toBottomOf="parent" />-->
 
     <!--<TextView-->
     <!--android:id="@+id/textView5"-->

@@ -13,15 +13,13 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.example.user.payme.ChooseContact;
+import com.example.user.payme.ChooseContactActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.R;
 import com.example.user.payme.ShowActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.support.v4.content.ContextCompat.startActivity;
 
 public class ContactAdapter extends ArrayAdapter<Contact> implements Filterable {
     private static final String TAG = "ContactAdapter";
@@ -42,11 +40,7 @@ public class ContactAdapter extends ArrayAdapter<Contact> implements Filterable 
         if (listItem == null)
             listItem = LayoutInflater.from(mContext).inflate(R.layout.list_item, parent, false);
 
-
         Contact contact = contactsList.get(position);
-
-        //ImageView image = (ImageView) listItem.findViewById(R.id.profile_image);
-        //image.setImageResource(contact.getmImageDrawable());
 
         TextView name = (TextView) listItem.findViewById(R.id.textView_name);
         name.setText(contact.getmName());
@@ -55,28 +49,17 @@ public class ContactAdapter extends ArrayAdapter<Contact> implements Filterable 
         number.setText(contact.getmPhoneNumber());
 
         // TODO pass the correct imagepath to ShowActivity
-        // TODO check mContext if is it equals to ChooseActivity
+        // TODO check mContext if is it equals to ChooseContactActivity
         listItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onItemClick: item: " + name);
-                Intent intent = new Intent(mContext, ShowActivity.class);
-                intent.putExtra("Contact", contact);
-                intent.putExtra("imagePath", "/storage/emulated/0/DCIM/PayMe/receipt_020718_103249.jpg");
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
-
-//                // toggle image
-//                boolean updatedIsShared = textArray.toggleIsShared();
-//                Log.d(TAG, "onClick: boolean is shared "+updatedIsShared);
-//                if (updatedIsShared) {
-//                    sharedButton.setImageResource(R.mipmap.tick_button);
-//                } else {
-//                    Log.d(TAG, "onClick: ishared false");
-//                    sharedButton.setImageResource(R.mipmap.shared_button);
-////                    textArray.setmIsShared(!isShared);
-//                }
-
+                if (mContext instanceof ChooseContactActivity) {
+                    Intent intent = new Intent(mContext, ShowActivity.class);
+                    intent.putExtra("Contact", contact);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    mContext.startActivity(intent);
+                }
             }
         });
 

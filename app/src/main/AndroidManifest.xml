@@ -35,7 +35,7 @@
             android:name=".ResetPasswordActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".AddReceipt"
+            android:name=".AddReceiptActivity"
             android:label="@string/title_activity_add_receipt"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
@@ -48,8 +48,9 @@
             android:value="text" />
 
         <activity android:name=".Backup" />
-        <activity android:name=".ChooseContact" />
-        <activity android:name=".RequestPayment"></activity>
+        <activity android:name=".ChooseContactActivity" />
+        <activity android:name=".RequestPaymentActivity" />
+        <activity android:name=".TestImage" />
     </application>
 
 </manifest>

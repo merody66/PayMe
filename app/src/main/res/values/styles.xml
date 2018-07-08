@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@color/colourWhite</item>
+        <item name="android:textColor">@color/colourBlack</item>
     </style>
 
     <!-- To hide 'PayMe' action bar on specific Activity. -->
