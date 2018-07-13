@@ -90,6 +90,7 @@ public class ContactsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        contactsList = new ArrayList<>();
         setHasOptionsMenu(true);
 
         // Set title bar
@@ -107,36 +108,35 @@ public class ContactsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
 
+        searchContact = view.findViewById(R.id.searchContact);
+        listView = view.findViewById(R.id.contactList);
+
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
         if (!hasPermissions(getActivity(), PERMISSIONS)) {
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
-        } else {
-
-            listView = view.findViewById(R.id.contactList);
-            searchContact = view.findViewById(R.id.searchContact);
-            contactsList = new ArrayList<>();
-
-            GetContactsIntoArrayList();
-            mAdapter = new ContactAdapter(getActivity(), contactsList);
-            listView.setAdapter(mAdapter);
-
-            searchContact.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                    // When user changed the Text
-                    mAdapter.getFilter().filter(cs);
-                }
-
-                @Override
-                public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                }
-
-                @Override
-                public void afterTextChanged(Editable arg0) {
-                }
-            });
         }
+
+        GetContactsIntoArrayList();
+        mAdapter = new ContactAdapter(getActivity(), contactsList);
+        listView.setAdapter(mAdapter);
+
+        searchContact.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+                // When user changed the Text
+                mAdapter.getFilter().filter(cs);
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable arg0) {
+            }
+        });
+
 
         return view;
     }

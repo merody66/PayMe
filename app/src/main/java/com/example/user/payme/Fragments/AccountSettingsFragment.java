@@ -2,8 +2,10 @@ package com.example.user.payme.Fragments;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -15,10 +17,18 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.payme.AddReceiptActivity;
+import com.example.user.payme.LoginActivity;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.User;
 import com.example.user.payme.R;
 import com.example.user.payme.SignupActivity;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -61,6 +71,7 @@ public class AccountSettingsFragment extends Fragment {
     private DatabaseReference ref;
     private FirebaseUser currentUser;
     private String userId;
+    private Boolean bool;
 
     public AccountSettingsFragment() {
         // Required empty public constructor
@@ -113,10 +124,10 @@ public class AccountSettingsFragment extends Fragment {
         notifyToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                if (isChecked) {
-                   setNotificationSetting(true);
+                   bool = true;
                    Toast.makeText(getActivity(), "Notifications turned on.", Toast.LENGTH_SHORT).show();
                } else {
-                   setNotificationSetting(false);
+                   bool = false;
                    Toast.makeText(getActivity(), "Notifications turned off.", Toast.LENGTH_SHORT).show();
                }
             }
@@ -136,8 +147,7 @@ public class AccountSettingsFragment extends Fragment {
                         })
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
-                                auth.signOut();
-                                getActivity().finish();
+                                sendToLogin();
                             }
                         });
                 AlertDialog alert = builder.create();
@@ -219,7 +229,7 @@ public class AccountSettingsFragment extends Fragment {
 
     }
 
-    private void setNotificationSetting(Boolean bool) {
+    private void setNotificationSetting() {
         ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -236,5 +246,24 @@ public class AccountSettingsFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {  }
         });
+    }
+
+    private void sendToLogin() {
+        GoogleSignInClient googleSignInClient ;
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        googleSignInClient = GoogleSignIn.getClient(getContext(), gso);
+        googleSignInClient.signOut().addOnCompleteListener(getActivity(),
+                new OnCompleteListener<Void>() {  // Google auth sign out
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        FirebaseAuth.getInstance().signOut(); // Firebase auth sign out
+                        Intent loginIntent = new Intent(getContext(), LoginActivity.class);
+                        loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                        startActivity(loginIntent);
+                    }
+                });
     }
 }
