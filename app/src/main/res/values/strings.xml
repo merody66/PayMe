@@ -44,4 +44,5 @@
     <string name="chng_profile_pic">Change Profile Picture</string>
     <string name="push_notify">Push notifications</string>
     <string name="log_out">Log out</string>
+    <string name="total">Total</string>
 </resources>

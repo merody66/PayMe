@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.payme.Interfaces.OnImageClickListener;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.R;
 
@@ -18,14 +19,15 @@ import java.util.ArrayList;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class HorizontalRecyclerViewAdapter extends RecyclerView.Adapter<HorizontalRecyclerViewAdapter.ViewHolder> {
-
     private static final String TAG = "HorizontalRecyclerViewA";
-    private ArrayList<Contact> mContacts = new ArrayList<>();
+    private ArrayList<Contact> mContacts;
     private Context mContext;
+    private OnImageClickListener onImageClickListener;
 
-    public HorizontalRecyclerViewAdapter(Context mContext, ArrayList<Contact> mContacts) {
+    public HorizontalRecyclerViewAdapter(Context mContext, ArrayList<Contact> mContacts, OnImageClickListener onImageClickListener) {
         this.mContext = mContext;
         this.mContacts = mContacts;
+        this.onImageClickListener = onImageClickListener;
     }
 
     @NonNull
@@ -50,6 +52,7 @@ public class HorizontalRecyclerViewAdapter extends RecyclerView.Adapter<Horizont
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "onClick: clicked on image "+name);
+                onImageClickListener.onImageClick(name);
                 Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
             }
         });

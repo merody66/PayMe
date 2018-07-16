@@ -8,7 +8,7 @@ import java.io.Serializable;
  *  - Profile Image Drawable
  *  - Phone Number (From Phone Directory)
  */
-public class Contact implements Serializable{
+public class Contact implements Serializable {
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;

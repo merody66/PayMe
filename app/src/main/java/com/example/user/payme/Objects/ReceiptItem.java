@@ -1,14 +1,26 @@
 package com.example.user.payme.Objects;
 
-public class ReceiptItem {
+import java.io.Serializable;
+
+public class ReceiptItem implements Serializable {
     private String mName;
     private String mPrice;
+    private String mBelongsTo;
     private boolean mIsShared;
 
     public ReceiptItem(String mName, String mPrice) {
         this.mName = mName;
         this.mPrice = mPrice;
-        this.mIsShared = false;
+        this.mBelongsTo = null;
+        this.mIsShared = true;
+    }
+
+    public String getmBelongsTo() {
+        return mBelongsTo;
+    }
+
+    public void setmBelongsTo(String mBelongsTo) {
+        this.mBelongsTo = mBelongsTo;
     }
 
     public boolean getmIsShared() {
