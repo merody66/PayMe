@@ -42,26 +42,20 @@ public class ContactAdapter extends ArrayAdapter<Contact> implements Filterable 
 
         Contact contact = contactsList.get(position);
 
-        TextView name = (TextView) listItem.findViewById(R.id.textView_name);
-        name.setText(contact.getmName());
-
-        TextView number = (TextView) listItem.findViewById(R.id.textView_contact);
-        number.setText(contact.getmPhoneNumber());
-
         // TODO pass the correct imagepath to ShowActivity
         // TODO check mContext if is it equals to ChooseContactActivity
-        listItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "onItemClick: item: " + name);
-                if (mContext instanceof ChooseContactActivity) {
-                    Intent intent = new Intent(mContext, ShowActivity.class);
-                    intent.putExtra("Contact", contact);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    mContext.startActivity(intent);
-                }
-            }
-        });
+//        listItem.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Log.d(TAG, "onItemClick: item: " + name);
+//                if (mContext instanceof ChooseContactActivity) {
+//                    Intent intent = new Intent(mContext, ShowActivity.class);
+//                    intent.putExtra("Contact", contact);
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    mContext.startActivity(intent);
+//                }
+//            }
+//        });
 
         return listItem;
 

@@ -47,7 +47,6 @@
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="text" />
 
-        <activity android:name=".Backup" />
         <activity android:name=".ChooseContactActivity" />
         <activity android:name=".RequestPaymentActivity" />
         <activity android:name=".TestImage" />

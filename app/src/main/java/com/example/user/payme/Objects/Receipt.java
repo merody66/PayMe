@@ -36,47 +36,23 @@ public class Receipt implements Serializable {
     public ArrayList<ReceiptItem> getmItemList() {
         return mItemList;
     }
-
     public void setmItemList(ArrayList<ReceiptItem> mItemList) {
         this.mItemList = mItemList;
     }
 
-    public String getmShopname() {
-        return mShopname;
-    }
+    public String getmShopname() { return mShopname; }
+    public void setmShopname(String mShopname) { this.mShopname = mShopname; }
 
-    public void setmShopname(String mShopname) {
-        this.mShopname = mShopname;
-    }
+    public String getmDate() { return mDate; }
+    public void setmDate(String mDate) { this.mDate = mDate; }
 
-    public String getmDate() {
-        return mDate;
-    }
+    public String getmGstAmt() { return mGstAmt; }
+    public void setmGstAmt(String mGstAmt) { this.mGstAmt = mGstAmt; }
 
-    public void setmDate(String mDate) {
-        this.mDate = mDate;
-    }
+    public String getmServiceChargeAmt() { return mServiceChargeAmt; }
+    public void setmServiceChargeAmt(String mServiceChargeAmt) { this.mServiceChargeAmt = mServiceChargeAmt; }
 
-    public String getmGstAmt() {
-        return mGstAmt;
-    }
-
-    public void setmGstAmt(String mGstAmt) {
-        this.mGstAmt = mGstAmt;
-    }
-
-    public String getmServiceChargeAmt() {
-        return mServiceChargeAmt;
-    }
-
-    public void setmServiceChargeAmt(String mServiceChargeAmt) {
-        this.mServiceChargeAmt = mServiceChargeAmt;
-    }
-
-    public String getmSubtotalAmt() {
-        return mSubtotalAmt;
-    }
-
+    public String getmSubtotalAmt() { return mSubtotalAmt; }
     public void setmSubtotalAmt(String mSubtotalAmt) {
         this.mSubtotalAmt = mSubtotalAmt;
     }

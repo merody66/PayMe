@@ -21,11 +21,19 @@
         android:textColorHint="@android:color/white"
         android:textColor="@android:color/white"/>
 
-    <ListView
-        android:id="@+id/contactList"
+    <!-- Apparently cannot use ScrollView with a RecyclerView within it as both views have their own scrolls,
+    conflicting each other, replacing it to NestedScrollView will work, together with setNestedScrollingEnabled(false) -->
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="60dp">
-    </ListView>
+        android:layout_height="wrap_content"
+        android:layout_marginTop="60dp" >
 
+            <LinearLayout
+                android:id="@+id/groupContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+            </LinearLayout>
+
+    </android.support.v4.widget.NestedScrollView>
 </FrameLayout>

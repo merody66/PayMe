@@ -37,30 +37,30 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
 
         navigation.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_home:
-                    break;
-                case R.id.navigation_history:
-                    break;
-                case R.id.navigation_addNewReceipt:
-                    Intent intent = new Intent(MainActivity.this, AddReceiptActivity.class);
-                    startActivity(intent);
-                    return true;
-                case R.id.navigation_contacts:
-                    fragment = new ContactsFragment();
-                    break;
-                case R.id.navigation_account:
-                    fragment = new AccountSettingsFragment();
-                    break;
-            }
-            final FragmentTransaction transaction = fragmentManager.beginTransaction();
-            transaction.replace(R.id.fragment_container, fragment);
-            transaction.commit();
-            return true;
-        }
-        });
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        switch (item.getItemId()) {
+                            case R.id.navigation_home:
+                                break;
+                            case R.id.navigation_history:
+                                break;
+                            case R.id.navigation_addNewReceipt:
+                                Intent intent = new Intent(MainActivity.this, AddReceiptActivity.class);
+                                startActivity(intent);
+                                return true;
+                            case R.id.navigation_contacts:
+                                fragment = new ContactsFragment();
+                                break;
+                            case R.id.navigation_account:
+                                fragment = new AccountSettingsFragment();
+                                break;
+                        }
+                        FragmentTransaction transaction = fragmentManager.beginTransaction();
+                        transaction.replace(R.id.fragment_container, fragment);
+                        transaction.commit();
+                        return true;
+                    }
+                });
     };
 
     @Override
@@ -71,7 +71,8 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
         FirebaseUser currentUser = auth.getCurrentUser();
         System.out.println(currentUser);
         if (currentUser == null) {
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(loginIntent);
         }
     }
 
