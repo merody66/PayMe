@@ -7,10 +7,39 @@ public class UserItem {
     private ArrayList<ReceiptItem> receiptItems;
     private String total;
 
+    // Firebase var
+    private String mName;
+    private String mNumber;
+    private double mAmount;
+    private boolean mIsPaid;
+
     public UserItem(Contact mContact, ArrayList<ReceiptItem> receiptItems, String total) {
         this.mContact = mContact;
         this.receiptItems = receiptItems;
         this.total = total;
+    }
+
+    public UserItem(String mName, String mNumber, double mAmount, boolean mIsPaid) {
+        this.mName = mName;
+        this.mNumber = mNumber;
+        this.mAmount = mAmount;
+        this.mIsPaid = mIsPaid;
+    }
+
+    public String getmName() {
+        return mName;
+    }
+
+    public String getmNumber() {
+        return mNumber;
+    }
+
+    public double getmAmount() {
+        return mAmount;
+    }
+
+    public boolean ismIsPaid() {
+        return mIsPaid;
     }
 
     public Contact getmContact() {

@@ -1,22 +1,36 @@
 package com.example.user.payme.Objects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Receipt {
+public class Receipt implements Serializable {
     private ArrayList<ReceiptItem> mItemList = new ArrayList<>();
     private String mShopname;
     private String mDate;
     private String mGstAmt;
     private String mServiceChargeAmt;
     private String mSubtotalAmt;
+    private ArrayList<UserItem> payees;
 
-    public Receipt (String mShopname, String mDate, String mGstAmt, String mServiceChargeAmt, String mSubtotalAmt, ArrayList<ReceiptItem> menuList) {
+    public Receipt(String mShopname, String mDate, String mGstAmt, String mServiceChargeAmt, String mSubtotalAmt, ArrayList<ReceiptItem> menuList) {
         this.mShopname = mShopname;
         this.mDate = mDate;
         this.mGstAmt = mGstAmt;
         this.mServiceChargeAmt = mServiceChargeAmt;
         this.mSubtotalAmt = mSubtotalAmt;
         this.mItemList = menuList;
+    }
+
+    public Receipt(ArrayList<UserItem> payees) {
+        super();
+    }
+
+    public void setPayees(ArrayList<UserItem> payees) {
+        this.payees = payees;
+    }
+
+    public ArrayList<UserItem> getPayees() {
+        return payees;
     }
 
     public ArrayList<ReceiptItem> getmItemList() {

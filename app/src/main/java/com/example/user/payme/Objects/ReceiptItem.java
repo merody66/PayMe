@@ -32,12 +32,7 @@ public class ReceiptItem implements Serializable {
     }
 
     public boolean toggleIsShared() {
-        if (mIsShared) {
-            this.mIsShared = false;
-        } else {
-            this.mIsShared = true;
-        }
-
+        this.mIsShared = !mIsShared;
         return mIsShared;
     }
 

@@ -71,6 +71,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
     private ArrayList<ReceiptItem> updatedItemList;
 
     private ReceiptArrayAdapter adapter;
+    private Receipt receipt;
 
     // todo change to listview or something
 //    private CircleImageView profile_image_contact1;
@@ -351,9 +352,12 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             tvShopname.setText(mShopname);
             mDate = "17/05/2018";
             tvDate.setText(mDate);
-            tvSubtotalAmt.setText("33.40");
-            tvServiceChargeAmt.setText("3.34");
-            tvGstAmt.setText("2.57");
+            mSubtotalAmt = "33.40";
+            tvSubtotalAmt.setText(mSubtotalAmt);
+            mServiceChargeAmt = "3.34";
+            tvServiceChargeAmt.setText(mServiceChargeAmt);
+            mGstAmt = "2.57";
+            tvGstAmt.setText(mGstAmt);
             updatedItemList = new ArrayList<>();
             updatedItemList.add(new ReceiptItem("3 RICE", "2.40"));
             updatedItemList.add(new ReceiptItem("1 CHINESE TEA (GLASS)", "1.80"));
@@ -364,7 +368,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             updatedItemList.add(new ReceiptItem("1 FRAGRANT FRIED CHICKEN WI", "6.80"));
 
 
-            Receipt receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
+            receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
 
             initRecyclerView();
 
@@ -374,7 +378,6 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             mListView.setAdapter(adapter);
             Log.d(TAG, "ProcessOCR: after setadapter");
 
-            //todo pass the clicked item
             mDone_button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -382,6 +385,8 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                     HashMap<String, ArrayList<ReceiptItem>> result = adapter.calculateAmount();
                     intent.putExtra("Contact", mContacts);
                     intent.putExtra("result", result);
+                    intent.putExtra("receiptItemList", adapter.getReceiptItems());
+                    intent.putExtra("receipt",receipt);
                     startActivity(intent);
                 }
             });

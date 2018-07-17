@@ -135,6 +135,10 @@ public class ReceiptArrayAdapter extends ArrayAdapter<ReceiptItem> {
         return (value == null) ? defaultValue : (ArrayList<ReceiptItem>) value;
     }
 
+    public ArrayList<ReceiptItem> getReceiptItems() {
+        return receiptItems;
+    }
+
     /***
      *
      * @return HashMap<String, ArrayList<ReceiptItem>>
