@@ -3,14 +3,22 @@ package com.example.user.payme.Fragments;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
@@ -62,16 +70,17 @@ public class AccountSettingsFragment extends Fragment {
 
     private EditText nameTxt;
     private EditText emailTxt;
-    private EditText pwdTxt;
     private EditText paylahTxt;
     private Switch notifyToggle;
     private TextView logoutLbl;
+    private TextView chngPwdLbl;
+    private Button saveBtn;
+    private String userId;
+    private int nonEmptyFields;
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference ref;
     private FirebaseUser currentUser;
-    private String userId;
-    private Boolean bool;
 
     public AccountSettingsFragment() {
         // Required empty public constructor
@@ -116,20 +125,48 @@ public class AccountSettingsFragment extends Fragment {
         // Initialize widgets
         nameTxt = view.findViewById(R.id.nameTxtField);
         emailTxt = view.findViewById(R.id.emailTxtField);
-        pwdTxt = view.findViewById(R.id.pwdTxtField);
+        chngPwdLbl = view.findViewById(R.id.chngPwdLbl);
         paylahTxt = view.findViewById(R.id.paylahTxtField);
         notifyToggle = view.findViewById(R.id.notifyToggle);
+        saveBtn = view.findViewById(R.id.saveBtn);
         logoutLbl = view.findViewById(R.id.logoutLbl);
+
+
+        chngPwdLbl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         notifyToggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                if (isChecked) {
-                   bool = true;
-                   Toast.makeText(getActivity(), "Notifications turned on.", Toast.LENGTH_SHORT).show();
+                   setNotificationSetting(true);
+                   Toast.makeText(getContext(), "Notifications turned on.", Toast.LENGTH_SHORT).show();
                } else {
-                   bool = false;
-                   Toast.makeText(getActivity(), "Notifications turned off.", Toast.LENGTH_SHORT).show();
+                   setNotificationSetting(false);
+                   Toast.makeText(getContext(), "Notifications turned off.", Toast.LENGTH_SHORT).show();
                }
+            }
+        });
+
+        saveBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String name = nameTxt.getText().toString().trim();
+                String email = emailTxt.getText().toString().trim();
+                String paylahNumber = paylahTxt.getText().toString().trim();
+
+                // Checks if the input fields are empty before saving changes
+                checkEmptyInput(nameTxt, name);
+                checkEmptyInput(emailTxt, email);
+                checkEmptyInput(paylahTxt, paylahNumber);
+                System.out.println(nonEmptyFields);
+                if (nonEmptyFields == 3) {
+                    saveAccountInfo(name, email, paylahNumber);
+                }
+                nonEmptyFields = 0;
             }
         });
 
@@ -166,10 +203,9 @@ public class AccountSettingsFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
         ref = db.getReference();
+
         currentUser = auth.getCurrentUser();
         userId = currentUser.getUid();
-
-
         loadAccountDetails();
     }
 
@@ -229,17 +265,15 @@ public class AccountSettingsFragment extends Fragment {
 
     }
 
-    private void setNotificationSetting() {
+    private void setNotificationSetting(boolean bool) {
         ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User updatedUser = dataSnapshot.getValue(User.class);
-                updatedUser.setNotificationSetting(bool);
-                Map<String, Object> postValues = new HashMap<String,Object>();
+                Map<String, Object> postValues = new HashMap<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     postValues.put(snapshot.getKey(), snapshot.getValue());
                 }
-                postValues.put("notificationSetting", updatedUser.getNotificationSetting());
+                postValues.put("notificationSetting", bool);
                 ref.child("users").child(userId).updateChildren(postValues);
             }
 
@@ -266,4 +300,59 @@ public class AccountSettingsFragment extends Fragment {
                     }
                 });
     }
+
+    private void checkEmptyInput(EditText et, String input) {
+        if (input.isEmpty()) {
+            String errorMsg;
+            if (et == nameTxt) {
+                errorMsg = "<font color='red'><i>Name cannot be empty!</i></font>";
+                et.setText(Html.fromHtml(errorMsg));
+            } else if (et == emailTxt) {
+                errorMsg = "<font color='red'><i>Email cannot be empty!</i></font>";
+                et.setText(Html.fromHtml(errorMsg));
+            } else {  // paylah number
+                errorMsg = "<font color='red'><i>Number cannot be empty!</i></font>";
+                et.setText(Html.fromHtml(errorMsg));
+            }
+        } else {
+            // if not empty and is not error message
+            if (!input.contains("cannot be empty")) {
+                nonEmptyFields++;
+            }
+        }
+    }
+
+    private void saveAccountInfo(String name, String email, String paylahNumber) {
+        if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (paylahNumber.matches("^([89]{1})([0-9]{7})")) {
+                Toast.makeText(getContext(), "Saving account details...", Toast.LENGTH_SHORT).show();
+                ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        Map<String, Object> postValues = new HashMap<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            postValues.put(snapshot.getKey(), snapshot.getValue());
+                        }
+                        postValues.put("name", name);
+                        postValues.put("email", email);
+                        postValues.put("number", paylahNumber);
+                        ref.child("users").child(userId).updateChildren(postValues);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {  }
+                });
+
+            } else {  // invalid phone number (starting with 8 or 9 and 8 digits long)
+                Toast.makeText(getContext(), "Invalid phone number.", Toast.LENGTH_SHORT).show();
+            }
+        } else {  // invalid email address
+            Toast.makeText(getContext(), "Invalid email address.", Toast.LENGTH_SHORT).show();
+        }
+
+        }
+
 }
+
+
+
