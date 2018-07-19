@@ -113,7 +113,7 @@
                 android:textColorHint="@android:color/white"
                 android:textSize="20sp" />
 
-            <ListView
+            <android.support.v7.widget.RecyclerView
                 android:id="@+id/contactList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -124,7 +124,7 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/addMembersBtn">
-            </ListView>
+            </android.support.v7.widget.RecyclerView>
 
         </LinearLayout>
 

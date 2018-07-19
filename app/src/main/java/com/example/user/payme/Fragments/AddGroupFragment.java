@@ -1,12 +1,15 @@
 package com.example.user.payme.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,15 +18,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.user.payme.Adapters.ContactAdapter;
+import com.example.user.payme.Adapters.VerticalRecyclerViewAdapter;
+import com.example.user.payme.Interfaces.ContactClickListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.Objects.User;
@@ -65,7 +67,7 @@ public class AddGroupFragment extends Fragment {
     private EditText grpNameTxt;
     private EditText searchContact;
     private TextView membersList;
-    private ListView contactsListView;
+    private RecyclerView contactsRecyclerView;
     private LinearLayout groupListContainer;
     private FirebaseAuth auth;
     private FirebaseDatabase db;
@@ -73,7 +75,7 @@ public class AddGroupFragment extends Fragment {
 
     private ArrayList<Contact> contactsList;
     private ArrayList<Contact> selectedContacts;
-    private ContactAdapter mAdapter;
+    private VerticalRecyclerViewAdapter mAdapter;
     Cursor cursor;
 
     public AddGroupFragment() {
@@ -122,7 +124,7 @@ public class AddGroupFragment extends Fragment {
         grpNameTxt = view.findViewById(R.id.grpNameTxtField);
         searchContact = view.findViewById(R.id.searchContact);
         membersList = view.findViewById(R.id.membersList);
-        contactsListView = view.findViewById(R.id.contactList);
+        contactsRecyclerView = view.findViewById(R.id.contactList);
         groupListContainer = view.findViewById(R.id.groupListContainer);
 
         auth = FirebaseAuth.getInstance();
@@ -133,8 +135,26 @@ public class AddGroupFragment extends Fragment {
         selectedContacts = new ArrayList<>();
 
         GetContactsIntoArrayList();
-        mAdapter = new ContactAdapter(getActivity(), contactsList);
-        contactsListView.setAdapter(mAdapter);
+
+        ContactClickListener listener = new ContactClickListener()
+        {
+            String msg = "";
+
+            @Override
+            public void onContactClick(Contact contact)
+            {
+                Toast.makeText(getActivity(), "Contact clicked: " + contact.getmName(), Toast.LENGTH_SHORT).show();
+                if (!selectedContacts.contains(contact)) {
+                    selectedContacts.add(contact);
+                    msg += contact.getmName() + ",";
+                    membersList.setText(msg);
+                }
+            }
+        };
+
+        mAdapter = new VerticalRecyclerViewAdapter(getActivity(), contactsList, listener);
+        contactsRecyclerView.setAdapter(mAdapter);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         addMembersBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -143,34 +163,21 @@ public class AddGroupFragment extends Fragment {
             }
         });
 
+
         searchContact.addTextChangedListener(new TextWatcher() {
             @Override
             public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
                 // When user changed the Text
-                mAdapter.getFilter().filter(cs);
+                //mAdapter.getFilter().filter(cs);
             }
 
             @Override
-            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) { }
+            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {  }
 
             @Override
-            public void afterTextChanged(Editable arg0) { }
+            public void afterTextChanged(Editable arg0) {  }
         });
 
-        contactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            String msg = "";
-
-            @Override
-            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-                Contact c = (Contact) adapter.getItemAtPosition(position);
-                if (!selectedContacts.contains(c)) {
-                    selectedContacts.add(c);
-                    //System.out.println(c.getmName());
-                    msg += c.getmName() + ",";
-                }
-                membersList.setText(msg);
-            }
-        });
 
         return view;
     }
@@ -183,13 +190,29 @@ public class AddGroupFragment extends Fragment {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         String grpName = grpNameTxt.getText().toString().trim();
+        if (grpName.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setMessage("Group name cannot be empty!")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+        }
+
 
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.done_btn:
                 addGroup(grpName, selectedContacts);
-                FragmentManager manager = getFragmentManager();
-                manager.popBackStack();
+                groupListContainer.setVisibility(View.GONE);
+                grpNameTxt.setText("");
+                grpNameTxt.setFocusable(false);
+                membersList.setText("Add friends to the group");
+                item.setVisible(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -274,7 +297,7 @@ public class AddGroupFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {  }
         });
 
-        Toast.makeText(getActivity(), grpName + " group added.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), grpName + " group added.", Toast.LENGTH_LONG).show();
     }
 
 }
