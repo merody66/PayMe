@@ -17,8 +17,6 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -28,6 +26,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.provider.ContactsContract;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -81,6 +80,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
 
     final int PERMISSION_ALL = 1;
     private ArrayList<Contact> contactsList;
+    private Button groupsBtn;
+    private View groups_selected;
+    private View contacts_selected;
+    private Button contactsBtn;
     private LinearLayout groupContainer;
     private EditText searchContact;
     private FirebaseAuth auth;
@@ -89,6 +92,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
     private FirebaseUser currentUser;
     private String userId;
     Cursor cursor;
+    Typeface fontFace;
     HashMap<String, ArrayList<Contact>> groupList = new HashMap<>();
 
     // Empty public constructor, required by the system
@@ -120,12 +124,15 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
+        fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
         contactsList = new ArrayList<>();
+
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
         ref = db.getReference();
         currentUser = auth.getCurrentUser();
         userId = currentUser.getUid();
+
         setHasOptionsMenu(true);
 
         // Set title bar
@@ -143,34 +150,66 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
 
-        searchContact = view.findViewById(R.id.searchContact);
+        //searchContact = view.findViewById(R.id.searchContact);
+        contactsBtn = view.findViewById(R.id.contactsBtn);
+        contacts_selected = view.findViewById(R.id.contacts_selected);
+        groupsBtn = view.findViewById(R.id.groupsBtn);
+        groups_selected = view.findViewById(R.id.groups_selected);
         groupContainer = view.findViewById(R.id.groupContainer);
 
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
+        // Request for permission to read or write to user's contacts
         if (!hasPermissions(getActivity(), PERMISSIONS)) {  // if permission is not granted
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
         } else {  // if granted
             GetContactsIntoArrayList();
-            GetGroupList();
+            GetGroupsIntoHashMap();
+
+            // Show contacts first
+            contacts_selected.setVisibility(View.VISIBLE);
+            ShowContacts();
+
+            contactsBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    groups_selected.setVisibility(View.INVISIBLE);
+                    if (contacts_selected.getVisibility() == View.INVISIBLE) {
+                        contacts_selected.setVisibility(View.VISIBLE);
+                    }
+                    ShowContacts();
+                }
+            });
+
+            groupsBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    contacts_selected.setVisibility(View.INVISIBLE);
+                    if (groups_selected.getVisibility() == View.INVISIBLE) {
+                        groups_selected.setVisibility(View.VISIBLE);
+                    }
+                    ShowGroups();
+                }
+            });
+
         }
 
 
-        searchContact.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                // When user changed the Text
-                // contactAdapter.getFilter().filter(cs);
-            }
-
-            @Override
-            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-            }
-        });
+//        searchContact.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+//                // When user changed the Text
+//                // contactAdapter.getFilter().filter(cs);
+//            }
+//
+//            @Override
+//            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable arg0) {
+//            }
+//        });
 
         return view;
     }
@@ -224,9 +263,35 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
                                            int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_ALL: {
-                Log.d("PERMISSION", "Permission Granted.");
+                Log.d("PERMISSION REQUEST", "Permission Granted.");
                 GetContactsIntoArrayList();
-                GetGroupList();
+                GetGroupsIntoHashMap();
+
+                // Show contacts first
+                contacts_selected.setVisibility(View.VISIBLE);
+                ShowContacts();
+
+                contactsBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        groups_selected.setVisibility(View.INVISIBLE);
+                        if (contacts_selected.getVisibility() == View.INVISIBLE) {
+                            contacts_selected.setVisibility(View.VISIBLE);
+                        }
+                        ShowContacts();
+                    }
+                });
+
+                groupsBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        contacts_selected.setVisibility(View.INVISIBLE);
+                        if (groups_selected.getVisibility() == View.INVISIBLE) {
+                            groups_selected.setVisibility(View.VISIBLE);
+                        }
+                        ShowGroups();
+                    }
+                });
                 return;
             }
         }
@@ -261,7 +326,9 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
 
     public void GetContactsIntoArrayList() {
 
-        cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null, null);
+        cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                null,null, null, null);
+
         while (cursor.moveToNext()) {
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -276,91 +343,100 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
     }
 
 
-    public void GetGroupList() {
+    public void GetGroupsIntoHashMap() {
         ref.child("users").child(userId).child("groupList")
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+            .addListenerForSingleValueEvent(new ValueEventListener() {
 
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        // Loops through every group
-                        for (DataSnapshot groupSnapshot : dataSnapshot.getChildren()) {
-                            ArrayList<Contact> contacts = new ArrayList<>();
-                            // Loops through every contact in each group
-                            for (DataSnapshot contactsSnapshop : groupSnapshot.getChildren()) {
-                                Contact c = contactsSnapshop.getValue(Contact.class);
-                                contacts.add(c);
-                            }
-                            groupList.put(groupSnapshot.getKey(), contacts);
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    // Loops through every group
+                    for (DataSnapshot groupSnapshot : dataSnapshot.getChildren()) {
+                        ArrayList<Contact> contacts = new ArrayList<>();
+                        // Loops through every contact in each group
+                        for (DataSnapshot contactsSnapshop : groupSnapshot.getChildren()) {
+                            Contact c = contactsSnapshop.getValue(Contact.class);
+                            contacts.add(c);
                         }
-
-                        Typeface fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
-                        Iterator iterator = groupList.entrySet().iterator();
-                        while(iterator.hasNext()) {
-                            Map.Entry pair = (Map.Entry) iterator.next();
-                            String groupName = pair.getKey().toString();
-                            ArrayList<Contact> contacts = (ArrayList<Contact>) pair.getValue();
-                            LinearLayout layout = new LinearLayout(getContext());  // create a layout for every group
-                            layout.setLayoutParams(new LinearLayout.LayoutParams(
-                                    // int width, int height
-                                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                            ));
-                            layout.setPadding(50, 50, 50, 0);
-                            layout.setOrientation(LinearLayout.VERTICAL);
-                            TextView nameTextView = new TextView(getContext());
-                            nameTextView.setText(groupName);
-                            nameTextView.setTypeface(fontFace);
-                            nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
-                            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
-                            HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
-                            RecyclerView recyclerView = new RecyclerView(getContext());
-                            recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                            recyclerView.setAdapter(adapter);
-                            recyclerView.setLayoutManager(layoutManager);
-                            View separator = new View(getContext());
-                            separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,3));
-                            separator.setBackgroundColor(Color.BLACK);
-                            layout.addView(nameTextView);
-                            layout.addView(recyclerView);
-                            layout.addView(separator);
-                            groupContainer.addView(layout);
-
-                            // On click listener for select group for add receipt
-                            layout.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                        LinearLayout layout = new LinearLayout(getContext());
-                        layout.setLayoutParams(new LinearLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-                        ));
-                        layout.setPadding(50, 50, 50, 0);
-                        layout.setOrientation(LinearLayout.VERTICAL);
-                        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
-                        VerticalRecyclerViewAdapter adapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
-                        RecyclerView recyclerView = new RecyclerView(getContext());
-                        recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                        recyclerView.setAdapter(adapter);
-                        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
-                        recyclerView.addItemDecoration(decoration);
-                        recyclerView.setLayoutManager(layoutManager);
-                        recyclerView.setNestedScrollingEnabled(false);
-                        TextView contactsTextView = new TextView(getContext());
-                        contactsTextView.setText("Contacts");
-                        contactsTextView.setTypeface(fontFace);
-                        contactsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
-                        layout.addView(contactsTextView);
-                        layout.addView(recyclerView);
-                        groupContainer.addView(layout);
+                        groupList.put(groupSnapshot.getKey(), contacts);
                     }
+                }
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {  }
-                });
+                @Override
+                public void onCancelled(DatabaseError databaseError) {  }
+            });
+    }
+
+
+    public void ShowContacts() {
+        groupContainer.removeAllViews();
+        LinearLayout layout = new LinearLayout(getContext());
+        layout.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        layout.setPadding(50, 50, 50, 0);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
+        VerticalRecyclerViewAdapter adapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
+        RecyclerView recyclerView = new RecyclerView(getContext());
+        recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        recyclerView.setAdapter(adapter);
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+        recyclerView.addItemDecoration(decoration);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setNestedScrollingEnabled(false);
+        TextView contactsTextView = new TextView(getContext());
+        contactsTextView.setText("Contacts");
+        contactsTextView.setTypeface(fontFace);
+        contactsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
+        layout.addView(contactsTextView);
+        layout.addView(recyclerView);
+        groupContainer.addView(layout);
+    }
+
+
+    public void ShowGroups() {
+        groupContainer.removeAllViews();
+        Iterator iterator = groupList.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry pair = (Map.Entry) iterator.next();
+            String groupName = pair.getKey().toString();
+            ArrayList<Contact> contacts = (ArrayList<Contact>) pair.getValue();
+            LinearLayout layout = new LinearLayout(getContext());  // create a layout for every group
+            layout.setLayoutParams(new LinearLayout.LayoutParams(
+                    // int width, int height
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+            ));
+            layout.setPadding(50, 50, 50, 0);
+            layout.setOrientation(LinearLayout.VERTICAL);
+            TextView nameTextView = new TextView(getContext());
+            nameTextView.setText(groupName);
+            nameTextView.setTypeface(fontFace);
+            nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
+            HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
+            RecyclerView recyclerView = new RecyclerView(getContext());
+            recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            recyclerView.setAdapter(adapter);
+            recyclerView.setLayoutManager(layoutManager);
+            View separator = new View(getContext());
+            separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,3));
+            separator.setBackgroundColor(Color.BLACK);
+            layout.addView(nameTextView);
+            layout.addView(recyclerView);
+            layout.addView(separator);
+            groupContainer.addView(layout);
+
+            // On click listener for select group for add receipt
+            layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 
     private void addFriend() {

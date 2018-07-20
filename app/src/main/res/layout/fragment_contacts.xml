@@ -5,28 +5,81 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.ContactsFragment">
 
-    <EditText
-        android:id="@+id/searchContact"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:fontFamily="@font/nunito"
-        android:background="@drawable/searchbar"
-        android:drawableLeft="@mipmap/search"
-        android:drawablePadding="10dp"
-        android:ems="10"
-        android:inputType="text"
-        android:paddingLeft="10dp"
-        android:hint="Search"
-        android:textSize="20sp"
-        android:textColorHint="@android:color/white"
-        android:textColor="@android:color/white"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/contactsBtn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/button_tab"
+                android:text="Contacts" />
+
+            <View
+                android:id="@+id/contacts_selected"
+                android:layout_width="match_parent"
+                android:layout_height="2.5dp"
+                android:background="@color/colorPrimary"
+                android:visibility="invisible" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/groupsBtn"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="@drawable/button_tab"
+                android:text="Groups" />
+
+            <View
+                android:id="@+id/groups_selected"
+                android:layout_width="match_parent"
+                android:layout_height="2.5dp"
+                android:background="@color/colorPrimary"
+                android:visibility="invisible" />
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--<EditText-->
+        <!--android:id="@+id/searchContact"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="60dp"-->
+        <!--android:fontFamily="@font/nunito"-->
+        <!--android:background="@drawable/searchbar"-->
+        <!--android:drawableLeft="@mipmap/search"-->
+        <!--android:drawablePadding="10dp"-->
+        <!--android:ems="10"-->
+        <!--android:inputType="text"-->
+        <!--android:paddingLeft="10dp"-->
+        <!--android:hint="Search"-->
+        <!--android:textSize="20sp"-->
+        <!--android:textColorHint="@android:color/white"-->
+        <!--android:textColor="@android:color/white"/>-->
+
 
     <!-- Apparently cannot use ScrollView with a RecyclerView within it as both views have their own scrolls,
     conflicting each other, replacing it to NestedScrollView will work, together with setNestedScrollingEnabled(false) -->
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="60dp" >
+        android:layout_marginTop="55dp" >
 
             <LinearLayout
                 android:id="@+id/groupContainer"
@@ -36,4 +89,5 @@
             </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
+
 </FrameLayout>
