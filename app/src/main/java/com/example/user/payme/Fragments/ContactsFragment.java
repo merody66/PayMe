@@ -2,6 +2,7 @@ package com.example.user.payme.Fragments;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -13,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.res.ResourcesCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -34,9 +36,11 @@ import android.widget.Toast;
 import com.example.user.payme.Adapters.HorizontalRecyclerViewAdapter;
 import com.example.user.payme.Adapters.VerticalRecyclerViewAdapter;
 import com.example.user.payme.ChooseContactActivity;
+import com.example.user.payme.Interfaces.ContactClickListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.R;
+import com.example.user.payme.ShowActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -51,6 +55,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,7 +66,8 @@ import java.util.Map;
  * Use the {@link ContactsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ContactsFragment extends Fragment {
+public class ContactsFragment extends Fragment implements ContactClickListener{
+    private static final String TAG = "ContactsFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -333,11 +340,13 @@ public class ContactsFragment extends Fragment {
                         layout.setPadding(50, 50, 50, 0);
                         layout.setOrientation(LinearLayout.VERTICAL);
                         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
-                        VerticalRecyclerViewAdapter adapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
+                        VerticalRecyclerViewAdapter adapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
                         RecyclerView recyclerView = new RecyclerView(getContext());
                         recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
                                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                         recyclerView.setAdapter(adapter);
+                        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+                        recyclerView.addItemDecoration(decoration);
                         recyclerView.setLayoutManager(layoutManager);
                         recyclerView.setNestedScrollingEnabled(false);
                         TextView contactsTextView = new TextView(getContext());
@@ -374,5 +383,16 @@ public class ContactsFragment extends Fragment {
         // must be done before commit.
         transaction.addToBackStack(null);
         transaction.commit();
+    }
+
+    @Override
+    public void onContactClick(Contact contact) {
+        if (getActivity() instanceof ChooseContactActivity) {
+            Log.d(TAG, "onContactClick: pass it to showactivity "+contact.getmName());
+            Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+            intent.putExtra("Contact", contact);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 }
