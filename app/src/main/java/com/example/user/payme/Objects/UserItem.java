@@ -19,6 +19,7 @@ public class UserItem {
         this.total = total;
     }
 
+    // For firebase constructor and name
     public UserItem(String mName, String mNumber, double mAmount, boolean mIsPaid) {
         this.mName = mName;
         this.mNumber = mNumber;

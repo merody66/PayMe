@@ -330,6 +330,13 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
                                 @Override
                                 public void onClick(View v) {
                                     Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                                    Log.d(TAG, "onClick: group pass it to showactivity "+groupName);
+                                    Log.d(TAG, "onClick: list of contacts "+contacts.get(0));
+                                    Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+                                    intent.putExtra("Contacts", contacts);
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                    startActivity(intent);
+
                                 }
                             });
                         }
@@ -390,7 +397,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
         if (getActivity() instanceof ChooseContactActivity) {
             Log.d(TAG, "onContactClick: pass it to showactivity "+contact.getmName());
             Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
-            intent.putExtra("Contact", contact);
+            // todo multi select pass it as arraylist
+            ArrayList<Contact> contacts = new ArrayList<>();
+            contacts.add(contact);
+            intent.putExtra("Contacts", contacts);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }

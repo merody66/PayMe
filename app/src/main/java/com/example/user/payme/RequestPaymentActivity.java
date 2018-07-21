@@ -21,11 +21,8 @@ import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.Objects.Receipt;
 import com.example.user.payme.Objects.ReceiptItem;
 import com.example.user.payme.Objects.UserItem;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -44,6 +41,14 @@ public class RequestPaymentActivity extends AppCompatActivity {
 
     private ArrayList<UserItem> userItems;
     private ArrayList<UserItem> fbUserItems;
+    private double allUsersTotal;
+    ArrayList<ReceiptItem> updatedSharedItems;
+
+    private ArrayList<Contact> mContacts;
+    private HashMap<String, ArrayList<ReceiptItem>> mResult;
+    private ArrayList<ReceiptItem> mReceiptItems;
+    private Receipt mReceipt;
+    private double mShared;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -79,54 +84,15 @@ public class RequestPaymentActivity extends AppCompatActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
         // Get extra from intent
-        ArrayList<Contact> mContacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contact");
-        HashMap<String, ArrayList<ReceiptItem>> result = (HashMap<String, ArrayList<ReceiptItem>>) getIntent().getSerializableExtra("result");
-        ArrayList<ReceiptItem> receiptItems = (ArrayList<ReceiptItem>) getIntent().getSerializableExtra("receiptItemList");
-        Receipt receipt = (Receipt) getIntent().getSerializableExtra("receipt");
-        Log.d(TAG, "onCreate receipt "+receipt);
+        mContacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contact");
+        mResult = (HashMap<String, ArrayList<ReceiptItem>>) getIntent().getSerializableExtra("result");
+        mReceiptItems = (ArrayList<ReceiptItem>) getIntent().getSerializableExtra("receiptItemList");
+        mReceipt = (Receipt) getIntent().getSerializableExtra("receipt");
+        Log.d(TAG, "onCreate mReceipt "+ mReceipt);
+        
+        mShared = calcIndivSharedAmt();
 
-        HashMap<String, Double> finalAmount = new HashMap<>();
-        double shared = 0;
-        if (result.get(null) != null) {
-            ArrayList<ReceiptItem> sharedItems = result.remove(null);
-
-            for (ReceiptItem items : sharedItems) {
-                Log.d(TAG, "onCreate: shared "+items.getmName() + " price: "+items.getmPrice());
-                shared += Double.parseDouble(items.getmPrice());
-            }
-
-            shared = shared / mContacts.size();
-            finalAmount.put("Shared items", shared);
-        }
-
-
-
-        userItems = new ArrayList<>();
-        fbUserItems = new ArrayList<>();
-        double allUsersTotal = 0;
-
-        for (Contact contact : mContacts) {
-            String name = contact.getmName();
-            double total = 0;
-
-            ArrayList<ReceiptItem> userItem = result.get(name);
-            total = 0;
-            for (ReceiptItem items : userItem) {
-                total += Double.parseDouble(items.getmPrice());
-            }
-
-
-            userItem.add(new ReceiptItem("Shared items", String.valueOf(shared)));
-            total = (total + shared) * GST * SERVICE_CHARGE;
-            String formattedTotal = String.format("%.2f", total);
-            userItems.add(new UserItem(contact, userItem, formattedTotal));
-
-            // TODO get and set current user name
-            if (!name.equals("You")) {
-                allUsersTotal += total;
-                fbUserItems.add(new UserItem(name, contact.getmPhoneNumber(), Double.parseDouble(formattedTotal), false));
-            }
-        }
+        setIndivItemsInfo();
 
         //todo delete this
         // ensure all is saving alright
@@ -148,7 +114,6 @@ public class RequestPaymentActivity extends AppCompatActivity {
         total_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //todo save to firebase
                 FirebaseAuth auth;
                 FirebaseDatabase db;
                 DatabaseReference ref;
@@ -161,10 +126,10 @@ public class RequestPaymentActivity extends AppCompatActivity {
                 String userId = currentUser.getUid();
 
                 Map<String, Object> postValues = new HashMap<>();
-                receipt.setmItemList(receiptItems);
-                receipt.setPayees(fbUserItems);
+                mReceipt.setmItemList(mReceiptItems);
+                mReceipt.setPayees(fbUserItems);
                 String key = ref.child("users").push().getKey();
-                postValues.put("receipts/"+key, receipt);
+                postValues.put("receipts/"+key, mReceipt);
 
                 ref.child("users").child(userId).updateChildren(postValues)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -193,6 +158,69 @@ public class RequestPaymentActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private double calcIndivSharedAmt() {
+        double shared = 0;
+        updatedSharedItems = new ArrayList<>();
+        int contactsSize = mContacts.size();
+        if (mResult.get(null) != null) {
+            ArrayList<ReceiptItem> sharedItems = mResult.remove(null);
+            for (ReceiptItem items : sharedItems) {
+                String name = items.getmName();
+                String price = items.getmPrice();
+                double parsedPrice = Double.parseDouble(price);
+                Log.d(TAG, "onCreate: mShared "+items.getmName() + " price: "+items.getmPrice());
+                updatedSharedItems.add(new ReceiptItem(name, String.valueOf(parsedPrice/contactsSize)));
+                shared += Double.parseDouble(items.getmPrice());
+            }
+
+            shared = shared / contactsSize;
+        }
+
+        return shared;
+    }
+
+    /**
+     * Get the individual UserItem and in another format for firebase
+     * This also calculate the total requesting amount.
+     */
+    private void setIndivItemsInfo() {
+        userItems = new ArrayList<>();
+        fbUserItems = new ArrayList<>();
+        allUsersTotal = 0;
+
+        for (Contact contact : mContacts) {
+            String name = contact.getmName();
+            String phoneNumber = contact.getmPhoneNumber();
+            double total = 0;
+
+            ArrayList<ReceiptItem> userItem = mResult.get(name);
+
+            // Adding all the shared item to calculate later
+            ArrayList<ReceiptItem> userIncSharedItems = updatedSharedItems;
+
+            if (userItem != null) {
+                userIncSharedItems.addAll(userItem);
+            } else {
+                userItem = new ArrayList<>();
+            }
+
+            for (ReceiptItem items : userIncSharedItems) {
+                total += Double.parseDouble(items.getmPrice());
+            }
+
+            userItem.add(new ReceiptItem("Shared items", String.valueOf(mShared)));
+            total = total * GST * SERVICE_CHARGE;
+            String formattedTotal = String.format("%.2f", total);
+            userItems.add(new UserItem(contact, userItem, formattedTotal));
+
+            // TODO get and set current user name
+            if (!name.equals("You")) {
+                allUsersTotal += total;
+                fbUserItems.add(new UserItem(name, phoneNumber, Double.parseDouble(formattedTotal), false));
+            }
+        }
     }
 
     private void initRecyclerView() {
