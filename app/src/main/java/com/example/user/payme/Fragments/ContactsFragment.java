@@ -342,19 +342,21 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
                             groupContainer.addView(layout);
 
                             // On click listener for select group for add receipt
-                            layout.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
-                                    Log.d(TAG, "onClick: group pass it to showactivity "+groupName);
-                                    Log.d(TAG, "onClick: list of contacts "+contacts.get(0));
-                                    Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
-                                    intent.putExtra("Contacts", contacts);
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
+                            if (getActivity() instanceof ChooseContactActivity) {
+                                layout.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                                        Log.d(TAG, "onClick: group pass it to showactivity "+groupName);
+                                        Log.d(TAG, "onClick: list of contacts "+contacts.get(0));
+                                        Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+                                        intent.putExtra("Contacts", contacts);
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
 
-                                }
-                            });
+                                    }
+                                });
+                            }
                         }
                         LinearLayout layout = new LinearLayout(getContext());
                         layout.setLayoutParams(new LinearLayout.LayoutParams(

@@ -14,16 +14,15 @@
             android:id="@+id/contactNameLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginTop="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="48dp"
             android:fontFamily="@font/nunito"
             android:text="@string/contact_name"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.063"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -31,57 +30,46 @@
             android:id="@+id/contactNameTxtField"
             android:layout_width="314dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
             android:fontFamily="@font/nunito"
             android:hint="@string/text_hint_name"
             android:inputType="textPersonName"
             android:textColorHint="#a5a5a5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/contactNameLbl"
             app:layout_constraintTop_toBottomOf="@+id/contactNameLbl" />
 
         <TextView
             android:id="@+id/numberLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             android:fontFamily="@font/nunito"
             android:text="@string/paylah_number"
             android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.131"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/contactNameTxtField"
             app:layout_constraintTop_toBottomOf="@+id/contactNameTxtField" />
 
         <EditText
             android:id="@+id/numberTxtField"
             android:layout_width="314dp"
             android:layout_height="40dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="8dp"
             android:ems="10"
             android:fontFamily="@font/nunito"
             android:hint="+65 XXXXXXXX"
             android:inputType="numberSigned"
             android:textColorHint="#a5a5a5"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.413"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/numberLbl"
             app:layout_constraintTop_toBottomOf="@+id/numberLbl" />
 
         <Button
             android:id="@+id/saveBtn"
             android:layout_width="145dp"
             android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="88dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
@@ -92,10 +80,9 @@
             android:textSize="16sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/numberTxtField"
-            app:layout_constraintVertical_bias="0.406" />
+            app:layout_constraintVertical_bias="1.0" />
 
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>
