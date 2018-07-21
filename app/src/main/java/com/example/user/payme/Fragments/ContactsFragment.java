@@ -101,6 +101,8 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     private String userId;
 
 
+    private ArrayList<Contact> mContacts = new ArrayList<>();
+
     // Empty public constructor, required by the system
     public ContactsFragment() { }
 
@@ -146,7 +148,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
             ((MainActivity) getActivity())
                     .setActionBarTitle("Contacts");
         } else {
-            ((ChooseContactActivity) getActivity()).setActionBarTitle("Choose");
+            ((ChooseContactActivity) getActivity()).setActionBarTitle("Choose Contacts");
         }
     }
 
@@ -172,8 +174,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
             GetContactsIntoArrayList();
             GetGroupsIntoHashMap();
 
-            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList,
-                    ContactsFragment.this::onContactClick);
+            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
+            if (getActivity() instanceof ChooseContactActivity) {
+                contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
+            }
 
             // Show contacts first
             contacts_selected.setVisibility(View.VISIBLE);
@@ -232,21 +236,35 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.contacts_bar, menu);
+        if (getActivity() instanceof ChooseContactActivity) {
+            inflater.inflate(R.menu.choose_contact_bar, menu);
+        } else {
+            inflater.inflate(R.menu.contacts_bar, menu);
+        }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle item selection
-        switch (item.getItemId()) {
-            case R.id.add_friend:
-                addFriend();
-                return true;
-            case R.id.add_group:
-                addGroup();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (getActivity() instanceof ChooseContactActivity) {
+            switch (item.getItemId()) {
+                case R.id.next:
+                    nextShowActvity();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
+        } else {
+            switch (item.getItemId()) {
+                case R.id.add_friend:
+                    addFriend();
+                    return true;
+                case R.id.add_group:
+                    addGroup();
+                    return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+            }
         }
     }
 
@@ -491,6 +509,16 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
     }
 
+
+    private void nextShowActvity() {
+        Log.d(TAG, "onContactClick: pass it to showactivity ");
+        Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+        intent.putExtra("Contacts", mContacts);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+
     private void addFriend() {
         Fragment friendFragment = new AddFriendFragment();
         FragmentManager fm = getActivity().getSupportFragmentManager();
@@ -516,14 +544,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     @Override
     public void onContactClick(Contact contact) {
         if (getActivity() instanceof ChooseContactActivity) {
-            Log.d(TAG, "onContactClick: pass it to showactivity "+contact.getmName());
-            Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
-            // todo multi select pass it as arraylist
-            ArrayList<Contact> contacts = new ArrayList<>();
-            contacts.add(contact);
-            intent.putExtra("Contacts", contacts);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            mContacts.add(contact);
         }
     }
 
