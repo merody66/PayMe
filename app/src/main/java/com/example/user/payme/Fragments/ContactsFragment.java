@@ -17,6 +17,8 @@ import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -55,7 +57,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
-
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -65,7 +67,7 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
  * Use the {@link ContactsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ContactsFragment extends Fragment implements ContactClickListener{
+public class ContactsFragment extends Fragment implements ContactClickListener,  MaterialSearchBar.OnSearchActionListener {
     private static final String TAG = "ContactsFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -79,21 +81,25 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
     private OnFragmentInteractionListener mListener;
 
     final int PERMISSION_ALL = 1;
+    Typeface fontFace;
+    Cursor cursor;
     private ArrayList<Contact> contactsList;
-    private Button groupsBtn;
-    private View groups_selected;
-    private View contacts_selected;
+    HashMap<String, ArrayList<Contact>> groupList = new HashMap<>();
+    VerticalRecyclerViewAdapter contactsAdapter;
     private Button contactsBtn;
+    private Button groupsBtn;
+    private View contacts_selected;
+    private View groups_selected;
+    private MaterialSearchBar searchBar;
     private LinearLayout groupContainer;
-    private EditText searchContact;
+    private boolean contactsSelected;
+
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference ref;
     private FirebaseUser currentUser;
     private String userId;
-    Cursor cursor;
-    Typeface fontFace;
-    HashMap<String, ArrayList<Contact>> groupList = new HashMap<>();
+
 
     // Empty public constructor, required by the system
     public ContactsFragment() { }
@@ -150,12 +156,12 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_contacts, container, false);
 
-        //searchContact = view.findViewById(R.id.searchContact);
         contactsBtn = view.findViewById(R.id.contactsBtn);
         contacts_selected = view.findViewById(R.id.contacts_selected);
         groupsBtn = view.findViewById(R.id.groupsBtn);
         groups_selected = view.findViewById(R.id.groups_selected);
         groupContainer = view.findViewById(R.id.groupContainer);
+        searchBar = (MaterialSearchBar) view.findViewById(R.id.searchBar);
 
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
@@ -166,8 +172,12 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
             GetContactsIntoArrayList();
             GetGroupsIntoHashMap();
 
+            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList,
+                    ContactsFragment.this::onContactClick);
+
             // Show contacts first
             contacts_selected.setVisibility(View.VISIBLE);
+            contactsSelected = true;
             ShowContacts();
 
             contactsBtn.setOnClickListener(new View.OnClickListener() {
@@ -176,6 +186,8 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
                     groups_selected.setVisibility(View.INVISIBLE);
                     if (contacts_selected.getVisibility() == View.INVISIBLE) {
                         contacts_selected.setVisibility(View.VISIBLE);
+                        contactsSelected = true;
+                        searchBar.setPlaceHolder("Search Contacts");
                     }
                     ShowContacts();
                 }
@@ -187,29 +199,33 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
                     contacts_selected.setVisibility(View.INVISIBLE);
                     if (groups_selected.getVisibility() == View.INVISIBLE) {
                         groups_selected.setVisibility(View.VISIBLE);
+                        contactsSelected = false;
+                        searchBar.setPlaceHolder("Search Groups");
                     }
                     ShowGroups();
                 }
             });
 
+            searchBar.addTextChangeListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                    if (contactsSelected) {  // run this block of code only for search contacts
+                        String searchText = searchBar.getText();
+                        //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
+                        contactsAdapter.getFilter().filter(searchText);
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {  }
+
+            });
+
+            searchBar.setOnSearchActionListener(this);
         }
-
-
-//        searchContact.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-//                // When user changed the Text
-//                // contactAdapter.getFilter().filter(cs);
-//            }
-//
-//            @Override
-//            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable arg0) {
-//            }
-//        });
 
         return view;
     }
@@ -376,11 +392,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
         layout.setPadding(50, 50, 50, 0);
         layout.setOrientation(LinearLayout.VERTICAL);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
-        VerticalRecyclerViewAdapter adapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
         RecyclerView recyclerView = new RecyclerView(getContext());
         recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(contactsAdapter);
         DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
         recyclerView.addItemDecoration(decoration);
         recyclerView.setLayoutManager(layoutManager);
@@ -426,6 +441,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
             layout.addView(nameTextView);
             layout.addView(recyclerView);
             layout.addView(separator);
+            layout.setTag(groupName);
             groupContainer.addView(layout);
 
             // On click listener for select group for add receipt
@@ -471,4 +487,25 @@ public class ContactsFragment extends Fragment implements ContactClickListener{
             startActivity(intent);
         }
     }
+
+
+    @Override
+    public void onSearchStateChanged(boolean enabled) {  }
+
+    @Override
+    public void onSearchConfirmed(CharSequence searchText) {
+        searchText = searchText.toString().toLowerCase().trim();
+        Log.d("LOG_TAG", getClass().getSimpleName() + " text searched. " + searchText);
+        for (int i = 0; i < groupContainer.getChildCount(); i++) {
+            LinearLayout layout = (LinearLayout) groupContainer.getChildAt(i);
+            String tagName = layout.getTag().toString().toLowerCase().trim();
+            if (!tagName.contains(searchText)) {
+                // if group name does not match the query text, remove the layout
+                layout.setVisibility(LinearLayout.GONE);
+            }
+        }
+    }
+
+    @Override
+    public void onButtonClicked(int buttonCode) {  }
 }

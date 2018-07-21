@@ -37,6 +37,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,6 +53,7 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class AddGroupFragment extends Fragment {
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -63,20 +65,21 @@ public class AddGroupFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
+    Cursor cursor;
     private Button addMembersBtn;
     private EditText grpNameTxt;
-    private EditText searchContact;
     private TextView membersList;
+    private VerticalRecyclerViewAdapter mAdapter;
     private RecyclerView contactsRecyclerView;
-    private LinearLayout groupListContainer;
+    private LinearLayout contactsListContainer;
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference ref;
 
     private ArrayList<Contact> contactsList;
     private ArrayList<Contact> selectedContacts;
-    private VerticalRecyclerViewAdapter mAdapter;
-    Cursor cursor;
+    private MaterialSearchBar searchBar;
+
 
     public AddGroupFragment() {
         // Required empty public constructor
@@ -122,10 +125,10 @@ public class AddGroupFragment extends Fragment {
         // Initialize widgets
         addMembersBtn = view.findViewById(R.id.addMembersBtn);
         grpNameTxt = view.findViewById(R.id.grpNameTxtField);
-        searchContact = view.findViewById(R.id.searchContact);
         membersList = view.findViewById(R.id.membersList);
+        searchBar = view.findViewById(R.id.searchBar);
         contactsRecyclerView = view.findViewById(R.id.contactList);
-        groupListContainer = view.findViewById(R.id.groupListContainer);
+        contactsListContainer = view.findViewById(R.id.contactsListContainer);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
@@ -133,13 +136,11 @@ public class AddGroupFragment extends Fragment {
 
         contactsList = new ArrayList<>();
         selectedContacts = new ArrayList<>();
-
         GetContactsIntoArrayList();
 
         ContactClickListener listener = new ContactClickListener()
         {
             String msg = "";
-
             @Override
             public void onContactClick(Contact contact)
             {
@@ -156,26 +157,29 @@ public class AddGroupFragment extends Fragment {
         contactsRecyclerView.setAdapter(mAdapter);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
+
         addMembersBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                groupListContainer.setVisibility(View.VISIBLE);
+                contactsListContainer.setVisibility(View.VISIBLE);
                 setHasOptionsMenu(true);
             }
         });
 
 
-        searchContact.addTextChangedListener(new TextWatcher() {
+        searchBar.addTextChangeListener(new TextWatcher() {
             @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                // When user changed the Text
-                //mAdapter.getFilter().filter(cs);
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String searchText = searchBar.getText();
+                //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
+                mAdapter.getFilter().filter(searchText);
             }
 
             @Override
-            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {  }
+            public void afterTextChanged(Editable editable) {  }
 
-            @Override
-            public void afterTextChanged(Editable arg0) {  }
         });
 
 
@@ -208,7 +212,7 @@ public class AddGroupFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.done_btn:
                 addGroup(grpName, selectedContacts);
-                groupListContainer.setVisibility(View.GONE);
+                contactsListContainer.setVisibility(View.GONE);
                 grpNameTxt.setText("");
                 grpNameTxt.setFocusable(false);
                 membersList.setText("Add friends to the group");
@@ -243,6 +247,7 @@ public class AddGroupFragment extends Fragment {
         mListener = null;
     }
 
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -261,7 +266,6 @@ public class AddGroupFragment extends Fragment {
     public void GetContactsIntoArrayList() {
 
         cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null, null);
-
         while (cursor.moveToNext()) {
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));

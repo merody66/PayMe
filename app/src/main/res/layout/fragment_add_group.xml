@@ -86,7 +86,7 @@
             app:layout_constraintTop_toBottomOf="@+id/grpMembersLbl" />
 
         <LinearLayout
-            android:id="@+id/groupListContainer"
+            android:id="@+id/contactsListContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="36dp"
@@ -97,27 +97,27 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/addMembersBtn">
 
-            <EditText
-                android:id="@+id/searchContact"
+            <View
+                android:id="@+id/groups_selected"
                 android:layout_width="match_parent"
-                android:layout_height="60dp"
-                android:background="@drawable/searchbar"
-                android:drawableLeft="@mipmap/search"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:fontFamily="@font/nunito"
-                android:hint="Search"
-                android:inputType="text"
-                android:paddingLeft="10dp"
-                android:textColor="@android:color/white"
-                android:textColorHint="@android:color/white"
-                android:textSize="20sp" />
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray" />
+
+            <com.mancj.materialsearchbar.MaterialSearchBar
+                style="@style/MaterialSearchBarLight"
+                app:mt_hint="Search"
+                app:mt_placeholder="Search Contacts"
+                app:mt_maxSuggestionsCount="10"
+                app:mt_navIconEnabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="Search Contacts"
+                android:id="@+id/searchBar" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/contactList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:choiceMode="multipleChoice"
                 android:listSelector="#ffeaa7"
                 app:layout_constraintEnd_toEndOf="parent"

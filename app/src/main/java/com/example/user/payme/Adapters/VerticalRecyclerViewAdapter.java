@@ -6,6 +6,8 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import com.example.user.payme.Interfaces.ContactClickListener;
@@ -16,21 +18,26 @@ import java.util.ArrayList;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRecyclerViewAdapter.ViewHolder> {
+public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRecyclerViewAdapter.ViewHolder> implements Filterable {
+
     private static final String TAG = "VerticalRecyclerView";
-    private ArrayList<Contact> mContacts;
     private Context mContext;
+    private ArrayList<Contact> mContacts;
+    private ArrayList<Contact> mFilteredContacts;
     ContactClickListener contactClickListener;
+    public MyFilter mFilter;
 
     public VerticalRecyclerViewAdapter(Context mContext, ArrayList<Contact> mContacts, ContactClickListener contactClickListener) {
         this.mContext = mContext;
         this.mContacts = mContacts;
+        this.mFilteredContacts = new ArrayList<>();
         this.contactClickListener = contactClickListener;
     }
 
     public VerticalRecyclerViewAdapter(Context mContext, ArrayList<Contact> mContacts) {
         this.mContext = mContext;
         this.mContacts = mContacts;
+        this.mFilteredContacts = new ArrayList<>();
     }
 
 
@@ -83,4 +90,63 @@ public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRe
             }
         }
     }
+
+    @Override
+    public Filter getFilter() {
+
+        if (mFilter == null){
+            mFilteredContacts.clear();
+            mFilteredContacts.addAll(this.mContacts);
+            mFilter = new VerticalRecyclerViewAdapter.MyFilter(this, mFilteredContacts);
+        }
+        return mFilter;
+
+    }
+
+
+    private static class MyFilter extends Filter {
+
+        private final VerticalRecyclerViewAdapter myAdapter;
+        private final ArrayList<Contact> originalList;
+        private final ArrayList<Contact> filteredList;
+
+        private MyFilter(VerticalRecyclerViewAdapter myAdapter, ArrayList<Contact> originalList) {
+            this.myAdapter = myAdapter;
+            this.originalList = originalList;
+            this.filteredList = new ArrayList<>();
+        }
+
+        @Override
+        protected FilterResults performFiltering(CharSequence charSequence) {
+
+            filteredList.clear();
+            final FilterResults results = new FilterResults();
+
+            if (charSequence.length() == 0) {
+                filteredList.addAll(originalList);
+            } else {
+                final String filterPattern = charSequence.toString().toLowerCase().trim();
+                for (Contact contact : originalList){
+                    if (contact.getmName().toLowerCase().contains(filterPattern)){
+                        filteredList.add(contact);
+                    }
+                }
+            }
+
+            results.values = filteredList;
+            results.count = filteredList.size();
+            return results;
+
+        }
+
+        @Override
+        protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+
+            myAdapter.mContacts.clear();
+            myAdapter.mContacts.addAll((ArrayList<Contact>)filterResults.values);
+            myAdapter.notifyDataSetChanged();
+
+        }
+    }
+
 }
