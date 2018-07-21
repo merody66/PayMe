@@ -128,11 +128,10 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         mDone_button = (Button) findViewById(R.id.done_button);
 
         // Data taken from previous ChooseContactActivity
-        Contact mContact = (Contact) getIntent().getSerializableExtra("Contact");
+        ArrayList<Contact> contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contacts");
         // TODO retrieve current logged in user
-        mContacts.add(new Contact(0, "You", "99999999"));
-//        mContact.setmName("Hui Chun");
-        mContacts.add(mContact);
+        mContacts.add(0, new Contact(0, "You", "99999999"));
+        mContacts.addAll(contacts);
 
         // Data taken from shared preferences
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -407,7 +406,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             isChildEnabled = adapter.isItemEnabled(i);
             childView.setEnabled(isChildEnabled);
             adapter.setSelectedStyle(childView, isChildEnabled);
-            Log.d(TAG, "onImageClick: ischildenabled "+isChildEnabled);
+//            Log.d(TAG, "onImageClick: ischildenabled "+isChildEnabled);
         }
     }
 

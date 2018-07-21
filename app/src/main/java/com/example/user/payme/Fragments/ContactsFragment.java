@@ -283,8 +283,12 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 GetContactsIntoArrayList();
                 GetGroupsIntoHashMap();
 
+                contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList,
+                        ContactsFragment.this::onContactClick);
+
                 // Show contacts first
                 contacts_selected.setVisibility(View.VISIBLE);
+                contactsSelected = true;
                 ShowContacts();
 
                 contactsBtn.setOnClickListener(new View.OnClickListener() {
@@ -293,6 +297,8 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                         groups_selected.setVisibility(View.INVISIBLE);
                         if (contacts_selected.getVisibility() == View.INVISIBLE) {
                             contacts_selected.setVisibility(View.VISIBLE);
+                            contactsSelected = true;
+                            searchBar.setPlaceHolder("Search Contacts");
                         }
                         ShowContacts();
                     }
@@ -304,10 +310,33 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                         contacts_selected.setVisibility(View.INVISIBLE);
                         if (groups_selected.getVisibility() == View.INVISIBLE) {
                             groups_selected.setVisibility(View.VISIBLE);
+                            contactsSelected = false;
+                            searchBar.setPlaceHolder("Search Groups");
                         }
                         ShowGroups();
                     }
                 });
+
+                searchBar.addTextChangeListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                        if (contactsSelected) {  // run this block of code only for search contacts
+                            String searchText = searchBar.getText();
+                            //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
+                            contactsAdapter.getFilter().filter(searchText);
+                        }
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {  }
+
+                });
+
+                searchBar.setOnSearchActionListener(this);
+
                 return;
             }
         }
@@ -361,7 +390,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
     public void GetGroupsIntoHashMap() {
         ref.child("users").child(userId).child("groupList")
-            .addListenerForSingleValueEvent(new ValueEventListener() {
+                .addListenerForSingleValueEvent(new ValueEventListener() {
 
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -449,6 +478,13 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "onClick: group pass it to showactivity "+groupName);
+                    Log.d(TAG, "onClick: list of contacts "+contacts.get(0));
+                    Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+                    intent.putExtra("Contacts", contacts);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+
                 }
             });
         }
@@ -482,7 +518,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         if (getActivity() instanceof ChooseContactActivity) {
             Log.d(TAG, "onContactClick: pass it to showactivity "+contact.getmName());
             Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
-            intent.putExtra("Contact", contact);
+            // todo multi select pass it as arraylist
+            ArrayList<Contact> contacts = new ArrayList<>();
+            contacts.add(contact);
+            intent.putExtra("Contacts", contacts);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }

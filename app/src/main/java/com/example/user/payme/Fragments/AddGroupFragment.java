@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
@@ -43,6 +44,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -156,6 +159,8 @@ public class AddGroupFragment extends Fragment {
         mAdapter = new VerticalRecyclerViewAdapter(getActivity(), contactsList, listener);
         contactsRecyclerView.setAdapter(mAdapter);
         contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+        contactsRecyclerView.addItemDecoration(decoration);
 
 
         addMembersBtn.setOnClickListener(new View.OnClickListener() {
