@@ -6,4 +6,5 @@
     <color name="colourIcon">#9B59B6</color>
     <color name="colourWhite">#FFFFFF</color>
     <color name="colourBlack">#000000</color>
+    <color name="colourSelected">#EBEBEB</color>
 </resources>

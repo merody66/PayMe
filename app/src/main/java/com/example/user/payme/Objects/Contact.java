@@ -12,6 +12,7 @@ public class Contact implements Serializable {
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;
+    private boolean isSelected;
 
     public Contact() {
         // Default constructor needed
@@ -21,6 +22,12 @@ public class Contact implements Serializable {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
         this.mPhoneNumber = mPhoneNumber;
+    }
+
+    public boolean getIsSelected() { return isSelected; }
+
+    public void toggleSelected() {
+        this.isSelected = !isSelected;
     }
 
     public int getmImageDrawable() { return this.mImageDrawable; }

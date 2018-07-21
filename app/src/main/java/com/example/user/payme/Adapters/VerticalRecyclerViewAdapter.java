@@ -1,7 +1,9 @@
 package com.example.user.payme.Adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,7 +22,7 @@ public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRe
     private static final String TAG = "VerticalRecyclerView";
     private ArrayList<Contact> mContacts;
     private Context mContext;
-    ContactClickListener contactClickListener;
+    private ContactClickListener contactClickListener;
 
     public VerticalRecyclerViewAdapter(Context mContext, ArrayList<Contact> mContacts, ContactClickListener contactClickListener) {
         this.mContext = mContext;
@@ -51,6 +53,9 @@ public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRe
 
         holder.name.setText(name);
         holder.contact.setText(number);
+
+        // Here I am just highlighting the background
+        holder.cardInnerConstraintLayout.setBackgroundColor(contact.getIsSelected() ? mContext.getResources().getColor(R.color.colourSelected): Color.TRANSPARENT);
     }
 
     @Override
@@ -58,17 +63,18 @@ public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRe
         return mContacts.size();
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder {
         CircleImageView image;
         TextView name;
         TextView contact;
+        ConstraintLayout cardInnerConstraintLayout;
 
         public ViewHolder (View itemView) {
             super(itemView);
             image = itemView.findViewById(R.id.user_image);
             name = itemView.findViewById(R.id.user_name);
             contact = itemView.findViewById(R.id.user_contact);
+            cardInnerConstraintLayout = itemView.findViewById(R.id.cardInnerConstraintLayout);
 
             if (contactClickListener != null) {
                 itemView.setOnClickListener(new View.OnClickListener() {
@@ -76,7 +82,13 @@ public class VerticalRecyclerViewAdapter extends RecyclerView.Adapter<VerticalRe
                     public void onClick(View v) {
                         // get position
                         int position = getAdapterPosition();
+
                         Contact selectedContact = mContacts.get(position);
+                        // Updating isSelected in contact
+                        notifyItemChanged(position);
+                        selectedContact.toggleSelected();
+                        notifyItemChanged(position);
+
                         contactClickListener.onContactClick(selectedContact);
                     }
                 });

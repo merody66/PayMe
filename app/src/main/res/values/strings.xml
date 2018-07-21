@@ -30,6 +30,7 @@
     <!--AppBar-->
     <string name="back">Back</string>
     <string name="edit">Edit</string>
+    <string name="next">Next</string>
 
     <!--AddFriendFragment & AddGroupFragment-->
     <string name="add_friend">Add Friend</string>

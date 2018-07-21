@@ -89,21 +89,9 @@ public class RequestPaymentActivity extends AppCompatActivity {
         mReceiptItems = (ArrayList<ReceiptItem>) getIntent().getSerializableExtra("receiptItemList");
         mReceipt = (Receipt) getIntent().getSerializableExtra("receipt");
         Log.d(TAG, "onCreate mReceipt "+ mReceipt);
-        
+
         mShared = calcIndivSharedAmt();
-
         setIndivItemsInfo();
-
-        //todo delete this
-        // ensure all is saving alright
-        for (UserItem card: userItems) {
-            Log.d(TAG, "onCreate: card "+card.getmContact().getmName());
-            for (ReceiptItem items : card.getReceiptItems()) {
-                Log.d(TAG, items.getmName()+ "  "+ items.getmPrice());
-            }
-
-            Log.d(TAG, "total "+card.getTotal());
-        }
 
         Button total_button = (Button) findViewById(R.id.total_button);
         String formattedAllUsersTotal = String.format("Requesting: $%.2f", allUsersTotal);
@@ -170,7 +158,6 @@ public class RequestPaymentActivity extends AppCompatActivity {
                 String name = items.getmName();
                 String price = items.getmPrice();
                 double parsedPrice = Double.parseDouble(price);
-                Log.d(TAG, "onCreate: mShared "+items.getmName() + " price: "+items.getmPrice());
                 updatedSharedItems.add(new ReceiptItem(name, String.valueOf(parsedPrice/contactsSize)));
                 shared += Double.parseDouble(items.getmPrice());
             }
@@ -198,7 +185,8 @@ public class RequestPaymentActivity extends AppCompatActivity {
             ArrayList<ReceiptItem> userItem = mResult.get(name);
 
             // Adding all the shared item to calculate later
-            ArrayList<ReceiptItem> userIncSharedItems = updatedSharedItems;
+            ArrayList<ReceiptItem> userIncSharedItems = new ArrayList<>();
+            userIncSharedItems.addAll(updatedSharedItems);
 
             if (userItem != null) {
                 userIncSharedItems.addAll(userItem);
