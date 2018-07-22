@@ -69,7 +69,7 @@
             android:id="@+id/addMembersBtn"
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:background="@mipmap/add_black"
             app:layout_constraintStart_toStartOf="@+id/grpMembersLbl"
             app:layout_constraintTop_toBottomOf="@+id/grpMembersLbl" />

@@ -151,18 +151,19 @@ public class AddGroupFragment extends Fragment {
                 Toast.makeText(getActivity(), "Contact clicked: " + contact.getmName(), Toast.LENGTH_SHORT).show();
                 if (!selectedContacts.contains(contact)) {
                     selectedContacts.add(contact);
-                    msg += " "+contact.getmName() + ",";
-                    membersList.setText(msg);
                     showOption(R.id.done_btn);
                 } else {
                     selectedContacts.remove(contact);
-                    msg = msg.replaceFirst(" +"+contact.getmName()+",+", "");
-                    membersList.setText(msg);
 
                     if (selectedContacts.size() == 0) {
                         membersList.setText(R.string.group_members_msg);
                         hideOption(R.id.done_btn);
                     }
+                }
+
+                if (selectedContacts.size() != 0 ) {
+                    msg = "Selected "+String.valueOf(selectedContacts.size())+" contact(s)";
+                    membersList.setText(msg);
                 }
             }
         };
@@ -233,7 +234,6 @@ public class AddGroupFragment extends Fragment {
                 contactsListContainer.setVisibility(View.GONE);
                 grpNameTxt.setText("");
                 grpNameTxt.setFocusable(false);
-                membersList.setText("Add friends to the group");
                 item.setVisible(false);
                 return true;
             default:
