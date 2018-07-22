@@ -67,6 +67,7 @@ public class AddGroupFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private Menu mMenu;
 
     Cursor cursor;
     private Button addMembersBtn;
@@ -150,8 +151,18 @@ public class AddGroupFragment extends Fragment {
                 Toast.makeText(getActivity(), "Contact clicked: " + contact.getmName(), Toast.LENGTH_SHORT).show();
                 if (!selectedContacts.contains(contact)) {
                     selectedContacts.add(contact);
-                    msg += contact.getmName() + ",";
+                    msg += " "+contact.getmName() + ",";
                     membersList.setText(msg);
+                    showOption(R.id.done_btn);
+                } else {
+                    selectedContacts.remove(contact);
+                    msg = msg.replaceFirst(" +"+contact.getmName()+",+", "");
+                    membersList.setText(msg);
+
+                    if (selectedContacts.size() == 0) {
+                        membersList.setText(R.string.group_members_msg);
+                        hideOption(R.id.done_btn);
+                    }
                 }
             }
         };
@@ -193,7 +204,9 @@ public class AddGroupFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        this.mMenu = menu;
         inflater.inflate(R.menu.add_group_bar, menu);
+        hideOption(R.id.done_btn);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -210,8 +223,8 @@ public class AddGroupFragment extends Fragment {
                     });
             AlertDialog alert = builder.create();
             alert.show();
+            return false;
         }
-
 
         // Handle item selection
         switch (item.getItemId()) {
@@ -226,6 +239,17 @@ public class AddGroupFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void hideOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        item.setVisible(false);
+    }
+
+    private void showOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        setHasOptionsMenu(true);
+        item.setVisible(true);
     }
 
     // TODO: Rename method, update argument and hook method into UI event

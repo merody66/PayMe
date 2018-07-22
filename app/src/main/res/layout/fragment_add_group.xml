@@ -61,14 +61,15 @@
             android:fontFamily="@font/nunito"
             android:text="@string/group_members_msg"
             android:textSize="16sp"
-            app:layout_constraintBaseline_toBaselineOf="@+id/addMembersBtn"
-            app:layout_constraintStart_toEndOf="@+id/addMembersBtn" />
+            app:layout_constraintBottom_toBottomOf="@+id/addMembersBtn"
+            app:layout_constraintStart_toEndOf="@+id/addMembersBtn"
+            app:layout_constraintTop_toTopOf="@+id/addMembersBtn" />
 
         <Button
             android:id="@+id/addMembersBtn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="8dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="16dp"
             android:background="@mipmap/add_black"
             app:layout_constraintStart_toStartOf="@+id/grpMembersLbl"
             app:layout_constraintTop_toBottomOf="@+id/grpMembersLbl" />
@@ -92,15 +93,15 @@
                 android:background="@android:color/darker_gray" />
 
             <com.mancj.materialsearchbar.MaterialSearchBar
+                android:id="@+id/searchBar"
                 style="@style/MaterialSearchBarLight"
-                app:mt_hint="Search"
-                app:mt_placeholder="Search Contacts"
-                app:mt_maxSuggestionsCount="10"
-                app:mt_navIconEnabled="false"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="Search Contacts"
-                android:id="@+id/searchBar" />
+                android:text="Search contacts"
+                app:mt_hint="Search"
+                app:mt_maxSuggestionsCount="10"
+                app:mt_navIconEnabled="false"
+                app:mt_placeholder="Search Contacts" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/contactList"
@@ -111,7 +112,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/addMembersBtn"></android.support.v7.widget.RecyclerView>
+                app:layout_constraintTop_toBottomOf="@+id/addMembersBtn" />
 
         </LinearLayout>
 

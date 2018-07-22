@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -27,9 +28,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.provider.ContactsContract;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,6 +48,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +57,6 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
-import com.mancj.materialsearchbar.MaterialSearchBar;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -100,8 +99,8 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     private FirebaseUser currentUser;
     private String userId;
 
-
     private ArrayList<Contact> mContacts = new ArrayList<>();
+    private Menu mMenu;
 
     // Empty public constructor, required by the system
     public ContactsFragment() { }
@@ -236,8 +235,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        this.mMenu = menu;
         if (getActivity() instanceof ChooseContactActivity) {
             inflater.inflate(R.menu.choose_contact_bar, menu);
+            hideOption(R.id.next);
         } else {
             inflater.inflate(R.menu.contacts_bar, menu);
         }
@@ -266,6 +267,17 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                     return super.onOptionsItemSelected(item);
             }
         }
+    }
+
+    private void hideOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        item.setVisible(false);
+    }
+
+    private void showOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        setHasOptionsMenu(true);
+        item.setVisible(true);
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -436,7 +448,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         layout.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ));
-        layout.setPadding(50, 50, 50, 0);
         layout.setOrientation(LinearLayout.VERTICAL);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
         RecyclerView recyclerView = new RecyclerView(getContext());
@@ -447,11 +458,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         recyclerView.addItemDecoration(decoration);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setNestedScrollingEnabled(false);
-        TextView contactsTextView = new TextView(getContext());
-        contactsTextView.setText("Contacts");
-        contactsTextView.setTypeface(fontFace);
-        contactsTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
-        layout.addView(contactsTextView);
         layout.addView(recyclerView);
         groupContainer.addView(layout);
     }
@@ -546,7 +552,17 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     @Override
     public void onContactClick(Contact contact) {
         if (getActivity() instanceof ChooseContactActivity) {
-            mContacts.add(contact);
+            if (mContacts.contains(contact)) {
+                mContacts.remove(contact);
+
+                if (mContacts.size() == 0) {
+                    hideOption(R.id.next);
+                }
+            } else {
+                mContacts.add(contact);
+                showOption(R.id.next);
+            }
+
         }
     }
 
