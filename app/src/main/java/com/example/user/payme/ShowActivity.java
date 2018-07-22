@@ -40,10 +40,12 @@ import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,10 +74,6 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
     private ReceiptArrayAdapter adapter;
     private Receipt receipt;
-
-    // todo change to listview or something
-//    private CircleImageView profile_image_contact1;
-//    private TextView mContact1Text;
 
     private ArrayList<Contact> mContacts = new ArrayList<>();
 
@@ -126,6 +124,9 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         tvServiceChargeAmt = (TextView) findViewById(R.id.serviceChargeAmt);
         tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
         mDone_button = (Button) findViewById(R.id.done_button);
+
+        SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+        mDate = sdf.format(new Date());
 
         // Data taken from previous ChooseContactActivity
         ArrayList<Contact> contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contacts");
@@ -180,10 +181,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             case R.id.action_back:
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
-
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
@@ -196,20 +194,27 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
         runOnUiThread(new Runnable() {
             public void run() {
+                int leastTop = Integer.MAX_VALUE;
+
                 for (int i = 0; i < items.size(); i++) {
                     TextBlock item = items.valueAt(i);
-//                Log.d(TAG, "run: individual item " + item.getValue());
-
                     List<? extends Text> textComponents = item.getComponents();
                     for (Text currentText : textComponents) {
+                        Log.d(TAG, "run: item "+ currentText.getValue());
                         Matcher dateMatcher = datePattern.matcher(currentText.getValue());
+                        int currentTop = currentText.getBoundingBox().top;
+
+                        // Find shopname which is located at the top row
+                        if (currentTop < leastTop) {
+                            leastTop = currentTop;
+                            mShopname = currentText.getValue();
+                        }
 
                         // Find and add all price format [Text]
-                        if (currentText.getValue().matches("[o0-9]{1,2}.[o0-9]{2}")) {
-                        Log.d(TAG, "ProcessOCR: found a price match "+currentText.getValue());
+                        if (currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}")) {
+                            Log.d(TAG, "run: found "+currentText.getValue());
                             priceArray.add(currentText);
                         } else if (dateMatcher.find()) {
-//                        Log.d(TAG, "run: time " + currentText.getValue());
                             mDate = dateMatcher.group(0);
                         }
                     }
@@ -227,11 +232,14 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                 public void run() {
                 String[] menuArray = new String[2];
                 ReceiptItem receiptItem;
+
+                ArrayList<String> foundItem = new ArrayList<>();
                 for (int y = 0; y < priceArray.size(); y++) {
                     Text priceItem = priceArray.get(y);
                     float priceLeft = priceItem.getBoundingBox().left;
                     float priceBottom = priceItem.getBoundingBox().bottom;
 
+//                    Log.d(TAG, "run: price "+ priceItem.getValue()+" bounding box: "+priceItem.getBoundingBox().toString());
                     for (int i = 0; i < items.size(); i++) {
                         TextBlock item = items.valueAt(i);
                         List<? extends Text> textComponents = item.getComponents();
@@ -240,18 +248,21 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                             float itemLeft = currentText.getBoundingBox().left;
                             float itemBottom = currentText.getBoundingBox().bottom;
 
-
+//                            Log.d(TAG, "run: item "+ currentText.getValue()+" bounding box "+ currentText.getBoundingBox().toString());
                             if (priceItem != currentText && (priceLeft - itemLeft) > 0) { //skip itself and those in roughly around the same column
-                                if (priceBottom <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
-                                    Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
-                                    menuArray[0] = currentText.getValue();
-                                    menuArray[1] = priceItem.getValue();
-                                    menuList.add(menuArray);
-                                    menuArray = new String[2];
+                                if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
+                                    if (!foundItem.contains(currentText.getValue())) {
+                                        Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
+                                        menuArray[0] = currentText.getValue();
+                                        menuArray[1] = priceItem.getValue();
+                                        menuList.add(menuArray);
+                                        menuArray = new String[2];
 
-                                    receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
-                                    mItemList.add(receiptItem);
-                                    break;
+                                        receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
+                                        mItemList.add(receiptItem);
+                                        foundItem.add(currentText.getValue());
+                                        break;
+                                    }
                                 }
                             }
 
@@ -269,7 +280,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         Context context = getApplicationContext();
         // TODO: REMOVE SAMPLE IMAGE LATER
 //        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
-//        Bitmap myBitmap = rotateImage(imagePath);
+//        Bitmap myBitmap = new Image(context, imagePath).getmBitmap();
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
         // Create the TextRecognizer
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
@@ -292,15 +303,11 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         Log.d(TAG, "ProcessOCR: start detction");
         SparseArray<TextBlock> items = textRecognizer.detect(frame);
         ArrayList<Text> priceArray;
-        final Text[] resturantText = new Text[1];
-        String dateText = "";
 
         // Check if there is item
         // todo else what happen
         if (items.size() != 0) {
             // get the first line in the item.
-            resturantText[0] = items.valueAt(0).getComponents().get(0);
-
             Log.d(TAG, "ProcessOCR: finding xx.xx");
             priceArray = findPrice(items);
 
@@ -309,63 +316,43 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
             Log.d(TAG, "ProcessOCR: finding those 3 values");
             updatedItemList = new ArrayList<>();
-            boolean foundGST = false;
-            Pattern gstPattern = Pattern.compile("(GST).+", Pattern.CASE_INSENSITIVE);
-            Pattern serviceChargePattern = Pattern.compile("(service charge).+", Pattern.CASE_INSENSITIVE);
+            updatedItemList.addAll(mItemList);
+            boolean foundBreak = false;
+            int foundStart = -1;
+
+            // Combined pattern to search for subtotel, gst and service charge.
+            Pattern breakPattern = Pattern.compile("(sub ?to?ta?l)|((GST).*)|(service ?charge.*)", Pattern.CASE_INSENSITIVE);
+            double subtotal = 0;
 
             for (int i = 0; i < mItemList.size(); i++) {
                 String mName = mItemList.get(i).getmName();
 
-                // TODO to a non hardcoded way
-                switch (mName) {
-                    case "SUBTTL":
-                        mSubtotalAmt = mItemList.get(i).getmPrice();
-                        tvSubtotalAmt.setText(mSubtotalAmt);
-                        continue;
+                if (breakPattern.matcher(mName).find()) {
+                    foundBreak = true;
                 }
 
-                if (gstPattern.matcher(mName).find()) {
-                    foundGST = true;
-                    mGstAmt = mItemList.get(i).getmPrice();
-                    tvGstAmt.setText(mGstAmt);
-                    continue;
-                } else if (serviceChargePattern.matcher(mName).find()) {
-                    mServiceChargeAmt = mItemList.get(i).getmPrice();
-                    tvServiceChargeAmt.setText(mServiceChargeAmt);
-                    continue;
-                }
-
-                if (!foundGST ) {
-                    updatedItemList.add(mItemList.get(i));
+                if (!foundBreak) {
+                    String price = mItemList.get(i).getmPrice();
+                    price = price.replace("$", "");
+                    price = price.replace(",", "");
+                    try {
+                        subtotal += Double.parseDouble(price);
+                    } catch (NumberFormatException e ){
+                        Log.d(TAG, "ProcessOCR: WRONG NUMBER FORMAT");
+                    }
+                } else {
+                    updatedItemList.remove(mItemList.get(i));
                 }
             }
 
             Log.d(TAG, "ProcessOCR: set all the information and adapter");
-            mShopname = resturantText[0].getValue().replaceAll("\\s+","").toUpperCase();
-            tvShopname.setText(mShopname);
-            mDate = dateText;
-            tvDate.setText(mDate);
 
-            // TODO REMOVE HARDCODED VALUE
-            mShopname = "YA HUA BAK KUT TEH";
+            // To fit more receipts with any arrangement, we are doing the calculation
+            tvSubtotalAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal));
+            tvServiceChargeAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal * 0.1));
+            tvGstAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal * 0.07));
             tvShopname.setText(mShopname);
-            mDate = "17/05/2018";
             tvDate.setText(mDate);
-            mSubtotalAmt = "33.40";
-            tvSubtotalAmt.setText(mSubtotalAmt);
-            mServiceChargeAmt = "3.34";
-            tvServiceChargeAmt.setText(mServiceChargeAmt);
-            mGstAmt = "2.57";
-            tvGstAmt.setText(mGstAmt);
-            updatedItemList = new ArrayList<>();
-            updatedItemList.add(new ReceiptItem("3 RICE", "2.40"));
-            updatedItemList.add(new ReceiptItem("1 CHINESE TEA (GLASS)", "1.80"));
-            updatedItemList.add(new ReceiptItem("1 COKE", "1.80"));
-            updatedItemList.add(new ReceiptItem("1 PRIME CUT RIBS", "11.50"));
-            updatedItemList.add(new ReceiptItem("1 RIBS", "8.50"));
-            updatedItemList.add(new ReceiptItem("2 WET TOWEL", "0.60"));
-            updatedItemList.add(new ReceiptItem("1 FRAGRANT FRIED CHICKEN WI", "6.80"));
-
 
             receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
 
@@ -396,9 +383,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
     @Override
     public void onImageClick(String name) {
-        Log.d(TAG, "onImageClick: inside "+name);
         adapter.setCurrentChooseUser(name);
-//        mListView.getChildAt(0).setEnabled(false);
         boolean isChildEnabled;
         View childView;
         for (int i = 0; i < updatedItemList.size(); i++) {
@@ -406,7 +391,6 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             isChildEnabled = adapter.isItemEnabled(i);
             childView.setEnabled(isChildEnabled);
             adapter.setSelectedStyle(childView, isChildEnabled);
-//            Log.d(TAG, "onImageClick: ischildenabled "+isChildEnabled);
         }
     }
 

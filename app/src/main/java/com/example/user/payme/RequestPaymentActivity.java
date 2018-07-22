@@ -30,6 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
@@ -94,7 +95,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
         setIndivItemsInfo();
 
         Button total_button = (Button) findViewById(R.id.total_button);
-        String formattedAllUsersTotal = String.format("Requesting: $%.2f", allUsersTotal);
+        String formattedAllUsersTotal = String.format(Locale.ENGLISH, "Requesting: $%.2f", allUsersTotal);
         total_button.setText(formattedAllUsersTotal);
 
         initRecyclerView();
@@ -157,9 +158,17 @@ public class RequestPaymentActivity extends AppCompatActivity {
             for (ReceiptItem items : sharedItems) {
                 String name = items.getmName();
                 String price = items.getmPrice();
-                double parsedPrice = Double.parseDouble(price);
+                price = price.replace("$", "");
+                price = price.replace(",", "");
+                double parsedPrice = 0;
+                try {
+                    parsedPrice = Double.parseDouble(price);
+                } catch (NumberFormatException e ){
+                    Log.d(TAG, "calcIndivSharedAmt: WRONG NUMBER FORMAT");
+                }
+
                 updatedSharedItems.add(new ReceiptItem(name, String.valueOf(parsedPrice/contactsSize)));
-                shared += Double.parseDouble(items.getmPrice());
+                shared += parsedPrice;
             }
 
             shared = shared / contactsSize;
@@ -200,13 +209,16 @@ public class RequestPaymentActivity extends AppCompatActivity {
 
             userItem.add(new ReceiptItem("Shared items", String.valueOf(mShared)));
             total = total * GST * SERVICE_CHARGE;
-            String formattedTotal = String.format("%.2f", total);
+            String formattedTotal = String.format(Locale.ENGLISH, "$%.2f", total);
+            String withoutSignTotal = String.format(Locale.ENGLISH, "%.2f", total);
             userItems.add(new UserItem(contact, userItem, formattedTotal));
 
             // TODO get and set current user name
             if (!name.equals("You")) {
                 allUsersTotal += total;
-                fbUserItems.add(new UserItem(name, phoneNumber, Double.parseDouble(formattedTotal), false));
+                if (total != 0) {
+                    fbUserItems.add(new UserItem(name, phoneNumber, Double.parseDouble(withoutSignTotal), false));
+                }
             }
         }
     }
