@@ -59,6 +59,7 @@ public class User {
             this.groupList.put(grpName, contacts);
         }
     }
+    
     public void getGroupNames() {
         Iterator iterator = groupList.keySet().iterator();
 

@@ -11,8 +11,9 @@ import android.view.MenuItem;
 
 import com.example.user.payme.Fragments.AccountSettingsFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
+import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 
-public class ChooseContactActivity extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener {
+public class ChooseContactActivity extends AppCompatActivity implements OnFragmentInteractionListener {
     private static final String TAG = "ChooseContactActivity";
     private Fragment fragment;
 
@@ -60,8 +61,8 @@ public class ChooseContactActivity extends AppCompatActivity implements Contacts
     }
 
     @Override
-    public void onFragmentInteraction() {
-
+    public void onFragmentMessage(String TAG) {
+        // retrieve fragment tag here
     }
 
     @Override

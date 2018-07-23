@@ -53,6 +53,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.google.firebase:firebase-auth:16.0.1'
     implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.google.firebase:firebase-storage:16.0.1'
     implementation 'com.google.cloud:google-cloud-vision:1.31.0'
     implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
     implementation 'com.google.android.gms:play-services-vision:15.0.2'

@@ -11,16 +11,14 @@ import android.os.Bundle;
 import android.view.MenuItem;
 
 import com.example.user.payme.Fragments.AccountSettingsFragment;
-import com.example.user.payme.Fragments.AddFriendFragment;
-import com.example.user.payme.Fragments.AddGroupFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
+import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class MainActivity extends AppCompatActivity implements ContactsFragment.OnFragmentInteractionListener, AddFriendFragment.OnFragmentInteractionListener,
-        AddGroupFragment.OnFragmentInteractionListener, AccountSettingsFragment.OnFragmentInteractionListener {
 
-    private static final String TAG = MainActivity.class.getSimpleName();
+public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
+
     private FirebaseAuth auth;
     private Fragment fragment;
 
@@ -76,9 +74,8 @@ public class MainActivity extends AppCompatActivity implements ContactsFragment.
         }
     }
 
-    @Override
-    public void onFragmentInteraction() {
-        // can ignore at the moment
+    public void onFragmentMessage(String TAG) {
+        // retrieve fragment tag here
     }
 
     public void setActionBarTitle(String title) {

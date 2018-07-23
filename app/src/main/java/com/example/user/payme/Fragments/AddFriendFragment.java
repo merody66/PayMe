@@ -1,18 +1,13 @@
 package com.example.user.payme.Fragments;
 
-import android.Manifest;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,21 +15,22 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.R;
-import com.example.user.payme.SignupActivity;
 
 import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AddFriendFragment.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link AddFriendFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class AddFriendFragment extends Fragment {
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -113,7 +109,7 @@ public class AddFriendFragment extends Fragment {
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction();
+            mListener.onFragmentMessage("AddFriendFragment");
         }
     }
 
@@ -133,23 +129,6 @@ public class AddFriendFragment extends Fragment {
         super.onDetach();
         mListener = null;
     }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction();
-    }
-
 
     private void addContact(String name, String number) {
         ArrayList<ContentProviderOperation> operationList = new ArrayList<ContentProviderOperation>();

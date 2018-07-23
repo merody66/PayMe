@@ -37,6 +37,7 @@ import com.example.user.payme.Adapters.HorizontalRecyclerViewAdapter;
 import com.example.user.payme.Adapters.VerticalRecyclerViewAdapter;
 import com.example.user.payme.ChooseContactActivity;
 import com.example.user.payme.Interfaces.ContactClickListener;
+import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.R;
@@ -61,12 +62,13 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link ContactsFragment.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link ContactsFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class ContactsFragment extends Fragment implements ContactClickListener,  MaterialSearchBar.OnSearchActionListener {
+
     private static final String TAG = "ContactsFragment";
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -144,8 +146,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
         // Set title bar
         if (getActivity().getClass().equals(MainActivity.class)) {
-            ((MainActivity) getActivity())
-                    .setActionBarTitle("Contacts");
+            ((MainActivity) getActivity()).setActionBarTitle("Contacts");
         } else {
             ((ChooseContactActivity) getActivity()).setActionBarTitle("Choose Contacts");
         }
@@ -283,7 +284,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction();
+            mListener.onFragmentMessage("ContactsFragment");
         }
     }
 
@@ -370,22 +371,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 return;
             }
         }
-    }
-
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction();
     }
 
     public static boolean hasPermissions(Context context, String... permissions) {
