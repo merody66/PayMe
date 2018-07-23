@@ -50,6 +50,7 @@
         <activity android:name=".ChooseContactActivity" />
         <activity android:name=".RequestPaymentActivity" />
         <activity android:name=".TestImage" />
+        <activity android:name=".EditReceiptActivity"></activity>
     </application>
 
 </manifest>
