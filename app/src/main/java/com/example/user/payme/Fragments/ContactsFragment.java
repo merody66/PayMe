@@ -22,6 +22,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -175,61 +176,61 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
             GetGroupsIntoHashMap();
 
             contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
-            if (getActivity() instanceof ChooseContactActivity) {
-                contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
+        if (getActivity() instanceof ChooseContactActivity) {
+            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
+        }
+
+        // Show contacts first
+        contacts_selected.setVisibility(View.VISIBLE);
+        contactsSelected = true;
+        ShowContacts();
+
+        contactsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                groups_selected.setVisibility(View.INVISIBLE);
+                if (contacts_selected.getVisibility() == View.INVISIBLE) {
+                    contacts_selected.setVisibility(View.VISIBLE);
+                    contactsSelected = true;
+                    searchBar.setPlaceHolder("Search Contacts");
+                }
+                ShowContacts();
+            }
+        });
+
+        groupsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                contacts_selected.setVisibility(View.INVISIBLE);
+                if (groups_selected.getVisibility() == View.INVISIBLE) {
+                    groups_selected.setVisibility(View.VISIBLE);
+                    contactsSelected = false;
+                    searchBar.setPlaceHolder("Search Groups");
+                }
+                ShowGroups();
+            }
+        });
+
+        searchBar.addTextChangeListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (contactsSelected) {  // run this block of code only for search contacts
+                    String searchText = searchBar.getText();
+                    //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
+                    contactsAdapter.getFilter().filter(searchText);
+                }
             }
 
-            // Show contacts first
-            contacts_selected.setVisibility(View.VISIBLE);
-            contactsSelected = true;
-            ShowContacts();
+            @Override
+            public void afterTextChanged(Editable editable) {  }
 
-            contactsBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    groups_selected.setVisibility(View.INVISIBLE);
-                    if (contacts_selected.getVisibility() == View.INVISIBLE) {
-                        contacts_selected.setVisibility(View.VISIBLE);
-                        contactsSelected = true;
-                        searchBar.setPlaceHolder("Search Contacts");
-                    }
-                    ShowContacts();
-                }
-            });
+        });
 
-            groupsBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    contacts_selected.setVisibility(View.INVISIBLE);
-                    if (groups_selected.getVisibility() == View.INVISIBLE) {
-                        groups_selected.setVisibility(View.VISIBLE);
-                        contactsSelected = false;
-                        searchBar.setPlaceHolder("Search Groups");
-                    }
-                    ShowGroups();
-                }
-            });
-
-            searchBar.addTextChangeListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                    if (contactsSelected) {  // run this block of code only for search contacts
-                        String searchText = searchBar.getText();
-                        //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
-                        contactsAdapter.getFilter().filter(searchText);
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {  }
-
-            });
-
-            searchBar.setOnSearchActionListener(this);
-        }
+        searchBar.setOnSearchActionListener(this);
+    }
 
         return view;
     }
@@ -451,53 +452,66 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     public void ShowGroups() {
         groupContainer.removeAllViews();
         Iterator iterator = groupList.entrySet().iterator();
-        while(iterator.hasNext()) {
-            Map.Entry pair = (Map.Entry) iterator.next();
-            String groupName = pair.getKey().toString();
-            ArrayList<Contact> contacts = (ArrayList<Contact>) pair.getValue();
-            LinearLayout layout = new LinearLayout(getContext());  // create a layout for every group
-            layout.setLayoutParams(new LinearLayout.LayoutParams(
-                    // int width, int height
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
-            ));
-            layout.setPadding(50, 50, 50, 0);
-            layout.setOrientation(LinearLayout.VERTICAL);
-            TextView nameTextView = new TextView(getContext());
-            nameTextView.setText(groupName);
-            nameTextView.setTypeface(fontFace);
-            nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
-            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
-            HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
-            RecyclerView recyclerView = new RecyclerView(getContext());
-            recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-            recyclerView.setAdapter(adapter);
-            recyclerView.setLayoutManager(layoutManager);
-            View separator = new View(getContext());
-            separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,3));
-            separator.setBackgroundColor(Color.BLACK);
-            layout.addView(nameTextView);
-            layout.addView(recyclerView);
-            layout.addView(separator);
-            layout.setTag(groupName);
-            groupContainer.addView(layout);
+        if (!groupList.isEmpty()) {
+            while (iterator.hasNext()) {
+                Map.Entry pair = (Map.Entry) iterator.next();
+                String groupName = pair.getKey().toString();
+                ArrayList<Contact> contacts = (ArrayList<Contact>) pair.getValue();
+                LinearLayout layout = new LinearLayout(getContext());  // create a layout for every group
+                layout.setLayoutParams(new LinearLayout.LayoutParams(
+                        // int width, int height
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                ));
+                layout.setPadding(50, 50, 50, 0);
+                layout.setOrientation(LinearLayout.VERTICAL);
+                TextView nameTextView = new TextView(getContext());
+                nameTextView.setText(groupName);
+                nameTextView.setTypeface(fontFace);
+                nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
+                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
+                HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
+                RecyclerView recyclerView = new RecyclerView(getContext());
+                recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                recyclerView.setAdapter(adapter);
+                recyclerView.setLayoutManager(layoutManager);
+                View separator = new View(getContext());
+                separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 3));
+                separator.setBackgroundColor(Color.BLACK);
+                layout.addView(nameTextView);
+                layout.addView(recyclerView);
+                layout.addView(separator);
+                layout.setTag(groupName);
+                groupContainer.addView(layout);
 
-            // On click listener for select group for add receipt
-            if (getActivity() instanceof ChooseContactActivity) {
-                layout.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
-                        Log.d(TAG, "onClick: group pass it to showactivity "+groupName);
-                        Log.d(TAG, "onClick: list of contacts "+contacts.get(0));
-                        Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
-                        intent.putExtra("Contacts", contacts);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
+                // On click listener for select group for add receipt
+                if (getActivity() instanceof ChooseContactActivity) {
+                    layout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "onClick: group pass it to showactivity " + groupName);
+                            Log.d(TAG, "onClick: list of contacts " + contacts.get(0));
+                            Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+                            intent.putExtra("Contacts", contacts);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
 
-                    }
-                });
+                        }
+                    });
+                }
             }
+        } else {
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            params.setMargins(200, 100, 200, 0);
+            TextView messageTextView = new TextView(getContext());
+            messageTextView.setLayoutParams(params);
+            //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+            messageTextView.setTypeface(fontFace, Typeface.ITALIC);
+            messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+            messageTextView.setText(R.string.info_msg);
+            groupContainer.addView(messageTextView);
         }
 
     }

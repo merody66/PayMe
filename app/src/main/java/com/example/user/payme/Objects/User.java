@@ -27,8 +27,11 @@ public class User {
 
     public User(String name, String number, String email) {
         this.name = name;
+        this.profileURL = "";
         this.email = email;
         this.number = number;
+        this.notificationSetting = false;
+        this.groupList = new HashMap<>();
     }
 
     // Getters & Setters

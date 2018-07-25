@@ -12,6 +12,7 @@ import android.view.MenuItem;
 
 import com.example.user.payme.Fragments.AccountSettingsFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
+import com.example.user.payme.Fragments.HomeFragment;
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -30,6 +31,12 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         setContentView(R.layout.activity_main);
         auth = FirebaseAuth.getInstance();
 
+        // By default, show home fragment first
+        fragment = new HomeFragment();
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         BottomNavigationViewHelper.disableShiftMode(navigation);
 
@@ -39,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.navigation_home:
+                                fragment = new HomeFragment();
                                 break;
                             case R.id.navigation_history:
                                 break;

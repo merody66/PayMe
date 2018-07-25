@@ -64,12 +64,13 @@ public class SignupActivity extends AppCompatActivity {
         final String pwd = pwdTxt.getText().toString().trim();
         final String confirmPwd = confirmPwdTxt.getText().toString().trim();
 
-        auth.createUserWithEmailAndPassword(email, pwd)
+        if (pwd.equals(confirmPwd)) {
+            auth.createUserWithEmailAndPassword(email, pwd)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Log.d("UserCreation", "User Account Created.");
+                            Log.d("User Creation", "User Account Created.");
                             FirebaseUser user = auth.getCurrentUser();
 
                             // Save other user details into database
@@ -77,27 +78,13 @@ public class SignupActivity extends AppCompatActivity {
                             System.out.println(newUser);
                             ref.child("users").child(user.getUid()).setValue(newUser);
 
-//                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-//                                    .setDisplayName(name)
-//                                    .build();
-//
-//                            user.updateProfile(profileUpdates)
-//                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                        @Override
-//                                        public void onComplete(@NonNull Task<Void> task) {
-//                                            if (task.isSuccessful()) {
-//                                                Log.d("User Creation", "User profile updated.");
-//                                            }
-//                                        }
-//                                    });
-
-
                             // Send Confirmation Email
                             user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
                                         Log.d("User Creation", "Email sent.");
+                                        auth.signOut(); // clear the user object
                                     }
                                 }
                             });
@@ -105,12 +92,13 @@ public class SignupActivity extends AppCompatActivity {
                             // Show Alert Dialog
                             AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
                             builder.setMessage("A confirmation email has been sent to your registered email address.")
-                                    .setCancelable(false)
-                                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            dialog.cancel();
-                                        }
-                                    });
+                                .setCancelable(false)
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        finish();
+                                    }
+                                });
                             AlertDialog alert = builder.create();
                             alert.show();
                         } else {
@@ -119,5 +107,7 @@ public class SignupActivity extends AppCompatActivity {
                         }
                     }
                 });
+        }
+
     }
 }
