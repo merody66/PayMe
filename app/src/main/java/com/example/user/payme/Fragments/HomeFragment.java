@@ -1,18 +1,28 @@
 package com.example.user.payme.Fragments;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.res.ResourcesCompat;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TableLayout;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
+import com.example.user.payme.Objects.Payment;
 import com.example.user.payme.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -20,7 +30,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -43,12 +57,13 @@ public class  HomeFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
 
-    private TableLayout tableLayout;
+    private ArrayList<Payment> pendingPayments;
+    private ArrayList<Payment> completedPayments;
+    private LinearLayout paymentsList;
     private Button pendingBtn;
     private Button completedBtn;
     private View pending_selected;
     private View completed_selected;
-    private boolean pendingSelected;
 
     private FirebaseAuth auth;
     private FirebaseDatabase db;
@@ -80,14 +95,19 @@ public class  HomeFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        savedInstanceState = null;
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        ((MainActivity) getActivity()).setActionBarTitle("Payments");
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseDatabase.getInstance();
+        ref = db.getReference();
 
+        currentUser = auth.getCurrentUser();
+        userId = currentUser.getUid();
     }
 
     @Override
@@ -97,30 +117,45 @@ public class  HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize widgets
+        paymentsList = view.findViewById(R.id.paymentsList);
         pendingBtn = view.findViewById(R.id.pendingBtn);
         completedBtn = view.findViewById(R.id.completedBtn);
         pending_selected = view.findViewById(R.id.pending_selected);
         completed_selected = view.findViewById(R.id.completed_selected);
 
-        // Show contacts first
-        pending_selected.setVisibility(View.VISIBLE);
-        pendingSelected = true;
+        ((MainActivity) getActivity()).setActionBarTitle("Payments");
 
+        // Show pending as selected first
+        pending_selected.setVisibility(View.VISIBLE);
+
+        // Retrieve the payments for this user from db into the respective array lists
+        // and display pending payments
+        GetPendingPayments();
+        GetCompletedPayments();
+
+        pendingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                completed_selected.setVisibility(View.INVISIBLE);
+                if (pending_selected.getVisibility() == View.INVISIBLE) {
+                    pending_selected.setVisibility(View.VISIBLE);
+                }
+                ShowPendingPayments();
+            }
+        });
+
+        completedBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pending_selected.setVisibility(View.INVISIBLE);
+                if (completed_selected.getVisibility() == View.INVISIBLE) {
+                    completed_selected.setVisibility(View.VISIBLE);
+                }
+                ShowCompletedPayments();
+            }
+        });
 
         return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        auth = FirebaseAuth.getInstance();
-        db = FirebaseDatabase.getInstance();
-        ref = db.getReference();
-
-        currentUser = auth.getCurrentUser();
-        userId = currentUser.getUid();
-        ShowPendingPayments();
     }
 
     // TODO: Rename method, update argument and hook method into UI event
@@ -148,32 +183,31 @@ public class  HomeFragment extends Fragment {
     }
 
 
-    private void ShowPendingPayments() {
+    private void GetPendingPayments() {
+        pendingPayments = new ArrayList<>();
         ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 if (snapshot.hasChild("payments")) {  // checks if the user has any payment
-                    Iterable<DataSnapshot> payments = snapshot.child("payments").getChildren();
-                    for (DataSnapshot p : payments) {
-                        if (p.getKey().equals("pending")) {
-                            // write code for pending payments
-                            Iterable<DataSnapshot> pendingPayments = p.getChildren();
-                            for (DataSnapshot o : pendingPayments) {
-                                Iterable<DataSnapshot> oweSnapshot = o.getChildren();
-                                System.out.println(o.getKey() + " - children count: " + o.getChildrenCount());
-                                switch(o.getKey()) {
-                                    case "owe": {
-                                        getOwePayments(oweSnapshot);
-                                    }
-                                    break;
-                                    case "owed": {
+                    Query query = ref.child("users").child(userId).child("payments")
+                            .orderByChild("mStatus").equalTo("pending");
 
-                                    }
-                                    break;
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot querySnapshot) {
+                            if (querySnapshot.exists()) {
+                               Iterable<DataSnapshot> payments = querySnapshot.getChildren();
+                                for (DataSnapshot payment : payments) {
+                                    Payment p = payment.getValue(Payment.class);
+                                    pendingPayments.add(p);
                                 }
+                                ShowPendingPayments();
                             }
                         }
-                    }
+
+                        @Override
+                        public void onCancelled(DatabaseError queryError) {  }
+                    });
                 }
             }
 
@@ -182,59 +216,187 @@ public class  HomeFragment extends Fragment {
         });
     }
 
-    private void getOwePayments(Iterable<DataSnapshot> snapshot) {
-        String mAmount, mName, mNumber, mReceiptID;
-        mAmount = mName = mNumber = mReceiptID = "";
+    private void GetCompletedPayments() {
+        completedPayments = new ArrayList<>();
+        ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot snapshot) {
+                if (snapshot.hasChild("payments")) {  // checks if the user has any payment
+                    Query query = ref.child("users").child(userId).child("payments")
+                            .orderByChild("mStatus").equalTo("completed");
 
-        for (DataSnapshot payments : snapshot) {
-            Iterable<DataSnapshot> paymentItems = payments.getChildren();
-            for (DataSnapshot paymentInfo : paymentItems) {
-                switch (paymentInfo.getKey()) {
-                    case "mAmount":
-                        mAmount = paymentInfo.getValue().toString();
-                        break;
-                    case "mName":
-                        mName = paymentInfo.getValue().toString();
-                        break;
-                    case "mNumber":
-                        mNumber = paymentInfo.getValue().toString();
-                        break;
-                    case "mReceiptID":
-                        mReceiptID = paymentInfo.getValue().toString();
-                        break;
+                    query.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot querySnapshot) {
+                            if (querySnapshot.exists()) {
+                                Iterable<DataSnapshot> payments = querySnapshot.getChildren();
+                                for (DataSnapshot payment : payments) {
+                                    Payment p = payment.getValue(Payment.class);
+                                    completedPayments.add(p);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError queryError) {  }
+                    });
                 }
             }
-            addToTable(mName, mAmount, false);
-        }
 
-
+            @Override
+            public void onCancelled(DatabaseError databaseError) {  }
+        });
     }
 
-    private void addToTable(String name, String amount, Boolean isOwed) {
-        System.out.println(name + ", $" + amount);
-
-        TextView nameTextView = new TextView(getContext());
-        TextView oweAmtTextView = new TextView(getContext());
-        TextView owedAmtTextView = new TextView(getContext());
-
-        if (!isOwed) {
-            nameTextView.setText(name);
-            oweAmtTextView.setText("$" + amount);
-            owedAmtTextView.setText("-");
-        } else {
-
+    private void ShowPendingPayments() {
+        // Remove all existing payment views first
+        paymentsList.removeAllViews();
+        for (Payment p : pendingPayments) {
+            addToTable(p);
         }
-
-        //tableLayout.addView(row, rowParams);
-
-
-    }
-
-    private void getOwedPayments(Iterable<DataSnapshot> snapshot) {
-
     }
 
     private void ShowCompletedPayments() {
+        // Remove all existing payment views first
+        paymentsList.removeAllViews();
+        for (Payment p : completedPayments) {
+            addToTable(p);
+        }
+    }
+
+    private void addToTable(Payment p) {
+        // Initializing main layout, Text Views and params
+        Typeface fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
+        RelativeLayout layout = new RelativeLayout(getContext());
+        int height = dpToPx(50);  // row height
+        RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.MATCH_PARENT, height);
+        RelativeLayout.LayoutParams name_lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams owe_lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams owed_lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams divider_lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, dpToPx(2));
+        TextView nameTextView = new TextView(getContext());
+        TextView oweAmtTextView = new TextView(getContext());
+        TextView owedAmtTextView = new TextView(getContext());
+        TextView receiptIDs = new TextView(getContext());
+
+        // Styling the TextViews
+        nameTextView.setTypeface(fontFace);
+        oweAmtTextView.setTypeface(fontFace);
+        owedAmtTextView.setTypeface(fontFace);
+        nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        oweAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        owedAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        receiptIDs.setVisibility(View.GONE);
+
+        // Adding rules to the LayoutParams
+        name_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
+        name_lp.addRule(RelativeLayout.CENTER_VERTICAL);
+        name_lp.setMarginStart(dpToPx(10));  // margin_start 10dp
+        owe_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
+        owe_lp.addRule(RelativeLayout.CENTER_VERTICAL);
+        owe_lp.setMarginEnd(dpToPx(130));   // margin_end 130dp
+        owed_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
+        owed_lp.addRule(RelativeLayout.CENTER_VERTICAL);
+        owed_lp.setMarginEnd(dpToPx(20));   // margin_end 20dp
+        divider_lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+        divider_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
+
+        // Divider
+        int[] attr = {android.R.attr.listDivider};
+        TypedArray ta = getContext().getApplicationContext().obtainStyledAttributes(attr);
+        Drawable dividerDrawable = ta.getDrawable(0);
+        View divider = new View(getContext());
+        divider.setBackground(dividerDrawable);
+
+
+        RelativeLayout relativeLayout = getView().findViewWithTag(p.getmName());
+        if (relativeLayout == null) {  // if unable to find payment in existing rows
+            nameTextView.setText(p.getmName());
+            receiptIDs.setText(p.getmReceiptID());
+            if (p.getmType().equals("owe")) {
+                oweAmtTextView.setText("$" + p.getmAmount());
+                owedAmtTextView.setText("-");
+            } else {
+                oweAmtTextView.setText("-");
+                owedAmtTextView.setText("$" + p.getmAmount());
+            }
+            layout.setTag(p.getmName());
+            layout.addView(nameTextView, name_lp);
+            layout.addView(oweAmtTextView, owe_lp);
+            layout.addView(owedAmtTextView, owed_lp);
+            layout.addView(receiptIDs);
+            layout.addView(divider, divider_lp);
+            paymentsList.addView(layout, rlp);
+            layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(getContext(), layout.getTag().toString(), Toast.LENGTH_SHORT).show();
+
+                    Fragment fragment = new SettlePaymentFragment();
+                    Bundle bundle = new Bundle();
+                    bundle.putString("NAME", ((TextView)layout.getChildAt(0)).getText().toString());
+                    bundle.putString("AMOUNT_OWE", ((TextView)layout.getChildAt(1)).getText().toString().substring(1));
+                    bundle.putString("AMOUNT_OWED", ((TextView)layout.getChildAt(2)).getText().toString().substring(1));
+                    bundle.putString("PAYMENT_STATUS", p.getmStatus());
+                    bundle.putString("RECEIPT_IDS", ((TextView)layout.getChildAt(3)).getText().toString());
+                    fragment.setArguments(bundle);
+                    goToPaymentPage(fragment);
+                }
+            });
+        } else {  // otherwise, just update the information in the existing view
+            if (p.getmType().equals("owe")) {
+                oweAmtTextView = (TextView) relativeLayout.getChildAt(1);
+                String previousAmt = oweAmtTextView.getText().toString();
+                relativeLayout.removeViewAt(1);
+
+                if (previousAmt.equals("-")) {
+                    oweAmtTextView.setText("$" + p.getmAmount());
+                } else {
+                    Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
+                    Double total = prev + p.getmAmount();
+                    oweAmtTextView.setText("$" + total.toString());
+                }
+                relativeLayout.addView(oweAmtTextView, 1);
+            } else {
+                owedAmtTextView = (TextView) relativeLayout.getChildAt(2);
+                String previousAmt = owedAmtTextView.getText().toString();
+                relativeLayout.removeViewAt(2);
+
+                if (previousAmt.equals("-")) {
+                    owedAmtTextView.setText("$" + p.getmAmount());
+                } else {
+                    Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
+                    Double total = prev + p.getmAmount();
+                    owedAmtTextView.setText("$" + total.toString());
+                }
+                relativeLayout.addView(owedAmtTextView, 2);
+            }
+
+            receiptIDs = (TextView) relativeLayout.getChildAt(3);
+            relativeLayout.removeViewAt(3);
+            receiptIDs.setText(receiptIDs.getText().toString() + "," + p.getmReceiptID());
+            relativeLayout.addView(receiptIDs, 3);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round((float) dp * density);
+    }
+
+    private void goToPaymentPage(Fragment fragment) {
+        FragmentManager fm = getActivity().getSupportFragmentManager();
+        FragmentTransaction transaction = fm.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        // previous state will be added to the backstack, allowing you to go back with the back button.
+        // must be done before commit.
+        transaction.addToBackStack(null);
+        transaction.commit();
 
     }
 

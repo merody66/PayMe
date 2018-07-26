@@ -21,6 +21,12 @@
     <string name="col_2">Owe (-)</string>
     <string name="col_3">Owed (+)</string>
 
+    <!-- SettlePaymentFragment-->
+    <string name="title_payment_details">Payment Details Between</string>
+    <string name="amount_owe">Total Amount Owe:</string>
+    <string name="amount_owed">Total Amount Owed:</string>
+    <string name="nett_amount">Nett Amount:</string>
+
     <!--AddReceiptActivity-->
     <string name="desc_camera">Camera</string>
     <string name="desc_gallery">Gallery</string>
@@ -57,7 +63,7 @@
     <string name="log_out">Log out</string>
     <string name="total">Total</string>
 
-    <!-- ChangePasswordFragment -->
+    <!-- ChangePasswordFragment-->
     <string name="chng_password">Change Password</string>
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>

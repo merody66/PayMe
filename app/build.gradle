@@ -77,6 +77,10 @@ dependencies {
 
     // material design search bar
     implementation 'com.github.mancj:MaterialSearchBar:0.7.6'
+
+    // paypal integration
+    implementation 'com.braintreepayments.api:drop-in:3.+'
+    implementation 'com.android.volley:volley:1.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

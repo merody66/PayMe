@@ -92,7 +92,7 @@ public class AccountSettingsFragment extends Fragment {
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference dbRef;
-    private FirebaseUser currentUser;
+    private FirebaseUser user;
     private String userId;
     private FirebaseStorage storage;
     private StorageReference storageRef;
@@ -230,8 +230,8 @@ public class AccountSettingsFragment extends Fragment {
         storage = FirebaseStorage.getInstance();
         storageRef = storage.getReference();
 
-        currentUser = auth.getCurrentUser();
-        userId = currentUser.getUid();
+        user = auth.getCurrentUser();
+        userId = user.getUid();
         loadAccountDetails();
     }
 
@@ -337,6 +337,8 @@ public class AccountSettingsFragment extends Fragment {
     }
 
     private void saveAccountInfo(String name, String email, String paylahNumber) {
+        profilePicURL = "";
+
         if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             if (paylahNumber.matches("^([89]{1})([0-9]{7})")) {
                 dbRef.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -358,7 +360,6 @@ public class AccountSettingsFragment extends Fragment {
                     @Override
                     public void onCancelled(DatabaseError databaseError) {  }
                 });
-
                 Toast.makeText(getContext(), "Account details saved!", Toast.LENGTH_SHORT).show();
 
             } else {  // invalid phone number (starting with 8 or 9 and 8 digits long)
@@ -395,7 +396,7 @@ public class AccountSettingsFragment extends Fragment {
         }
     }
 
-    private void uploadToFirebase(Uri imageURI) {
+    private void uploadToFirebase(Uri imageURI) {  // Upload image to firebase
         StorageReference profileImageRef = storageRef.child(userId + "/" + imageURI.getLastPathSegment());
         UploadTask uploadTask = profileImageRef.putFile(imageURI);
 
