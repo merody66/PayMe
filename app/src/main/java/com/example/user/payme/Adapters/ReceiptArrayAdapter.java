@@ -16,8 +16,6 @@ import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-import static java.util.stream.Collectors.groupingBy;
-
 public class ReceiptArrayAdapter extends ArrayAdapter<ReceiptItem> {
     private static final String TAG = "ReceiptArrayAdapter";
     private final Context context;
