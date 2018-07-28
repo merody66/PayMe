@@ -55,6 +55,8 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
     private static final int readPermissionID = 103;
     private ArrayList<String[]> menuList = new ArrayList<>();
     private ListView mListView;
+    private RecyclerView mRecyclerView;
+    private HorizontalRecyclerViewAdapter contactAdapter;
     private TextView tvShopname;
     private TextView tvDate;
     private TextView tvGstAmt;
@@ -106,7 +108,6 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_show);
 
-        // TODO redo the toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbarTop);
         setSupportActionBar(myToolbar);
         myToolbar.setTitleTextColor(Color.WHITE);
@@ -125,36 +126,69 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
         mDone_button = (Button) findViewById(R.id.done_button);
 
+        // initialise all basic values
         SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
         mDate = sdf.format(new Date());
+        mSubtotalAmt = "";
+        mServiceChargeAmt = "";
+        mGstAmt = "";
 
-        // Data taken from previous ChooseContactActivity
+        // Get contacts from intent
         ArrayList<Contact> contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contacts");
-        // TODO retrieve current logged in user
-        mContacts.add(0, new Contact(0, "You", "99999999"));
         mContacts.addAll(contacts);
 
-        // Data taken from shared preferences
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mEditor = mSharedPreferences.edit();
-        String imagePath = mSharedPreferences.getString("imagePath", "default nothing");
-        Log.d(TAG, "onCreate: from sp "+imagePath);
-        Context mContext = getApplicationContext();
-        myBitmap = new Image(mContext, imagePath).getmBitmap();
+        // Check if coming from ChooseContactActivity or EditReceiptActivity
+        if (getIntent().getStringExtra("from_activity").equals("ChooseContactActivity")) {
+            // TODO retrieve current logged in user
+
+            // Toggle all
+            for (Contact contact: mContacts) {
+                contact.toggleSelected();
+            }
+
+            Contact currentUser = new Contact(0, "You", "99999999");
+            currentUser.setSelected(true);
+            mContacts.add(0, currentUser);
+
+            // Data taken from shared preferences
+            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mEditor = mSharedPreferences.edit();
+            String imagePath = mSharedPreferences.getString("imagePath", "default nothing");
+            Log.d(TAG, "onCreate: from sp "+imagePath);
+            Context mContext = getApplicationContext();
+            myBitmap = new Image(mContext, imagePath).getmBitmap();
+
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(ShowActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        readPermissionID);
+                return;
+            }
+
+            Log.d(TAG, "onCreate: started ProcessOCR");
+            ProcessOCR();
+        } else {
+            Log.d(TAG, "onCreate: CAME BACK FROM EDITRECEIPT");
+            receipt = (Receipt) getIntent().getSerializableExtra("receipt");
+            mShopname = receipt.getmShopname();
+            mSubtotalAmt = receipt.getmSubtotalAmt();
+            mServiceChargeAmt = receipt.getmServiceChargeAmt();
+            mGstAmt = receipt.getmGstAmt();
+            mDate = receipt.getmDate();
+            updatedItemList = receipt.getmItemList();
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    initReceipt();
+                    initRecyclerView();
+
+                }
+            });
 
 
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(ShowActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    readPermissionID);
-            return;
         }
-
-        Log.d(TAG, "onCreate: started ProcessOCR");
-        ProcessOCR();
-
     }
 
     // todo can do the same for receiptadapter
@@ -162,22 +196,58 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         Log.d(TAG, "initRecyclerView: started");
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-        RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(layoutManager);
-        HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(this, mContacts, this);
-        recyclerView.setAdapter(adapter);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(layoutManager);
+        contactAdapter = new HorizontalRecyclerViewAdapter(this, mContacts, this);
+        mRecyclerView.setAdapter(contactAdapter);
+    }
+
+    private void initReceipt() {
+        tvShopname.setText(mShopname);
+        tvDate.setText(mDate);
+        tvSubtotalAmt.setText(mSubtotalAmt);
+        tvServiceChargeAmt.setText(mServiceChargeAmt);
+        tvGstAmt.setText(mGstAmt);
+
+        adapter = new ReceiptArrayAdapter(this, updatedItemList);
+
+        // Set user as the first user.
+        adapter.setCurrentChooseUser("You");
+        mListView.setAdapter(adapter);
+
+        mDone_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowActivity.this, RequestPaymentActivity.class);
+                HashMap<String, ArrayList<ReceiptItem>> result = adapter.calculateAmount();
+                intent.putExtra("Contact", mContacts);
+                intent.putExtra("result", result);
+                intent.putExtra("receiptItemList", adapter.getReceiptItems());
+                intent.putExtra("receipt",receipt);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.back_appbar, menu);
+        inflater.inflate(R.menu.show_activity_bar, menu);
         super.onCreateOptionsMenu(menu);
         return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.edit_redirect_button:
+                //todo check if updateditemlist exist
+                Intent intent = new Intent(ShowActivity.this, EditReceiptActivity.class);
+                intent.putExtra("shopname", mShopname);
+                intent.putExtra("date", mDate);
+                intent.putExtra("itemList",updatedItemList);
+                intent.putExtra("Contacts", mContacts);
+                startActivity(intent);
+                finish();
             case R.id.action_back:
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
@@ -278,10 +348,8 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         Log.d(TAG, "ProcessOCR: within");
         
         Context context = getApplicationContext();
-        // TODO: REMOVE SAMPLE IMAGE LATER
-//        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
-//        Bitmap myBitmap = new Image(context, imagePath).getmBitmap();
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
+
         // Create the TextRecognizer
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
@@ -348,45 +416,37 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             Log.d(TAG, "ProcessOCR: set all the information and adapter");
 
             // To fit more receipts with any arrangement, we are doing the calculation
-            tvSubtotalAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal));
-            tvServiceChargeAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal * 0.1));
-            tvGstAmt.setText(String.format(Locale.ENGLISH, "%.2f", subtotal * 0.07));
-            tvShopname.setText(mShopname);
-            tvDate.setText(mDate);
+            mSubtotalAmt = String.format(Locale.ENGLISH, "%.2f", subtotal);
+            mServiceChargeAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.1);
+            mGstAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.07);
 
             receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
 
+            initReceipt();
             initRecyclerView();
 
-            adapter = new ReceiptArrayAdapter(this, updatedItemList);
-            // Set user as the first user.
-            adapter.setCurrentChooseUser("You");
-            mListView.setAdapter(adapter);
             Log.d(TAG, "ProcessOCR: after setadapter");
-
-            mDone_button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(ShowActivity.this, RequestPaymentActivity.class);
-                    HashMap<String, ArrayList<ReceiptItem>> result = adapter.calculateAmount();
-                    intent.putExtra("Contact", mContacts);
-                    intent.putExtra("result", result);
-                    intent.putExtra("receiptItemList", adapter.getReceiptItems());
-                    intent.putExtra("receipt",receipt);
-                    startActivity(intent);
-                }
-            });
         } else {
+            //todo open a dialog to say there is nothing, then redirect to edit
 
         }
     }
 
     @Override
     public void onImageClick(String name) {
+        boolean isUserSelected;
+        View userView;
+        for (int i = 0; i < contactAdapter.getItemCount(); i++) {
+            userView = mRecyclerView.getChildAt(i);
+            isUserSelected = contactAdapter.isUserSelected(i);
+            contactAdapter.setSelectedStyle(userView, isUserSelected);
+        }
+
         adapter.setCurrentChooseUser(name);
         boolean isChildEnabled;
         View childView;
-        for (int i = 0; i < updatedItemList.size(); i++) {
+
+        for (int i = 0; i < mListView.getChildCount(); i++) {
             childView = mListView.getChildAt(i);
             isChildEnabled = adapter.isItemEnabled(i);
             childView.setEnabled(isChildEnabled);

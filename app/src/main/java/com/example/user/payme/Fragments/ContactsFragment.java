@@ -493,10 +493,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                             Log.d(TAG, "onClick: group pass it to showactivity " + groupName);
                             Log.d(TAG, "onClick: list of contacts " + contacts.get(0));
                             Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+                            intent.putExtra("from_activity", "ChooseContactActivity");
                             intent.putExtra("Contacts", contacts);
                             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             startActivity(intent);
-
                         }
                     });
                 }
@@ -520,6 +520,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     private void nextShowActvity() {
         Log.d(TAG, "onContactClick: pass it to showactivity ");
         Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
+        intent.putExtra("from_activity", "ChooseContactActivity");
         intent.putExtra("Contacts", mContacts);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

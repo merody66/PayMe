@@ -25,6 +25,7 @@ public class Contact implements Serializable {
     }
 
     public boolean getIsSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
 
     public void toggleSelected() {
         this.isSelected = !isSelected;
