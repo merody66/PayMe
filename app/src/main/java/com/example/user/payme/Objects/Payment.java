@@ -7,18 +7,21 @@ public class Payment {
     private String mReceiptID;
     private String mStatus;
     private String mType;
+    private String mDate;
 
     public Payment() {
         // Default constructor needed
     }
 
-    public Payment(Double mAmount, String mName, String mNumber, String mReceiptID, String mStatus, String mType) {
+    public Payment(Double mAmount, String mName, String mNumber, String mReceiptID, String mStatus,
+                   String mType, String mDate) {
         this.mAmount = mAmount;
         this.mName = mName;
         this.mNumber = mNumber;
         this.mReceiptID = mReceiptID;
         this.mStatus = mStatus;
         this.mType = mType;
+        this.mDate = mDate;
     }
 
     // Getters & Setters
@@ -39,4 +42,7 @@ public class Payment {
 
     public String getmType() { return this.mType; }
     public void setmType(String mType) { this.mType = mType; }
+
+    public String getmDate() { return this.mDate; }
+    public void setmDate(String mDate) { this.mDate = mDate; }
 }

@@ -18,14 +18,18 @@
 
     <!--HomeFragment-->
     <string name="col_1">Name</string>
-    <string name="col_2">Owe (-)</string>
-    <string name="col_3">Owed (+)</string>
+    <string name="col_2">Owe(-)</string>
+    <string name="col_3">Owed(+)</string>
+    <string name="col_4">Date</string>
+    <string name="home_info_msg">Great, you do not have any pending payments at the moment! \n\n
+        Keep it up! (ᵔᴥᵔ)</string>
 
     <!-- SettlePaymentFragment-->
     <string name="title_payment_details">Payment Details Between</string>
     <string name="amount_owe">Total Amount Owe:</string>
     <string name="amount_owed">Total Amount Owed:</string>
     <string name="nett_amount">Nett Amount:</string>
+    <string name="date">Date:</string>
 
     <!--AddReceiptActivity-->
     <string name="desc_camera">Camera</string>
@@ -44,7 +48,7 @@
     <string name="next">Next</string>
 
     <!--ContactsFragment-->
-    <string name="info_msg">Oops, it appears you do not have any groups created. \n\n
+    <string name="contacts_info_msg">Oops, it appears you do not have any groups created. \n\n
         Groups are useful when the same contacts are often selected for receipts. \n\n
         Tap on the options menu to start adding one!</string>
 

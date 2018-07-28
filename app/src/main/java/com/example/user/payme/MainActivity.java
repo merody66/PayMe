@@ -12,6 +12,7 @@ import android.view.MenuItem;
 
 import com.example.user.payme.Fragments.AccountSettingsFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
+import com.example.user.payme.Fragments.HistoryFragment;
 import com.example.user.payme.Fragments.HomeFragment;
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                                 fragment = new HomeFragment();
                                 break;
                             case R.id.navigation_history:
+                                fragment = new HistoryFragment();
                                 break;
                             case R.id.navigation_addNewReceipt:
                                 Intent intent = new Intent(MainActivity.this, AddReceiptActivity.class);

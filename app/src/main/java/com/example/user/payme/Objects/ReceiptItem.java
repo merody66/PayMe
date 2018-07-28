@@ -8,6 +8,10 @@ public class ReceiptItem implements Serializable {
     private String mBelongsTo;
     private boolean mIsShared;
 
+    public ReceiptItem() {
+        // Default constructor needed
+    }
+
     public ReceiptItem(String mName, String mPrice) {
         this.mName = mName;
         this.mPrice = mPrice;

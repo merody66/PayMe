@@ -14,22 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="300dp">
 
-            <LinearLayout
-                android:id="@+id/itemDetailsLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="10dp"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="20dp"
-                android:minHeight="50dp"
-                android:orientation="vertical"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_3"></LinearLayout>
-
             <TextView
-                android:id="@+id/lbl_4"
+                android:id="@+id/lbl_5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="8dp"
@@ -55,9 +41,9 @@
                 android:text="xxxxxxxxx and You"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="@+id/lbl_4"
-                app:layout_constraintStart_toStartOf="@+id/lbl_4"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_4" />
+                app:layout_constraintEnd_toEndOf="@+id/lbl_5"
+                app:layout_constraintStart_toStartOf="@+id/lbl_5"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_5" />
 
             <TextView
                 android:id="@+id/lbl_1"
@@ -65,9 +51,9 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="48dp"
                 android:fontFamily="@font/nunito"
-                android:text="Total Amount Owe:"
+                android:text="@string/amount_owe"
                 android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="@+id/lbl_4"
+                app:layout_constraintStart_toStartOf="@+id/lbl_5"
                 app:layout_constraintTop_toBottomOf="@+id/paymentDetails" />
 
             <TextView
@@ -78,7 +64,7 @@
                 android:text="$ 0.00"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/lbl_1"
-                app:layout_constraintEnd_toEndOf="@+id/lbl_4" />
+                app:layout_constraintEnd_toEndOf="@+id/lbl_5" />
 
             <TextView
                 android:id="@+id/lbl_2"
@@ -86,7 +72,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/nunito"
-                android:text="Total Amount Owed:"
+                android:text="@string/amount_owed"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="@+id/lbl_1"
                 app:layout_constraintTop_toBottomOf="@+id/lbl_1" />
@@ -107,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:fontFamily="@font/nunito"
-                android:text="Nett Amount:"
+                android:text="@string/nett_amount"
                 android:textSize="16sp"
                 app:layout_constraintStart_toStartOf="@+id/lbl_2"
                 app:layout_constraintTop_toBottomOf="@+id/lbl_2" />
@@ -121,6 +107,41 @@
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/lbl_3"
                 app:layout_constraintEnd_toEndOf="@+id/amountOwed" />
+
+            <TextView
+                android:id="@+id/lbl_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nunito"
+                android:text="@string/date"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/lbl_3"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_3" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito"
+                android:text="DD/MM/YYYY"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@+id/lbl_4"
+                app:layout_constraintEnd_toEndOf="@+id/nettAmount" />
+
+            <LinearLayout
+                android:id="@+id/itemDetailsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="24dp"
+                android:minHeight="50dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_4"></LinearLayout>
 
             <Button
                 android:id="@+id/payBtn"

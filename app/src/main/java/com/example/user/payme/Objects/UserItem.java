@@ -13,6 +13,10 @@ public class UserItem {
     private double mAmount;
     private boolean mIsPaid;
 
+    public UserItem() {
+        // Default constructor needed
+    }
+
     public UserItem(Contact mContact, ArrayList<ReceiptItem> receiptItems, String total) {
         this.mContact = mContact;
         this.receiptItems = receiptItems;

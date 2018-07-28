@@ -510,7 +510,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
             //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
             messageTextView.setTypeface(fontFace, Typeface.ITALIC);
             messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
-            messageTextView.setText(R.string.info_msg);
+            messageTextView.setText(R.string.contacts_info_msg);
             groupContainer.addView(messageTextView);
         }
 
@@ -561,7 +561,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 mContacts.add(contact);
                 showOption(R.id.next);
             }
-
         }
     }
 

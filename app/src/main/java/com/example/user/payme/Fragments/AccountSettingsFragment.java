@@ -127,7 +127,13 @@ public class AccountSettingsFragment extends Fragment {
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
 
-        ((MainActivity) getActivity()).setActionBarTitle("Account Settings");
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseDatabase.getInstance();
+        dbRef = db.getReference();
+        storage = FirebaseStorage.getInstance();
+        storageRef = storage.getReference();
+        user = auth.getCurrentUser();
+        userId = user.getUid();
     }
 
     @Override
@@ -146,6 +152,10 @@ public class AccountSettingsFragment extends Fragment {
         notifyToggle = view.findViewById(R.id.notifyToggle);
         saveBtn = view.findViewById(R.id.saveBtn);
         logoutLbl = view.findViewById(R.id.logoutLbl);
+
+        ((MainActivity) getActivity()).setActionBarTitle("Account Settings");
+
+        loadAccountDetails();
 
         chngProfilePicLbl.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -220,22 +230,6 @@ public class AccountSettingsFragment extends Fragment {
         return view;
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        auth = FirebaseAuth.getInstance();
-        db = FirebaseDatabase.getInstance();
-        dbRef = db.getReference();
-        storage = FirebaseStorage.getInstance();
-        storageRef = storage.getReference();
-
-        user = auth.getCurrentUser();
-        userId = user.getUid();
-        loadAccountDetails();
-    }
-
-
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
@@ -276,7 +270,6 @@ public class AccountSettingsFragment extends Fragment {
             @Override
             public void onCancelled(DatabaseError databaseError) {  }
         });
-
     }
 
     private void setNotificationSetting(boolean bool) {

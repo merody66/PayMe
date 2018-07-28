@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -54,6 +55,7 @@ public class SettlePaymentFragment extends Fragment {
     private static final String AMOUNT_OWE = "AMOUNT_OWE";
     private static final String AMOUNT_OWED = "AMOUNT_OWED";
     private static final String PAYMENT_STATUS = "PAYMENT_STATUS";
+    private static final String DATE = "DATE";
     private static final String RECEIPT_IDS = "RECEIPT_IDS";
 
     // TODO: Rename and change types of parameters
@@ -66,12 +68,14 @@ public class SettlePaymentFragment extends Fragment {
     private String arg_amountOwe;
     private String arg_amountOwed;
     private String arg_status;
+    private String arg_date;
     private String[] arg_receiptIDs;
     private LinearLayout itemDetailsLayout;
     private TextView paymentDetails;
     private TextView amountOwe;
     private TextView amountOwed;
     private TextView nettAmount;
+    private TextView date;
     private Button payBtn;
 
     final int REQUEST_CODE = 1;
@@ -101,6 +105,7 @@ public class SettlePaymentFragment extends Fragment {
             arg_amountOwe = getArguments().getString(AMOUNT_OWE);
             arg_amountOwed = getArguments().getString(AMOUNT_OWED);
             arg_status = getArguments().getString(PAYMENT_STATUS);
+            arg_date = getArguments().getString(DATE);
             arg_receiptIDs = getArguments().getString(RECEIPT_IDS).split(",");
         }
 
@@ -126,6 +131,7 @@ public class SettlePaymentFragment extends Fragment {
         amountOwe = view.findViewById(R.id.amountOwe);
         amountOwed = view.findViewById(R.id.amountOwed);
         nettAmount = view.findViewById(R.id.nettAmount);
+        date = view.findViewById(R.id.date);
         itemDetailsLayout = view.findViewById(R.id.itemDetailsLayout);
         payBtn = view.findViewById(R.id.payBtn);
 
@@ -145,6 +151,7 @@ public class SettlePaymentFragment extends Fragment {
         }
         nett = owe + owed;
         nettAmount.setText("$ " + nett.toString());
+        date.setText(arg_date);
 
         if (nett > 0.0 || arg_status.equals("completed")) {
             // Remove the payment button if the nett amt is positive (people owe you),
@@ -281,6 +288,8 @@ public class SettlePaymentFragment extends Fragment {
                          //System.out.println(payment.getRef().toString());
                          payment.getRef().setValue(p);
                     }
+                    FragmentManager fm = getActivity().getSupportFragmentManager();
+                    fm.popBackStack();
                 }
             }
 

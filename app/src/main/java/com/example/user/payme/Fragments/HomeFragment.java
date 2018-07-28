@@ -18,7 +18,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
@@ -68,7 +67,7 @@ public class  HomeFragment extends Fragment {
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference ref;
-    private FirebaseUser currentUser;
+    private FirebaseUser user;
     private String userId;
 
     public HomeFragment() {
@@ -105,9 +104,8 @@ public class  HomeFragment extends Fragment {
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
         ref = db.getReference();
-
-        currentUser = auth.getCurrentUser();
-        userId = currentUser.getUid();
+        user = auth.getCurrentUser();
+        userId = user.getUid();
     }
 
     @Override
@@ -240,6 +238,8 @@ public class  HomeFragment extends Fragment {
                         @Override
                         public void onCancelled(DatabaseError queryError) {  }
                     });
+                } else {
+                    showInfoMessage();
                 }
             }
 
@@ -277,32 +277,40 @@ public class  HomeFragment extends Fragment {
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams owed_lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams date_lp = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams divider_lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, dpToPx(2));
         TextView nameTextView = new TextView(getContext());
         TextView oweAmtTextView = new TextView(getContext());
         TextView owedAmtTextView = new TextView(getContext());
+        TextView dateTextView = new TextView(getContext());
         TextView receiptIDs = new TextView(getContext());
 
         // Styling the TextViews
         nameTextView.setTypeface(fontFace);
         oweAmtTextView.setTypeface(fontFace);
         owedAmtTextView.setTypeface(fontFace);
-        nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
-        oweAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
-        owedAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+        dateTextView.setTypeface(fontFace);
+        nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        oweAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        owedAmtTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        dateTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
         receiptIDs.setVisibility(View.GONE);
 
         // Adding rules to the LayoutParams
         name_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
         name_lp.addRule(RelativeLayout.CENTER_VERTICAL);
         name_lp.setMarginStart(dpToPx(10));  // margin_start 10dp
-        owe_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
+        owe_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
         owe_lp.addRule(RelativeLayout.CENTER_VERTICAL);
-        owe_lp.setMarginEnd(dpToPx(130));   // margin_end 130dp
+        owe_lp.setMarginStart(dpToPx(146));   // margin_start 146dp
         owed_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
         owed_lp.addRule(RelativeLayout.CENTER_VERTICAL);
-        owed_lp.setMarginEnd(dpToPx(20));   // margin_end 20dp
+        owed_lp.setMarginEnd(dpToPx(140));   // margin_end 140dp
+        date_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
+        date_lp.addRule(RelativeLayout.CENTER_VERTICAL);
+        date_lp.setMarginEnd(dpToPx(20));   // margin_end 20dp
         divider_lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
         divider_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
 
@@ -314,10 +322,12 @@ public class  HomeFragment extends Fragment {
         divider.setBackground(dividerDrawable);
 
 
-        RelativeLayout relativeLayout = getView().findViewWithTag(p.getmName());
+        RelativeLayout relativeLayout = getView().findViewWithTag(p.getmDate() + "," + p.getmName());
         if (relativeLayout == null) {  // if unable to find payment in existing rows
             nameTextView.setText(p.getmName());
+            dateTextView.setText(p.getmDate());
             receiptIDs.setText(p.getmReceiptID());
+
             if (p.getmType().equals("owe")) {
                 oweAmtTextView.setText("$" + p.getmAmount());
                 owedAmtTextView.setText("-");
@@ -325,25 +335,26 @@ public class  HomeFragment extends Fragment {
                 oweAmtTextView.setText("-");
                 owedAmtTextView.setText("$" + p.getmAmount());
             }
-            layout.setTag(p.getmName());
+
+            layout.setTag(p.getmDate() + "," + p.getmName());
             layout.addView(nameTextView, name_lp);
             layout.addView(oweAmtTextView, owe_lp);
             layout.addView(owedAmtTextView, owed_lp);
+            layout.addView(dateTextView, date_lp);
             layout.addView(receiptIDs);
             layout.addView(divider, divider_lp);
             paymentsList.addView(layout, rlp);
             layout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(getContext(), layout.getTag().toString(), Toast.LENGTH_SHORT).show();
-
                     Fragment fragment = new SettlePaymentFragment();
                     Bundle bundle = new Bundle();
                     bundle.putString("NAME", ((TextView)layout.getChildAt(0)).getText().toString());
                     bundle.putString("AMOUNT_OWE", ((TextView)layout.getChildAt(1)).getText().toString().substring(1));
                     bundle.putString("AMOUNT_OWED", ((TextView)layout.getChildAt(2)).getText().toString().substring(1));
                     bundle.putString("PAYMENT_STATUS", p.getmStatus());
-                    bundle.putString("RECEIPT_IDS", ((TextView)layout.getChildAt(3)).getText().toString());
+                    bundle.putString("DATE", p.getmDate());
+                    bundle.putString("RECEIPT_IDS", ((TextView)layout.getChildAt(4)).getText().toString());
                     fragment.setArguments(bundle);
                     goToPaymentPage(fragment);
                 }
@@ -377,10 +388,10 @@ public class  HomeFragment extends Fragment {
                 relativeLayout.addView(owedAmtTextView, 2);
             }
 
-            receiptIDs = (TextView) relativeLayout.getChildAt(3);
-            relativeLayout.removeViewAt(3);
+            receiptIDs = (TextView) relativeLayout.getChildAt(4);
+            relativeLayout.removeViewAt(4);
             receiptIDs.setText(receiptIDs.getText().toString() + "," + p.getmReceiptID());
-            relativeLayout.addView(receiptIDs, 3);
+            relativeLayout.addView(receiptIDs, 4);
         }
     }
 
@@ -397,7 +408,20 @@ public class  HomeFragment extends Fragment {
         // must be done before commit.
         transaction.addToBackStack(null);
         transaction.commit();
+    }
 
+    private void showInfoMessage() {
+        Typeface fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(150, 100, 150, 0);
+        TextView messageTextView = new TextView(getContext());
+        messageTextView.setLayoutParams(params);
+        //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        messageTextView.setTypeface(fontFace, Typeface.ITALIC);
+        messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        messageTextView.setText(R.string.home_info_msg);
+        paymentsList.addView(messageTextView);
     }
 
 }

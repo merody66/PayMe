@@ -83,7 +83,7 @@ public class SignupActivity extends AppCompatActivity {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     if (task.isSuccessful()) {
-                                        Log.d("User Creation", "Email sent.");
+                                        Log.d("User Creation", "Email Sent.");
                                         auth.signOut(); // clear the user object
                                     }
                                 }
