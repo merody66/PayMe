@@ -3,7 +3,9 @@ package com.example.user.payme;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -37,6 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
@@ -94,6 +98,11 @@ public class RequestPaymentActivity extends AppCompatActivity {
         BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        // Current user taken from shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String currentUserName = sharedPreferences.getString("currentUserName", "default nothing");
+        String currentUserNumber = sharedPreferences.getString("currentUserNumber", "default nothing");
+
         // Get extra from intent
         mContacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contact");
         mResult = (HashMap<String, ArrayList<ReceiptItem>>) getIntent().getSerializableExtra("result");
@@ -129,7 +138,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
 //                Log.d(TAG, "onClick: dispayname "+currentUser.getDisplayName());
 //                Log.d(TAG, "onClick: number "+currentUser.getPhoneNumber());
 
-                setPayeesList(key, userId, currentUser.getDisplayName(), currentUser.getPhoneNumber(), mReceipt.getmDate());
+                setPayeesList(key, userId, currentUserName, currentUserNumber, mReceipt.getmDate());
 
                 for (Map.Entry<String, ArrayList<Payment>> entry : payments.entrySet()) {
                     Map<String, Object> postPayments = new HashMap<>();
@@ -201,6 +210,12 @@ public class RequestPaymentActivity extends AppCompatActivity {
             double amount = userItem.getmAmount();
 
             payer.add(new Payment(amount, payeeName, payeeNumber, receiptId, "pending", "owed", date));
+
+            // to standardise between saved phone number in firebase and phonebook.
+            Pattern plussixfive = Pattern.compile("\\+65 ?");
+            Matcher m = plussixfive.matcher(payeeNumber);
+            payeeNumber = m.replaceFirst("");
+            payeeNumber = payeeNumber.replaceAll("\\s+", "");
 
             Query query = ref.child("users").orderByChild("number").equalTo(payeeNumber);
             query.addListenerForSingleValueEvent(new ValueEventListener() {
