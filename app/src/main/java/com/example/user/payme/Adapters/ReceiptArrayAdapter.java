@@ -113,8 +113,9 @@ public class ReceiptArrayAdapter extends ArrayAdapter<ReceiptItem> {
     // Hence renaming method to isItemEnabled
     public boolean isItemEnabled(int position) {
         String name = receiptItems.get(position).getmBelongsTo();
+
         // Clickable only if no one have chose it before or it belongs to the user.
-        return name == null || name == currentChooseUser;
+        return name == null || name.equals(currentChooseUser);
     }
 
     public void setSelectedStyle(View convertView, boolean isEnabled) {

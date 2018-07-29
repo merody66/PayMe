@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
@@ -201,6 +203,12 @@ public class RequestPaymentActivity extends AppCompatActivity {
             double amount = userItem.getmAmount();
 
             payer.add(new Payment(amount, payeeName, payeeNumber, receiptId, "pending", "owed", date));
+
+            // to standardise between saved phone number in firebase and phonebook.
+            Pattern plussixfive = Pattern.compile("\\+65 ?");
+            Matcher m = plussixfive.matcher(payeeNumber);
+            payeeNumber = m.replaceFirst("");
+            payeeNumber = payeeNumber.replaceAll("\\s+", "");
 
             Query query = ref.child("users").orderByChild("number").equalTo(payeeNumber);
 

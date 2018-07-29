@@ -1,7 +1,9 @@
 package com.example.user.payme;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -140,15 +142,8 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         // Check if coming from ChooseContactActivity or EditReceiptActivity
         if (getIntent().getStringExtra("from_activity").equals("ChooseContactActivity")) {
             // TODO retrieve current logged in user
-
-            // Toggle all
-            for (Contact contact: mContacts) {
-                contact.toggleSelected();
-            }
-
-            Contact currentUser = new Contact(0, "You", "99999999");
-            currentUser.setSelected(true);
-            mContacts.add(0, currentUser);
+            mContacts.add(0, new Contact(0, "You", "99999999"));
+            resetContactSelected();
 
             // Data taken from shared preferences
             mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -171,6 +166,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             ProcessOCR();
         } else {
             Log.d(TAG, "onCreate: CAME BACK FROM EDITRECEIPT");
+            resetContactSelected();
             receipt = (Receipt) getIntent().getSerializableExtra("receipt");
             mShopname = receipt.getmShopname();
             mSubtotalAmt = receipt.getmSubtotalAmt();
@@ -189,6 +185,13 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
 
         }
+    }
+
+    private void resetContactSelected(){
+        for (int i = 1; i < mContacts.size(); i++) {
+            mContacts.get(i).setSelected(false);
+        }
+        mContacts.get(0).setSelected(true);
     }
 
     // todo can do the same for receiptadapter
@@ -240,14 +243,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.edit_redirect_button:
-                //todo check if updateditemlist exist
-                Intent intent = new Intent(ShowActivity.this, EditReceiptActivity.class);
-                intent.putExtra("shopname", mShopname);
-                intent.putExtra("date", mDate);
-                intent.putExtra("itemList",updatedItemList);
-                intent.putExtra("Contacts", mContacts);
-                startActivity(intent);
-                finish();
+                sendUserToEdit();
             case R.id.action_back:
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
@@ -255,6 +251,16 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                 return super.onOptionsItemSelected(item);
 
         }
+    }
+
+    private void sendUserToEdit(){
+        Intent intent = new Intent(ShowActivity.this, EditReceiptActivity.class);
+        intent.putExtra("shopname", mShopname);
+        intent.putExtra("date", mDate);
+        intent.putExtra("itemList",updatedItemList);
+        intent.putExtra("Contacts", mContacts);
+        startActivity(intent);
+        finish();
     }
 
     private ArrayList<Text> findPrice(SparseArray<TextBlock> items) {
@@ -386,7 +392,6 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             updatedItemList = new ArrayList<>();
             updatedItemList.addAll(mItemList);
             boolean foundBreak = false;
-            int foundStart = -1;
 
             // Combined pattern to search for subtotel, gst and service charge.
             Pattern breakPattern = Pattern.compile("(sub ?to?ta?l)|((GST).*)|(service ?charge.*)", Pattern.CASE_INSENSITIVE);
@@ -403,6 +408,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                     String price = mItemList.get(i).getmPrice();
                     price = price.replace("$", "");
                     price = price.replace(",", "");
+
                     try {
                         subtotal += Double.parseDouble(price);
                     } catch (NumberFormatException e ){
@@ -426,9 +432,19 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             initRecyclerView();
 
             Log.d(TAG, "ProcessOCR: after setadapter");
-        } else {
-            //todo open a dialog to say there is nothing, then redirect to edit
+        }
 
+        if (updatedItemList.isEmpty()){
+            AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
+            builder.setMessage("Unable to detect any item/price text, please enter your own item details")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            sendUserToEdit();
+                        }
+                    });
+
+            AlertDialog alert = builder.create();
+            alert.show();
         }
     }
 
