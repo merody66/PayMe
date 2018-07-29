@@ -22,7 +22,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.util.TypedValue;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -469,6 +468,13 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 nameTextView.setTypeface(fontFace);
                 nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
+
+//              //TODO HARD CODE TO FIX DEFAULT SELECTED IDK WHY
+                for (Contact contact:contacts) {
+                    Log.d(TAG, "onClick: contact "+contact.getmName()+" selected "+contact.getIsSelected());
+                    contact.setSelected(false);
+                }
+
                 HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
                 RecyclerView recyclerView = new RecyclerView(getContext());
                 recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
@@ -492,6 +498,9 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                             Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "onClick: group pass it to showactivity " + groupName);
                             Log.d(TAG, "onClick: list of contacts " + contacts.get(0));
+                            for (Contact contact:contacts) {
+                                Log.d(TAG, "onClick: contact "+contact.getmName()+" selected "+contact.getIsSelected());
+                            }
                             Intent intent = new Intent(getActivity().getBaseContext(), ShowActivity.class);
                             intent.putExtra("from_activity", "ChooseContactActivity");
                             intent.putExtra("Contacts", contacts);

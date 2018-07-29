@@ -129,7 +129,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
 //                Log.d(TAG, "onClick: dispayname "+currentUser.getDisplayName());
 //                Log.d(TAG, "onClick: number "+currentUser.getPhoneNumber());
 
-                setPayeesList(key, userId, currentUser.getDisplayName(), currentUser.getPhoneNumber());
+                setPayeesList(key, userId, currentUser.getDisplayName(), currentUser.getPhoneNumber(), mReceipt.getmDate());
 
                 for (Map.Entry<String, ArrayList<Payment>> entry : payments.entrySet()) {
                     Map<String, Object> postPayments = new HashMap<>();
@@ -188,7 +188,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
         });
     }
 
-    private void setPayeesList(String receiptId, String userId, String currentUser, String currentUserNumber) {
+    private void setPayeesList(String receiptId, String userId, String currentUser, String currentUserNumber, String date) {
         payments = new HashMap<>();
         ArrayList<Payment> payer = new ArrayList<>();
         ArrayList<Payment> payee;
@@ -200,7 +200,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
             payeeNumber = userItem.getmNumber();
             double amount = userItem.getmAmount();
 
-            payer.add(new Payment(amount, payeeName, payeeNumber, receiptId, "pending", "owed"));
+            payer.add(new Payment(amount, payeeName, payeeNumber, receiptId, "pending", "owed", date));
 
             Query query = ref.child("users").orderByChild("number").equalTo(payeeNumber);
 
@@ -212,7 +212,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
                         Map<String, Object> postPayments = new HashMap<>();
 
                         String paymentKey = ref.child("users").push().getKey();
-                        postPayments.put("/payments/"+paymentKey, new Payment(amount, currentUser, currentUserNumber, receiptId, "pending", "owe"));
+                        postPayments.put("/payments/"+paymentKey, new Payment(amount, currentUser, currentUserNumber, receiptId, "pending", "owe", date));
 
                         ref.child("users").child(payeeId).updateChildren(postPayments);
                     }

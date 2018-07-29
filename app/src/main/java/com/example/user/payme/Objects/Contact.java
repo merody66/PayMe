@@ -22,6 +22,7 @@ public class Contact implements Serializable {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
         this.mPhoneNumber = mPhoneNumber;
+        this.isSelected = false;
     }
 
     public boolean getIsSelected() { return isSelected; }
