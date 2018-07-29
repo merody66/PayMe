@@ -171,10 +171,18 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         if (!hasPermissions(getActivity(), PERMISSIONS)) {  // if permission is not granted
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
         } else {  // if granted
-            GetContactsIntoArrayList();
-            GetGroupsIntoHashMap();
+            initEverything();
+        }
 
-            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
+        return view;
+    }
+
+    private void initEverything(){
+        GetContactsIntoArrayList();
+        GetGroupsIntoHashMap();
+
+        contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
+
         if (getActivity() instanceof ChooseContactActivity) {
             contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
         }
@@ -229,9 +237,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         });
 
         searchBar.setOnSearchActionListener(this);
-    }
-
-        return view;
     }
 
     @Override
@@ -310,63 +315,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                                            int[] grantResults) {
         switch (requestCode) {
             case PERMISSION_ALL: {
-                Log.d("PERMISSION REQUEST", "Permission Granted.");
-                GetContactsIntoArrayList();
-                GetGroupsIntoHashMap();
-
-                contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList,
-                        ContactsFragment.this::onContactClick);
-
-                // Show contacts first
-                contacts_selected.setVisibility(View.VISIBLE);
-                contactsSelected = true;
-                ShowContacts();
-
-                contactsBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        groups_selected.setVisibility(View.INVISIBLE);
-                        if (contacts_selected.getVisibility() == View.INVISIBLE) {
-                            contacts_selected.setVisibility(View.VISIBLE);
-                            contactsSelected = true;
-                            searchBar.setPlaceHolder("Search Contacts");
-                        }
-                        ShowContacts();
-                    }
-                });
-
-                groupsBtn.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        contacts_selected.setVisibility(View.INVISIBLE);
-                        if (groups_selected.getVisibility() == View.INVISIBLE) {
-                            groups_selected.setVisibility(View.VISIBLE);
-                            contactsSelected = false;
-                            searchBar.setPlaceHolder("Search Groups");
-                        }
-                        ShowGroups();
-                    }
-                });
-
-                searchBar.addTextChangeListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                        if (contactsSelected) {  // run this block of code only for search contacts
-                            String searchText = searchBar.getText();
-                            //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
-                            contactsAdapter.getFilter().filter(searchText);
-                        }
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable editable) {  }
-
-                });
-
-                searchBar.setOnSearchActionListener(this);
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED &&
+                        grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    initEverything();
+                }
 
                 return;
             }
