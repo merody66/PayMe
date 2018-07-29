@@ -223,7 +223,6 @@ public class RequestPaymentActivity extends AppCompatActivity {
             payeeNumber = payeeNumber.replaceAll("\\s+", "");
 
             Query query = ref.child("users").orderByChild("number").equalTo(payeeNumber);
-
             query.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -232,7 +231,8 @@ public class RequestPaymentActivity extends AppCompatActivity {
                         Map<String, Object> postPayments = new HashMap<>();
 
                         String paymentKey = ref.child("users").push().getKey();
-                        postPayments.put("/payments/"+paymentKey, new Payment(amount, currentUser, currentUserNumber, receiptId, "pending", "owe", date));
+                        postPayments.put("/payments/"+paymentKey, new Payment(amount, currentUser, currentUserNumber, receiptId,
+                                "pending", "owe", date));
 
                         ref.child("users").child(payeeId).updateChildren(postPayments);
                     }

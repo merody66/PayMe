@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -35,7 +34,6 @@ import com.example.user.payme.R;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.internal.Storage;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,7 +49,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,18 +59,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Activities that contain this fragment must implement the
  * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link AccountSettingsFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class AccountSettingsFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
     private OnFragmentInteractionListener mListener;
 
@@ -101,31 +88,9 @@ public class AccountSettingsFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AccountSettingsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AccountSettingsFragment newInstance(String param1, String param2) {
-        AccountSettingsFragment fragment = new AccountSettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
@@ -196,7 +161,7 @@ public class AccountSettingsFragment extends Fragment {
                 checkEmptyInput(nameTxt, name);
                 checkEmptyInput(emailTxt, email);
                 checkEmptyInput(paylahTxt, paylahNumber);
-                System.out.println(nonEmptyFields);
+                //System.out.println(nonEmptyFields);
                 if (nonEmptyFields == 3) {
                     saveAccountInfo(name, email, paylahNumber);
                 }
@@ -330,8 +295,6 @@ public class AccountSettingsFragment extends Fragment {
     }
 
     private void saveAccountInfo(String name, String email, String paylahNumber) {
-        profilePicURL = "";
-
         if (Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             if (paylahNumber.matches("^([89]{1})([0-9]{7})")) {
                 dbRef.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -344,9 +307,7 @@ public class AccountSettingsFragment extends Fragment {
                         postValues.put("name", name);
                         postValues.put("email", email);
                         postValues.put("number", paylahNumber);
-                        if (!profilePicURL.isEmpty()) {
-                            postValues.put("profileURL", profilePicURL);
-                        }
+                        postValues.put("profileURL", profilePicURL);
                         dbRef.child("users").child(userId).updateChildren(postValues);
                     }
 
@@ -414,7 +375,7 @@ public class AccountSettingsFragment extends Fragment {
     private void setProfileImage(String URL) {
         StorageReference profileImageRef = storageRef.child(URL);
 
-        final long ONE_MEGABYTE = 1024 * 1024;
+        final long ONE_MEGABYTE = 1024 * 1024 * 5;  // 5 MB in size
         profileImageRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
             public void onSuccess(byte[] bytes) {

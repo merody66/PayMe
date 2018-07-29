@@ -85,29 +85,31 @@ public class SignupActivity extends AppCompatActivity {
                                     if (task.isSuccessful()) {
                                         Log.d("User Creation", "Email Sent.");
                                         auth.signOut(); // clear the user object
+                                        signUpComplete();
                                     }
                                 }
                             });
-
-                            // Show Alert Dialog
-                            AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
-                            builder.setMessage("A confirmation email has been sent to your registered email address.")
-                                .setCancelable(false)
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        dialog.cancel();
-                                        finish();
-                                    }
-                                });
-                            AlertDialog alert = builder.create();
-                            alert.show();
                         } else {
-                            Toast.makeText(SignupActivity.this, "Unable to create account.",
-                                    Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignupActivity.this, "Account with email already exists.", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
         }
-
     }
+
+    private void signUpComplete() {
+        // Show Alert Dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(SignupActivity.this);
+        builder.setMessage("A confirmation email has been sent to your registered email address.")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                        finish();
+                    }
+                });
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 }
