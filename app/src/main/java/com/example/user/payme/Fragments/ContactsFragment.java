@@ -468,6 +468,13 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 nameTextView.setText(groupName);
                 nameTextView.setTypeface(fontFace);
                 nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
+
+                // TODO
+                for (Contact contact: contacts) {
+                    Log.d(TAG, "onClick: contact " + contact.getmName() + " selected " + contact.getIsSelected());
+                    contact.setSelected(false);
+                }
+
                 LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
                 HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
                 RecyclerView recyclerView = new RecyclerView(getContext());

@@ -307,7 +307,7 @@ public class  HomeFragment extends Fragment {
         owe_lp.setMarginStart(dpToPx(146));   // margin_start 146dp
         owed_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
         owed_lp.addRule(RelativeLayout.CENTER_VERTICAL);
-        owed_lp.setMarginEnd(dpToPx(140));   // margin_end 140dp
+        owed_lp.setMarginEnd(dpToPx(130));   // margin_end 130dp
         date_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
         date_lp.addRule(RelativeLayout.CENTER_VERTICAL);
         date_lp.setMarginEnd(dpToPx(20));   // margin_end 20dp

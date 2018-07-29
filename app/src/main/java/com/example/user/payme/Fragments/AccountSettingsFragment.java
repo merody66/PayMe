@@ -259,7 +259,7 @@ public class AccountSettingsFragment extends Fragment {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
-                if (!user.getProfileURL().isEmpty()) {
+                if (user.getProfileURL() != null && !user.getProfileURL().isEmpty()) {
                     setProfileImage(user.getProfileURL());
                 }
                 nameTxt.setText(user.getName());

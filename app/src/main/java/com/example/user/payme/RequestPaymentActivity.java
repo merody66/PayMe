@@ -200,7 +200,9 @@ public class RequestPaymentActivity extends AppCompatActivity {
             payeeNumber = userItem.getmNumber();
             double amount = userItem.getmAmount();
 
-            payer.add(new Payment(amount, payeeName, payeeNumber, receiptId, "pending", "owed"));
+            Payment payerPayment = new Payment(amount, payeeName, payeeNumber, receiptId, "pending",
+                    "owed", mReceipt.getmDate());
+            payer.add(payerPayment);
 
             Query query = ref.child("users").orderByChild("number").equalTo(payeeNumber);
 
@@ -211,8 +213,10 @@ public class RequestPaymentActivity extends AppCompatActivity {
                         String payeeId = dataSnapshot.getChildren().iterator().next().getKey();
                         Map<String, Object> postPayments = new HashMap<>();
 
+                        Payment payeePayment = new Payment(amount, currentUser, currentUserNumber, receiptId,
+                                "pending", "owe", mReceipt.getmDate());
                         String paymentKey = ref.child("users").push().getKey();
-                        postPayments.put("/payments/"+paymentKey, new Payment(amount, currentUser, currentUserNumber, receiptId, "pending", "owe"));
+                        postPayments.put("/payments/"+paymentKey, payeePayment);
 
                         ref.child("users").child(payeeId).updateChildren(postPayments);
                     }
