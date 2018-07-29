@@ -1,5 +1,6 @@
 package com.example.user.payme;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -9,7 +10,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.example.user.payme.Fragments.AccountSettingsFragment;
 import com.example.user.payme.Fragments.ContactsFragment;
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 
@@ -38,23 +38,25 @@ public class ChooseContactActivity extends AppCompatActivity implements OnFragme
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        Intent intent = new Intent(ChooseContactActivity.this, MainActivity.class);
                         switch (item.getItemId()) {
                             case R.id.navigation_home:
+                                startActivity(intent);
                                 break;
                             case R.id.navigation_history:
+                                intent.putExtra("startFragment", MainActivity.REQUEST_HISTORY_FRAGMENT);
                                 break;
                             case R.id.navigation_addNewReceipt:
                                 return true;
                             case R.id.navigation_contacts:
-                                fragment = new ContactsFragment();
+                                intent.putExtra("startFragment", MainActivity.REQUEST_CONTACTS_FRAGMENT);
                                 break;
                             case R.id.navigation_account:
-                                fragment = new AccountSettingsFragment();
+                                intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
                                 break;
                         }
-//                        final FragmentTransaction transaction = fragmentManager.beginTransaction();
-//                        transaction.replace(R.id.fragment_container, fragment);
-//                        transaction.commit();
+                        startActivity(intent);
+                        finish();
                         return true;
                     }
                 });

@@ -70,21 +70,26 @@ public class RequestPaymentActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Intent intent = new Intent(RequestPaymentActivity.this, MainActivity.class);
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent intent = new Intent(RequestPaymentActivity.this, MainActivity.class);
                     startActivity(intent);
-                    return true;
+                    break;
                 case R.id.navigation_history:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_HISTORY_FRAGMENT);
+                    break;
                 case R.id.navigation_addNewReceipt:
                     return true;
                 case R.id.navigation_contacts:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_CONTACTS_FRAGMENT);
+                    break;
                 case R.id.navigation_account:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
+                    break;
             }
-            return false;
+            startActivity(intent);
+            finish();
+            return true;
         }
     };
 
