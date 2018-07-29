@@ -3,7 +3,9 @@ package com.example.user.payme;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
@@ -96,6 +98,11 @@ public class RequestPaymentActivity extends AppCompatActivity {
         BottomNavigationViewHelper.disableShiftMode(navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
+        // Current user taken from shared preferences
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        String currentUserName = sharedPreferences.getString("currentUserName", "default nothing");
+        String currentUserNumber = sharedPreferences.getString("currentUserNumber", "default nothing");
+
         // Get extra from intent
         mContacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contact");
         mResult = (HashMap<String, ArrayList<ReceiptItem>>) getIntent().getSerializableExtra("result");
@@ -131,7 +138,7 @@ public class RequestPaymentActivity extends AppCompatActivity {
 //                Log.d(TAG, "onClick: dispayname "+currentUser.getDisplayName());
 //                Log.d(TAG, "onClick: number "+currentUser.getPhoneNumber());
 
-                setPayeesList(key, userId, currentUser.getDisplayName(), currentUser.getPhoneNumber(), mReceipt.getmDate());
+                setPayeesList(key, userId, currentUserName, currentUserNumber, mReceipt.getmDate());
 
                 for (Map.Entry<String, ArrayList<Payment>> entry : payments.entrySet()) {
                     Map<String, Object> postPayments = new HashMap<>();

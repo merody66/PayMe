@@ -1,7 +1,6 @@
 package com.example.user.payme;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -24,10 +23,18 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.example.user.payme.Objects.User;
 import com.google.android.gms.vision.CameraSource;
 import com.google.android.gms.vision.Detector;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -210,8 +217,6 @@ public class AddReceiptActivity extends AppCompatActivity {
                 Log.d(TAG, "onPictureTaken: imagepath "+captureFile.toString());
 
                 // mSharedPreferences for camera
-                Context context = getApplicationContext();
-                mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
                 mEditor = mSharedPreferences.edit();
                 mEditor.putString("imagePath",captureFile.toString());
                 mEditor.commit();
@@ -246,7 +251,6 @@ public class AddReceiptActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK && requestCode == READ_EXTERNAL_ID) {
             Intent intent = new Intent(AddReceiptActivity.this, ChooseContactActivity.class);
 
-            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             mEditor = mSharedPreferences.edit();
             mEditor.putString("imagePath", data.getData().toString());
             mEditor.commit();
@@ -276,6 +280,33 @@ public class AddReceiptActivity extends AppCompatActivity {
         }
     }
 
+    private void getStoreCurrentUser(){
+        FirebaseAuth auth;
+        FirebaseDatabase db;
+        DatabaseReference ref;
+
+        auth = FirebaseAuth.getInstance();
+        db = FirebaseDatabase.getInstance();
+        ref = db.getReference();
+
+        FirebaseUser currentUser = auth.getCurrentUser();
+        String userId = currentUser.getUid();
+
+        ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                User currentUser = dataSnapshot.getValue(User.class);
+                mEditor = mSharedPreferences.edit();
+                mEditor.putString("currentUserName",currentUser.getName());
+                mEditor.putString("currentUserNumber",currentUser.getNumber());
+                mEditor.commit();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {}
+        });
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -293,6 +324,13 @@ public class AddReceiptActivity extends AppCompatActivity {
         mCameraView = (SurfaceView) findViewById(R.id.surfaceView);
         mTakePicture = (ImageButton) findViewById(R.id.cameraButton);
         mGallery = (ImageButton) findViewById(R.id.galleryButton);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mEditor = mSharedPreferences.edit();
+        // fetch and store current user
+        if (mSharedPreferences.getString("currentUserName", "").isEmpty()){
+            getStoreCurrentUser();
+        }
 
         startCameraSource();
         mTakePicture.setOnClickListener(new View.OnClickListener() {
