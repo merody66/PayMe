@@ -11,6 +11,7 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -45,7 +46,7 @@ import java.util.Date;
 
 public class AddReceiptActivity extends AppCompatActivity {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "AddReceiptActivity";
     private static final int REQUEST_CAMERA_ID = 100;
     private static final int WRITE_EXTERNAL_ID = 101;
     private static final int READ_EXTERNAL_ID = 102;
@@ -57,28 +58,33 @@ public class AddReceiptActivity extends AppCompatActivity {
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
 
-
+    private Fragment fragment;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Intent intent = new Intent(AddReceiptActivity.this, MainActivity.class);
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent intent = new Intent(AddReceiptActivity.this, MainActivity.class);
                     startActivity(intent);
-                    return true;
+                    break;
                 case R.id.navigation_history:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_HISTORY_FRAGMENT);
+                    break;
                 case R.id.navigation_addNewReceipt:
                     return true;
                 case R.id.navigation_contacts:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_CONTACTS_FRAGMENT);
+                    break;
                 case R.id.navigation_account:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
+                    break;
             }
-            return false;
+            startActivity(intent);
+            finish();
+            return true;
         }
     };
 

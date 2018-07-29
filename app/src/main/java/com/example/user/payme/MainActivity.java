@@ -1,13 +1,14 @@
 package com.example.user.payme;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.user.payme.Fragments.AccountSettingsFragment;
@@ -20,14 +21,17 @@ import com.google.firebase.auth.FirebaseUser;
 
 
 public class MainActivity extends AppCompatActivity implements OnFragmentInteractionListener {
+    private static final String TAG = "MainActivity";
+    public static final int REQUEST_HISTORY_FRAGMENT = 201;
+    public static final int REQUEST_CONTACTS_FRAGMENT = 202;
+    public static final int REQUEST_ACCOUNT_SETTING_FRAGMENT = 203;
 
     private FirebaseAuth auth;
     private Fragment fragment;
+    private final FragmentManager fragmentManager = getSupportFragmentManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final FragmentManager fragmentManager = getSupportFragmentManager();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         auth = FirebaseAuth.getInstance();
@@ -37,6 +41,8 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment);
         transaction.commit();
+
+        startFragment();
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         BottomNavigationViewHelper.disableShiftMode(navigation);
@@ -69,7 +75,30 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                         return true;
                     }
                 });
-    };
+    }
+
+
+
+    private void startFragment(){
+        int requestCode = getIntent().getIntExtra("startFragment", 0);
+        Log.e(TAG, "startFragment: "+requestCode);
+        if (requestCode != 0) {
+            switch (requestCode) {
+                case REQUEST_HISTORY_FRAGMENT:
+                    fragment = new HistoryFragment();
+                    break;
+                case REQUEST_CONTACTS_FRAGMENT:
+                    fragment = new ContactsFragment();
+                    break;
+                case REQUEST_ACCOUNT_SETTING_FRAGMENT:
+                    fragment = new AccountSettingsFragment();
+                    break;
+            }
+            FragmentTransaction transaction = fragmentManager.beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.commit();
+        }
+    }
 
     @Override
     protected void onStart() {
