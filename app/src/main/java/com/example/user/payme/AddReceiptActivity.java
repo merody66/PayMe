@@ -39,9 +39,9 @@ import java.util.Date;
 public class AddReceiptActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private static final int requestPermissionID = 101;
-    private static final int writePermissionID = 102;
-    private static final int PICK_IMAGE = 100;
+    private static final int REQUEST_CAMERA_ID = 100;
+    private static final int WRITE_EXTERNAL_ID = 101;
+    private static final int READ_EXTERNAL_ID = 102;
 
     private SurfaceView mCameraView;
     private CameraSource mCameraSource;
@@ -77,20 +77,36 @@ public class AddReceiptActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            try {
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    return;
+        Log.d(TAG, "onRequestPermissionsResult: "+grantResults);
+        switch (requestCode) {
+            case REQUEST_CAMERA_ID: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    try {
+                        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                            return;
+                        }
+                        mCameraSource.start(mCameraView.getHolder());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-                mCameraSource.start(mCameraView.getHolder());
-            } catch (IOException e) {
-                e.printStackTrace();
             }
-        } else if (grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                return;
+            case WRITE_EXTERNAL_ID: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                }
             }
+            case READ_EXTERNAL_ID: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    openGallery();
+                }
+            }
+
         }
     }
 
@@ -125,7 +141,7 @@ public class AddReceiptActivity extends AppCompatActivity {
 
                             ActivityCompat.requestPermissions(AddReceiptActivity.this,
                                     new String[]{Manifest.permission.CAMERA},
-                                    requestPermissionID);
+                                    REQUEST_CAMERA_ID);
                             return;
                         }
                         mCameraSource.start(mCameraView.getHolder());
@@ -147,32 +163,14 @@ public class AddReceiptActivity extends AppCompatActivity {
             //Set the TextRecognizer's Processor.
             textRecognizer.setProcessor(new Detector.Processor<TextBlock>() {
                 @Override
-                public void release() {
-                }
+                public void release() {}
 
                 /**
                  * Detect all the text from camera using TextBlock and the values into a stringBuilder
                  * which will then be set to the textView.
                  * */
                 @Override
-                public void receiveDetections(Detector.Detections<TextBlock> detections) {
-//                    final SparseArray<TextBlock> items = detections.getDetectedItems();
-//                    if (items.size() != 0) {
-//
-//                        mTextView.post(new Runnable() {
-//                            @Override
-//                            public void run() {
-//                                StringBuilder stringBuilder = new StringBuilder();
-//                                for (int i = 0; i < items.size(); i++) {
-//                                    TextBlock item = items.valueAt(i);
-//                                    stringBuilder.append(item.getValue());
-//                                    stringBuilder.append("\n");
-//                                }
-//                                mTextView.setText(stringBuilder.toString());
-//                            }
-//                        });
-//                    }
-                }
+                public void receiveDetections(Detector.Detections<TextBlock> detections) {}
             });
         }
     }
@@ -189,7 +187,7 @@ public class AddReceiptActivity extends AppCompatActivity {
 
             ActivityCompat.requestPermissions(AddReceiptActivity.this,
                     new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    writePermissionID);
+                    WRITE_EXTERNAL_ID);
 
             try {
                 String mainpath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe";
@@ -219,9 +217,6 @@ public class AddReceiptActivity extends AppCompatActivity {
                 mEditor.commit();
 
                 startActivity(intent);
-
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (Exception exception) {
@@ -236,29 +231,26 @@ public class AddReceiptActivity extends AppCompatActivity {
 
             ActivityCompat.requestPermissions(AddReceiptActivity.this,
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    PICK_IMAGE);
+                    READ_EXTERNAL_ID);
             return;
         }
 
         Intent gallery = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
-        startActivityForResult(gallery, PICK_IMAGE);
+        startActivityForResult(gallery, READ_EXTERNAL_ID);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && requestCode == PICK_IMAGE) {
+        if (resultCode == RESULT_OK && requestCode == READ_EXTERNAL_ID) {
             Intent intent = new Intent(AddReceiptActivity.this, ChooseContactActivity.class);
-//            Intent intent = new Intent(AddReceiptActivity.this, TestImage.class);
 
             mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
             mEditor = mSharedPreferences.edit();
             mEditor.putString("imagePath", data.getData().toString());
             mEditor.commit();
 
-//            Log.d(TAG, "onActivityResult: uri "+imageUri.getPath());
-//            Log.d(TAG, "onActivityResult: uri "+imageUri.toString());
             startActivity(intent);
         }
     }
