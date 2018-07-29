@@ -64,29 +64,19 @@ import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
  * Activities that contain this fragment must implement the
  * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link ContactsFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class ContactsFragment extends Fragment implements ContactClickListener,  MaterialSearchBar.OnSearchActionListener {
 
     private static final String TAG = "ContactsFragment";
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
     final int PERMISSION_ALL = 1;
-    Typeface fontFace;
     Cursor cursor;
+    private Typeface fontFace;
+    private Context parentContext;
     private ArrayList<Contact> contactsList;
-    HashMap<String, ArrayList<Contact>> groupList = new HashMap<>();
-    VerticalRecyclerViewAdapter contactsAdapter;
+    private HashMap<String, ArrayList<Contact>> groupList = new HashMap<>();
+    private VerticalRecyclerViewAdapter contactsAdapter;
     private Button contactsBtn;
     private Button groupsBtn;
     private View contacts_selected;
@@ -107,33 +97,12 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
     // Empty public constructor, required by the system
     public ContactsFragment() { }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment ContactsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static ContactsFragment newInstance(String param1, String param2) {
-        ContactsFragment fragment = new ContactsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
-        fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
+        parentContext = getContext();
+        fontFace = ResourcesCompat.getFont(parentContext, R.font.nunito);
         contactsList = new ArrayList<>();
 
         auth = FirebaseAuth.getInstance();
@@ -163,7 +132,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         groupsBtn = view.findViewById(R.id.groupsBtn);
         groups_selected = view.findViewById(R.id.groups_selected);
         groupContainer = view.findViewById(R.id.groupContainer);
-        searchBar = (MaterialSearchBar) view.findViewById(R.id.searchBar);
+        searchBar = view.findViewById(R.id.searchBar);
 
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
@@ -181,10 +150,10 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         GetContactsIntoArrayList();
         GetGroupsIntoHashMap();
 
-        contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList);
+        contactsAdapter = new VerticalRecyclerViewAdapter(parentContext, contactsList);
 
         if (getActivity() instanceof ChooseContactActivity) {
-            contactsAdapter = new VerticalRecyclerViewAdapter(getContext(), contactsList, ContactsFragment.this::onContactClick);
+            contactsAdapter = new VerticalRecyclerViewAdapter(parentContext, contactsList, ContactsFragment.this::onContactClick);
         }
 
         // Show contacts first
@@ -381,17 +350,17 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
     public void ShowContacts() {
         groupContainer.removeAllViews();
-        LinearLayout layout = new LinearLayout(getContext());
+        LinearLayout layout = new LinearLayout(parentContext);
         layout.setLayoutParams(new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
         ));
         layout.setOrientation(LinearLayout.VERTICAL);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.VERTICAL, false);
-        RecyclerView recyclerView = new RecyclerView(getContext());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(parentContext, LinearLayout.VERTICAL, false);
+        RecyclerView recyclerView = new RecyclerView(parentContext);
         recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         recyclerView.setAdapter(contactsAdapter);
-        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+        DividerItemDecoration decoration = new DividerItemDecoration(parentContext, VERTICAL);
         recyclerView.addItemDecoration(decoration);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setNestedScrollingEnabled(false);
@@ -408,14 +377,14 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 Map.Entry pair = (Map.Entry) iterator.next();
                 String groupName = pair.getKey().toString();
                 ArrayList<Contact> contacts = (ArrayList<Contact>) pair.getValue();
-                LinearLayout layout = new LinearLayout(getContext());  // create a layout for every group
+                LinearLayout layout = new LinearLayout(parentContext);  // create a layout for every group
                 layout.setLayoutParams(new LinearLayout.LayoutParams(
                         // int width, int height
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                 ));
                 layout.setPadding(50, 50, 50, 0);
                 layout.setOrientation(LinearLayout.VERTICAL);
-                TextView nameTextView = new TextView(getContext());
+                TextView nameTextView = new TextView(parentContext);
                 nameTextView.setText(groupName);
                 nameTextView.setTypeface(fontFace);
                 nameTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f);
@@ -426,21 +395,14 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                     contact.setSelected(false);
                 }
 
-                LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayout.HORIZONTAL, false);
-
-//              //TODO HARD CODE TO FIX DEFAULT SELECTED IDK WHY
-                for (Contact contact:contacts) {
-                    Log.d(TAG, "onClick: contact "+contact.getmName()+" selected "+contact.getIsSelected());
-                    contact.setSelected(false);
-                }
-
-                HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(getContext(), contacts);
-                RecyclerView recyclerView = new RecyclerView(getContext());
+                LinearLayoutManager layoutManager = new LinearLayoutManager(parentContext, LinearLayout.HORIZONTAL, false);
+                HorizontalRecyclerViewAdapter adapter = new HorizontalRecyclerViewAdapter(parentContext, contacts);
+                RecyclerView recyclerView = new RecyclerView(parentContext);
                 recyclerView.setLayoutParams(new RecyclerView.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 recyclerView.setAdapter(adapter);
                 recyclerView.setLayoutManager(layoutManager);
-                View separator = new View(getContext());
+                View separator = new View(parentContext);
                 separator.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 3));
                 separator.setBackgroundColor(Color.BLACK);
                 layout.addView(nameTextView);
@@ -454,7 +416,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                     layout.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            Toast.makeText(getContext(), groupName + " group clicked.", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(parentContext, groupName + " group clicked.", Toast.LENGTH_SHORT).show();
                             Log.d(TAG, "onClick: group pass it to showactivity " + groupName);
                             Log.d(TAG, "onClick: list of contacts " + contacts.get(0));
                             for (Contact contact:contacts) {
@@ -470,20 +432,23 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
                 }
             }
         } else {
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-            params.setMargins(200, 100, 200, 0);
-            TextView messageTextView = new TextView(getContext());
-            messageTextView.setLayoutParams(params);
-            //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
-            messageTextView.setTypeface(fontFace, Typeface.ITALIC);
-            messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
-            messageTextView.setText(R.string.contacts_info_msg);
-            groupContainer.addView(messageTextView);
+            showInfoMessage();
         }
 
     }
 
+    private void showInfoMessage() {
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins(100, 50, 100, 0);
+        TextView messageTextView = new TextView(parentContext);
+        messageTextView.setLayoutParams(params);
+        //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
+        messageTextView.setTypeface(fontFace, Typeface.ITALIC);
+        messageTextView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f);
+        messageTextView.setText(R.string.contacts_info_msg);
+        groupContainer.addView(messageTextView);
+    }
 
     private void nextShowActvity() {
         Log.d(TAG, "onContactClick: pass it to showactivity ");
@@ -522,7 +487,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         if (getActivity() instanceof ChooseContactActivity) {
             if (mContacts.contains(contact)) {
                 mContacts.remove(contact);
-
                 if (mContacts.size() == 0) {
                     hideOption(R.id.next);
                 }
@@ -532,7 +496,6 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
             }
         }
     }
-
 
     @Override
     public void onSearchStateChanged(boolean enabled) {  }

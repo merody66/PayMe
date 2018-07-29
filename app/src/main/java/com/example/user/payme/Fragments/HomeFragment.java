@@ -40,22 +40,13 @@ import java.util.ArrayList;
  * Activities that contain this fragment must implement the
  * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class  HomeFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
     private OnFragmentInteractionListener mListener;
 
+    private Context parentContext;
+    private Typeface fontFace;
     private ArrayList<Payment> pendingPayments;
     private ArrayList<Payment> completedPayments;
     private LinearLayout paymentsList;
@@ -74,33 +65,13 @@ public class  HomeFragment extends Fragment {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HomeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HomeFragment newInstance(String param1, String param2) {
-        HomeFragment fragment = new HomeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         savedInstanceState = null;
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
 
+        parentContext = getContext();
+        fontFace = ResourcesCompat.getFont(parentContext, R.font.nunito);
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
         ref = db.getReference();
@@ -266,8 +237,7 @@ public class  HomeFragment extends Fragment {
 
     private void addToTable(Payment p) {
         // Initializing main layout, Text Views and params
-        Typeface fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
-        RelativeLayout layout = new RelativeLayout(getContext());
+        RelativeLayout layout = new RelativeLayout(parentContext);
         int height = dpToPx(50);  // row height
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT, height);
@@ -281,11 +251,11 @@ public class  HomeFragment extends Fragment {
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams divider_lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, dpToPx(2));
-        TextView nameTextView = new TextView(getContext());
-        TextView oweAmtTextView = new TextView(getContext());
-        TextView owedAmtTextView = new TextView(getContext());
-        TextView dateTextView = new TextView(getContext());
-        TextView receiptIDs = new TextView(getContext());
+        TextView nameTextView = new TextView(parentContext);
+        TextView oweAmtTextView = new TextView(parentContext);
+        TextView owedAmtTextView = new TextView(parentContext);
+        TextView dateTextView = new TextView(parentContext);
+        TextView receiptIDs = new TextView(parentContext);
 
         // Styling the TextViews
         nameTextView.setTypeface(fontFace);
@@ -316,87 +286,88 @@ public class  HomeFragment extends Fragment {
 
         // Divider
         int[] attr = {android.R.attr.listDivider};
-        TypedArray ta = getContext().getApplicationContext().obtainStyledAttributes(attr);
+        TypedArray ta = parentContext.getApplicationContext().obtainStyledAttributes(attr);
         Drawable dividerDrawable = ta.getDrawable(0);
-        View divider = new View(getContext());
+        View divider = new View(parentContext);
         divider.setBackground(dividerDrawable);
 
+        if (getView() != null) {
+            RelativeLayout relativeLayout = getView().findViewWithTag(p.getmDate() + "," + p.getmName());
+            if (relativeLayout == null) {  // if unable to find payment in existing rows
+                nameTextView.setText(p.getmName());
+                dateTextView.setText(p.getmDate());
+                receiptIDs.setText(p.getmReceiptID());
 
-        RelativeLayout relativeLayout = getView().findViewWithTag(p.getmDate() + "," + p.getmName());
-        if (relativeLayout == null) {  // if unable to find payment in existing rows
-            nameTextView.setText(p.getmName());
-            dateTextView.setText(p.getmDate());
-            receiptIDs.setText(p.getmReceiptID());
-
-            if (p.getmType().equals("owe")) {
-                oweAmtTextView.setText("$" + p.getmAmount());
-                owedAmtTextView.setText("-");
-            } else {
-                oweAmtTextView.setText("-");
-                owedAmtTextView.setText("$" + p.getmAmount());
-            }
-
-            layout.setTag(p.getmDate() + "," + p.getmName());
-            layout.addView(nameTextView, name_lp);
-            layout.addView(oweAmtTextView, owe_lp);
-            layout.addView(owedAmtTextView, owed_lp);
-            layout.addView(dateTextView, date_lp);
-            layout.addView(receiptIDs);
-            layout.addView(divider, divider_lp);
-            paymentsList.addView(layout, rlp);
-            layout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Fragment fragment = new SettlePaymentFragment();
-                    Bundle bundle = new Bundle();
-                    bundle.putString("NAME", ((TextView)layout.getChildAt(0)).getText().toString());
-                    bundle.putString("AMOUNT_OWE", ((TextView)layout.getChildAt(1)).getText().toString().substring(1));
-                    bundle.putString("AMOUNT_OWED", ((TextView)layout.getChildAt(2)).getText().toString().substring(1));
-                    bundle.putString("PAYMENT_STATUS", p.getmStatus());
-                    bundle.putString("DATE", p.getmDate());
-                    bundle.putString("RECEIPT_IDS", ((TextView)layout.getChildAt(4)).getText().toString());
-                    fragment.setArguments(bundle);
-                    goToPaymentPage(fragment);
-                }
-            });
-        } else {  // otherwise, just update the information in the existing view
-            if (p.getmType().equals("owe")) {
-                oweAmtTextView = (TextView) relativeLayout.getChildAt(1);
-                String previousAmt = oweAmtTextView.getText().toString();
-                relativeLayout.removeViewAt(1);
-
-                if (previousAmt.equals("-")) {
+                if (p.getmType().equals("owe")) {
                     oweAmtTextView.setText("$" + p.getmAmount());
+                    owedAmtTextView.setText("-");
                 } else {
-                    Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
-                    Double total = prev + p.getmAmount();
-                    oweAmtTextView.setText("$" + total.toString());
-                }
-                relativeLayout.addView(oweAmtTextView, 1);
-            } else {
-                owedAmtTextView = (TextView) relativeLayout.getChildAt(2);
-                String previousAmt = owedAmtTextView.getText().toString();
-                relativeLayout.removeViewAt(2);
-
-                if (previousAmt.equals("-")) {
+                    oweAmtTextView.setText("-");
                     owedAmtTextView.setText("$" + p.getmAmount());
-                } else {
-                    Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
-                    Double total = prev + p.getmAmount();
-                    owedAmtTextView.setText("$" + total.toString());
                 }
-                relativeLayout.addView(owedAmtTextView, 2);
-            }
 
-            receiptIDs = (TextView) relativeLayout.getChildAt(4);
-            relativeLayout.removeViewAt(4);
-            receiptIDs.setText(receiptIDs.getText().toString() + "," + p.getmReceiptID());
-            relativeLayout.addView(receiptIDs, 4);
+                layout.setTag(p.getmDate() + "," + p.getmName());
+                layout.addView(nameTextView, name_lp);
+                layout.addView(oweAmtTextView, owe_lp);
+                layout.addView(owedAmtTextView, owed_lp);
+                layout.addView(dateTextView, date_lp);
+                layout.addView(receiptIDs);
+                layout.addView(divider, divider_lp);
+                paymentsList.addView(layout, rlp);
+                layout.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Fragment fragment = new SettlePaymentFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putString("NAME", ((TextView) layout.getChildAt(0)).getText().toString());
+                        bundle.putString("AMOUNT_OWE", ((TextView) layout.getChildAt(1)).getText().toString().substring(1));
+                        bundle.putString("AMOUNT_OWED", ((TextView) layout.getChildAt(2)).getText().toString().substring(1));
+                        bundle.putString("PAYMENT_STATUS", p.getmStatus());
+                        bundle.putString("DATE", p.getmDate());
+                        bundle.putString("RECEIPT_IDS", ((TextView) layout.getChildAt(4)).getText().toString());
+                        fragment.setArguments(bundle);
+                        goToPaymentPage(fragment);
+                    }
+                });
+            } else {  // otherwise, just update the information in the existing view
+                if (p.getmType().equals("owe")) {
+                    oweAmtTextView = (TextView) relativeLayout.getChildAt(1);
+                    String previousAmt = oweAmtTextView.getText().toString();
+                    relativeLayout.removeViewAt(1);
+
+                    if (previousAmt.equals("-")) {
+                        oweAmtTextView.setText("$" + p.getmAmount());
+                    } else {
+                        Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
+                        Double total = prev + p.getmAmount();
+                        oweAmtTextView.setText("$" + total.toString());
+                    }
+                    relativeLayout.addView(oweAmtTextView, 1);
+                } else {
+                    owedAmtTextView = (TextView) relativeLayout.getChildAt(2);
+                    String previousAmt = owedAmtTextView.getText().toString();
+                    relativeLayout.removeViewAt(2);
+
+                    if (previousAmt.equals("-")) {
+                        owedAmtTextView.setText("$" + p.getmAmount());
+                    } else {
+                        Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
+                        Double total = prev + p.getmAmount();
+                        owedAmtTextView.setText("$" + total.toString());
+                    }
+                    relativeLayout.addView(owedAmtTextView, 2);
+                }
+
+                receiptIDs = (TextView) relativeLayout.getChildAt(4);
+                relativeLayout.removeViewAt(4);
+                receiptIDs.setText(receiptIDs.getText().toString() + "," + p.getmReceiptID());
+                relativeLayout.addView(receiptIDs, 4);
+            }
         }
     }
 
     private int dpToPx(int dp) {
-        float density = getContext().getResources().getDisplayMetrics().density;
+        float density = parentContext.getResources().getDisplayMetrics().density;
         return Math.round((float) dp * density);
     }
 
@@ -411,11 +382,10 @@ public class  HomeFragment extends Fragment {
     }
 
     private void showInfoMessage() {
-        Typeface fontFace = ResourcesCompat.getFont(getContext(), R.font.nunito);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins(150, 100, 150, 0);
-        TextView messageTextView = new TextView(getContext());
+        params.setMargins(100, 50, 100, 0);
+        TextView messageTextView = new TextView(parentContext);
         messageTextView.setLayoutParams(params);
         //messageTextView.setGravity(Gravity.CENTER_HORIZONTAL);
         messageTextView.setTypeface(fontFace, Typeface.ITALIC);

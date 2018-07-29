@@ -57,7 +57,7 @@ public class LoginActivity extends AppCompatActivity {
         signInGoogleBtn = findViewById(R.id.sign_in_button);
         auth = FirebaseAuth.getInstance();
 
-        googleTxt= (TextView) signInGoogleBtn.getChildAt(0);
+        googleTxt = (TextView) signInGoogleBtn.getChildAt(0);
         googleTxt.setText("Sign in with Google Account");
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
@@ -126,7 +126,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // [START config_signin]
         googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestIdToken(getString(R.string.google_web_client_id))
                 .requestEmail()
                 .build();
         // [END config_signin]
