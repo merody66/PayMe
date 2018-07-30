@@ -33,6 +33,7 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 
 /**
@@ -165,7 +166,7 @@ public class  HomeFragment extends Fragment {
                         @Override
                         public void onDataChange(DataSnapshot querySnapshot) {
                             if (querySnapshot.exists()) {
-                               Iterable<DataSnapshot> payments = querySnapshot.getChildren();
+                                Iterable<DataSnapshot> payments = querySnapshot.getChildren();
                                 for (DataSnapshot payment : payments) {
                                     Payment p = payment.getValue(Payment.class);
                                     pendingPayments.add(p);
@@ -242,7 +243,7 @@ public class  HomeFragment extends Fragment {
         RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.MATCH_PARENT, height);
         RelativeLayout.LayoutParams name_lp = new RelativeLayout.LayoutParams(
-                RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+                400, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams owe_lp = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
         RelativeLayout.LayoutParams owed_lp = new RelativeLayout.LayoutParams(
@@ -274,10 +275,10 @@ public class  HomeFragment extends Fragment {
         name_lp.setMarginStart(dpToPx(10));  // margin_start 10dp
         owe_lp.addRule(RelativeLayout.ALIGN_PARENT_START);
         owe_lp.addRule(RelativeLayout.CENTER_VERTICAL);
-        owe_lp.setMarginStart(dpToPx(146));   // margin_start 146dp
+        owe_lp.setMarginStart(dpToPx(135));   // margin_start 135dp
         owed_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
         owed_lp.addRule(RelativeLayout.CENTER_VERTICAL);
-        owed_lp.setMarginEnd(dpToPx(130));   // margin_end 130dp
+        owed_lp.setMarginEnd(dpToPx(125));   // margin_end 125dp
         date_lp.addRule(RelativeLayout.ALIGN_PARENT_END);
         date_lp.addRule(RelativeLayout.CENTER_VERTICAL);
         date_lp.setMarginEnd(dpToPx(20));   // margin_end 20dp
@@ -340,7 +341,7 @@ public class  HomeFragment extends Fragment {
                     } else {
                         Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
                         Double total = prev + p.getmAmount();
-                        oweAmtTextView.setText("$" + total.toString());
+                        oweAmtTextView.setText("$" + String.format(Locale.ENGLISH,"%.2f", total));
                     }
                     relativeLayout.addView(oweAmtTextView, 1);
                 } else {
@@ -353,7 +354,7 @@ public class  HomeFragment extends Fragment {
                     } else {
                         Double prev = Double.parseDouble(previousAmt.substring(1));  // remove the '$'
                         Double total = prev + p.getmAmount();
-                        owedAmtTextView.setText("$" + total.toString());
+                        owedAmtTextView.setText("$" + String.format(Locale.ENGLISH, "%.2f", total));
                     }
                     relativeLayout.addView(owedAmtTextView, 2);
                 }
