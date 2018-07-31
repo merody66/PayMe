@@ -119,7 +119,7 @@ public class AccountSettingsFragment extends Fragment {
         logoutLbl = view.findViewById(R.id.logoutLbl);
 
         ((MainActivity) getActivity()).setActionBarTitle("Account Settings");
-
+        profilePicURL = "";
         loadAccountDetails();
 
         chngProfilePicLbl.setOnClickListener(new View.OnClickListener() {

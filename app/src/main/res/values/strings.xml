@@ -10,6 +10,9 @@
     <string name="credit">Cr(+)</string>
     <string name="title_activity_add_receipt">AddReceipt</string>
 
+    <!--LoginActivity-->
+    <string name="dialog_title">Complete Registration</string>
+
     <!--BottonNavigationView-->
     <string name="title_home">Home</string>
     <string name="title_history">History</string>

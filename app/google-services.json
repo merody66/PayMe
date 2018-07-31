@@ -23,8 +23,12 @@
           }
         },
         {
-          "client_id": "25682984659-e7kavds2kvmqb885jav0fdha3i673m6n.apps.googleusercontent.com",
-          "client_type": 3
+          "client_id": "25682984659-t7khpv6q8cmr67ne4eu2foljs8l0c4h7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.user.payme",
+            "certificate_hash": "a182d9d6c78ebcf4e79400537f80d10c9ee16be2"
+          }
         },
         {
           "client_id": "25682984659-e7kavds2kvmqb885jav0fdha3i673m6n.apps.googleusercontent.com",
@@ -44,7 +48,7 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "25682984659-e7kavds2kvmqb885jav0fdha3i673m6n.apps.googleusercontent.com",
+              "client_id": "25682984659-bfdd88u7qpsvgskk4sgoss3lqn9toqti.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
