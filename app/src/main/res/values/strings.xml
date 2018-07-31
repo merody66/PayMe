@@ -42,6 +42,8 @@
     <string name="_service_charge">10% Service Charge</string>
     <string name="subtotal">Subtotal</string>
     <string name="done">Done</string>
+    <string name="defaultValue_shopname">Shopname</string>
+    <string name="defaultValue_money">0</string>
 
     <!--Edit Receipt-->
     <string name="item_name">Item name</string>

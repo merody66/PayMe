@@ -1,10 +1,12 @@
 package com.example.user.payme;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -40,8 +42,10 @@ import com.google.firebase.database.ValueEventListener;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 
 public class AddReceiptActivity extends AppCompatActivity {
@@ -57,6 +61,7 @@ public class AddReceiptActivity extends AppCompatActivity {
     private ImageButton mGallery;
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
+    private String imagePath;
 
     private Fragment fragment;
 
@@ -151,12 +156,13 @@ public class AddReceiptActivity extends AppCompatActivity {
 
                         if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                                 Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
+                            Log.e(TAG, "surfaceCreated: ASKING CAMERA PERMISSION");
                             ActivityCompat.requestPermissions(AddReceiptActivity.this,
                                     new String[]{Manifest.permission.CAMERA},
                                     REQUEST_CAMERA_ID);
                             return;
                         }
+
                         mCameraSource.start(mCameraView.getHolder());
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -188,51 +194,23 @@ public class AddReceiptActivity extends AppCompatActivity {
         }
     }
 
-    private String getPhotoTime(){
-        SimpleDateFormat sdf=new SimpleDateFormat("ddMMyy_hhmmss");
-        return sdf.format(new Date());
-    }
-
     // Callback for 'takePicture'
     CameraSource.PictureCallback pictureCallback = new CameraSource.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] bytes) {
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(AddReceiptActivity.this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    WRITE_EXTERNAL_ID);
-
-            try {
-                String mainpath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe";
-                File basePath = new File(mainpath);
-                if (!basePath.exists())
-                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success": "Failed");
-                File captureFile = new File(mainpath + "/receipt_" + getPhotoTime() + ".jpg");
-                if (!captureFile.exists())
-                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
-
-                Log.d(TAG, "onPictureTaken: " + captureFile);
-                FileOutputStream stream = new FileOutputStream(captureFile);
-                stream.write(bytes);
-                stream.flush();
-                stream.close();
-                Toast.makeText(getApplicationContext(),"Successfully saved at: "+ captureFile.toString(),Toast.LENGTH_LONG).show();
-
-
-                Intent intent = new Intent(AddReceiptActivity.this, ChooseContactActivity.class);
-                Log.d(TAG, "onPictureTaken: imagepath "+captureFile.toString());
-
-                // mSharedPreferences for camera
-                mEditor = mSharedPreferences.edit();
-                mEditor.putString("imagePath",captureFile.toString());
-                mEditor.commit();
-
-                startActivity(intent);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (Exception exception) {
-                    Toast.makeText(getApplicationContext(),"Error saving: "+ exception.toString(),Toast.LENGTH_LONG).show();
+                Log.e(TAG, "surfaceCreated: ASKING WRITE EXTERNAL PERMISSION");
+                ActivityCompat.requestPermissions(AddReceiptActivity.this,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        WRITE_EXTERNAL_ID);
+                return;
             }
+
+
+            SavePhotoToGallery savePhotoToGallery = new SavePhotoToGallery(AddReceiptActivity.this);
+            savePhotoToGallery.execute(bytes);
         }
     };
 
@@ -343,8 +321,6 @@ public class AddReceiptActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mCameraSource.takePicture(null, pictureCallback);
-//                mCameraSource.stop();
-
             }
         });
 
@@ -354,5 +330,73 @@ public class AddReceiptActivity extends AppCompatActivity {
                 openGallery();
             }
         });
+    }
+
+    private static class SavePhotoToGallery extends AsyncTask<byte[] , Void, String> {
+        private final WeakReference<Activity> weakActivity;
+
+        SavePhotoToGallery(Activity weakActivity) {
+            this.weakActivity = new WeakReference<>(weakActivity);
+        }
+
+        @Override
+        protected String doInBackground(byte[]... params) {
+            try {
+                Log.d(TAG, "doInBackground: START");
+                byte[] bytes = params[0];
+
+                String mainpath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe";
+                File basePath = new File(mainpath);
+                if (!basePath.exists()) {
+                    Log.d("CAPTURE_BASE_PATH", basePath.mkdirs() ? "Success": "Failed");
+                }
+
+                SimpleDateFormat sdf = new SimpleDateFormat("ddMMyy_hhmmss", Locale.ENGLISH);
+                String date = sdf.format(new Date());
+
+                File captureFile = new File(mainpath + "/receipt_" + date + ".jpg");
+                if (!captureFile.exists()) {
+                    Log.d("CAPTURE_FILE_PATH", captureFile.createNewFile() ? "Success": "Failed");
+                }
+
+                FileOutputStream stream = new FileOutputStream(captureFile);
+                stream.write(bytes);
+                stream.flush();
+                stream.close();
+
+                Log.d(TAG, "onPictureTaken: imagepath "+captureFile.toString());
+
+                return captureFile.toString();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception exception) {
+                Log.e(TAG, "doInBackground: ",exception );
+                Activity activity = weakActivity.get();
+                Toast.makeText(activity.getApplicationContext(),"Error saving: "+ exception.toString(),Toast.LENGTH_LONG).show();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            Log.d(TAG, "onPostExecute: DONEEE imagepath "+result);
+
+            if (result != null) {
+                Activity activity = weakActivity.get();
+
+                // mSharedPreferences for camera
+                SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
+                        SharedPreferences.Editor mEditor;
+                mEditor = mSharedPreferences.edit();
+                mEditor.putString("imagePath",result);
+                mEditor.apply();
+
+                Intent intent = new Intent(activity, ChooseContactActivity.class);
+                activity.startActivity(intent);
+            }
+
+        }
     }
 }

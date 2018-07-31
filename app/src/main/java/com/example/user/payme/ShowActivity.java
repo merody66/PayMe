@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -74,7 +75,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
     private Bitmap myBitmap;
-    private ArrayList<ReceiptItem> updatedItemList;
+    private ArrayList<ReceiptItem> mUpdatedItemList;
 
     private ReceiptArrayAdapter adapter;
     private Receipt receipt;
@@ -136,9 +137,12 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         // initialise all basic values
         SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
         mDate = sdf.format(new Date());
+        tvDate.setText(mDate);
+
         mSubtotalAmt = "";
         mServiceChargeAmt = "";
         mGstAmt = "";
+        mUpdatedItemList = new ArrayList<>();
 
         // Get contacts from intent
         ArrayList<Contact> contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contacts");
@@ -155,8 +159,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             mEditor = mSharedPreferences.edit();
             String imagePath = mSharedPreferences.getString("imagePath", "default nothing");
             Log.d(TAG, "onCreate: from sp "+imagePath);
-            Context mContext = getApplicationContext();
-            myBitmap = new Image(mContext, imagePath).getmBitmap();
+            myBitmap = new Image(this, imagePath).getmBitmap();
 
             if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                     Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -167,8 +170,10 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                 return;
             }
 
+            initRecyclerView();
+
             Log.d(TAG, "onCreate: started ProcessOCR");
-            ProcessOCR();
+            new ProcessOcrAsync().execute();
         } else {
             Log.d(TAG, "onCreate: CAME BACK FROM EDITRECEIPT");
             resetContactSelected();
@@ -178,7 +183,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             mServiceChargeAmt = receipt.getmServiceChargeAmt();
             mGstAmt = receipt.getmGstAmt();
             mDate = receipt.getmDate();
-            updatedItemList = receipt.getmItemList();
+            mUpdatedItemList = receipt.getmItemList();
 
             runOnUiThread(new Runnable() {
                 public void run() {
@@ -217,7 +222,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         tvServiceChargeAmt.setText(mServiceChargeAmt);
         tvGstAmt.setText(mGstAmt);
 
-        adapter = new ReceiptArrayAdapter(this, updatedItemList);
+        adapter = new ReceiptArrayAdapter(this, mUpdatedItemList);
 
         // Set user as the first user.
         adapter.setCurrentChooseUser("You");
@@ -262,46 +267,41 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         Intent intent = new Intent(ShowActivity.this, EditReceiptActivity.class);
         intent.putExtra("shopname", mShopname);
         intent.putExtra("date", mDate);
-        intent.putExtra("itemList",updatedItemList);
+        intent.putExtra("itemList", mUpdatedItemList);
         intent.putExtra("Contacts", mContacts);
         startActivity(intent);
         finish();
     }
 
     private ArrayList<Text> findPrice(SparseArray<TextBlock> items) {
-        Log.d(TAG, "ProcessOCR: finding xx.xx");
         ArrayList<Text> priceArray = new ArrayList<>();
         Pattern datePattern = Pattern.compile("(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\\d\\d");
 
-        runOnUiThread(new Runnable() {
-            public void run() {
-                int leastTop = Integer.MAX_VALUE;
+        int leastTop = Integer.MAX_VALUE;
 
-                for (int i = 0; i < items.size(); i++) {
-                    TextBlock item = items.valueAt(i);
-                    List<? extends Text> textComponents = item.getComponents();
-                    for (Text currentText : textComponents) {
-                        Log.d(TAG, "run: item "+ currentText.getValue());
-                        Matcher dateMatcher = datePattern.matcher(currentText.getValue());
-                        int currentTop = currentText.getBoundingBox().top;
+        for (int i = 0; i < items.size(); i++) {
+            TextBlock item = items.valueAt(i);
+            List<? extends Text> textComponents = item.getComponents();
+            for (Text currentText : textComponents) {
+                Log.d(TAG, "run: item "+ currentText.getValue());
+                Matcher dateMatcher = datePattern.matcher(currentText.getValue());
+                int currentTop = currentText.getBoundingBox().top;
 
-                        // Find shopname which is located at the top row
-                        if (currentTop < leastTop) {
-                            leastTop = currentTop;
-                            mShopname = currentText.getValue();
-                        }
+                // Find shopname which is located at the top row
+                if (currentTop < leastTop) {
+                    leastTop = currentTop;
+                    mShopname = currentText.getValue();
+                }
 
-                        // Find and add all price format [Text]
-                        if (currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}")) {
-                            Log.d(TAG, "run: found "+currentText.getValue());
-                            priceArray.add(currentText);
-                        } else if (dateMatcher.find()) {
-                            mDate = dateMatcher.group(0);
-                        }
-                    }
+                // Find and add all price format [Text]
+                if (currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}")) {
+                    Log.d(TAG, "run: found "+currentText.getValue());
+                    priceArray.add(currentText);
+                } else if (dateMatcher.find()) {
+                    mDate = dateMatcher.group(0);
                 }
             }
-        });
+        }
 
         return priceArray;
     }
@@ -309,49 +309,46 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
     private ArrayList<ReceiptItem> findLeftItem(SparseArray<TextBlock> items, ArrayList<Text> priceArray) {
         ArrayList<ReceiptItem> mItemList = new ArrayList<>();
 
-        runOnUiThread(new Runnable() {
-                public void run() {
-                String[] menuArray = new String[2];
-                ReceiptItem receiptItem;
+        String[] menuArray = new String[2];
+        ReceiptItem receiptItem;
 
-                ArrayList<String> foundItem = new ArrayList<>();
-                for (int y = 0; y < priceArray.size(); y++) {
-                    Text priceItem = priceArray.get(y);
-                    float priceLeft = priceItem.getBoundingBox().left;
-                    float priceBottom = priceItem.getBoundingBox().bottom;
+        ArrayList<String> foundItem = new ArrayList<>();
+        for (int y = 0; y < priceArray.size(); y++) {
+            Text priceItem = priceArray.get(y);
+            float priceLeft = priceItem.getBoundingBox().left;
+            float priceBottom = priceItem.getBoundingBox().bottom;
 
 //                    Log.d(TAG, "run: price "+ priceItem.getValue()+" bounding box: "+priceItem.getBoundingBox().toString());
-                    for (int i = 0; i < items.size(); i++) {
-                        TextBlock item = items.valueAt(i);
-                        List<? extends Text> textComponents = item.getComponents();
+            for (int i = 0; i < items.size(); i++) {
+                TextBlock item = items.valueAt(i);
+                List<? extends Text> textComponents = item.getComponents();
 
-                        for (Text currentText : textComponents) {
-                            float itemLeft = currentText.getBoundingBox().left;
-                            float itemBottom = currentText.getBoundingBox().bottom;
+                for (Text currentText : textComponents) {
+                    float itemLeft = currentText.getBoundingBox().left;
+                    float itemBottom = currentText.getBoundingBox().bottom;
 
-//                            Log.d(TAG, "run: item "+ currentText.getValue()+" bounding box "+ currentText.getBoundingBox().toString());
-                            if (priceItem != currentText && (priceLeft - itemLeft) > 0) { //skip itself and those in roughly around the same column
-                                if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
-                                    if (!foundItem.contains(currentText.getValue())) {
-                                        Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
-                                        menuArray[0] = currentText.getValue();
-                                        menuArray[1] = priceItem.getValue();
-                                        menuList.add(menuArray);
-                                        menuArray = new String[2];
+//                    Log.d(TAG, "run: item "+ currentText.getValue()+" bounding box "+ currentText.getBoundingBox().toString());
+                    if (!currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}") && (priceLeft - itemLeft) > 0) { //skip all price item and those in roughly around the same column
+                        if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
+                            if (!foundItem.contains(currentText.getValue())) { // Skip those item that have already been found before
+                                Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
+                                menuArray[0] = currentText.getValue();
+                                menuArray[1] = priceItem.getValue();
+                                menuList.add(menuArray);
+                                menuArray = new String[2];
 
-                                        receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
-                                        mItemList.add(receiptItem);
-                                        foundItem.add(currentText.getValue());
-                                        break;
-                                    }
-                                }
+                                receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
+                                mItemList.add(receiptItem);
+                                foundItem.add(currentText.getValue());
+                                break;
                             }
-
                         }
                     }
+
                 }
             }
-        });
+        }
+
         return mItemList;
     }
 
@@ -394,8 +391,8 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             ArrayList<ReceiptItem> mItemList = findLeftItem(items, priceArray);
 
             Log.d(TAG, "ProcessOCR: finding those 3 values");
-            updatedItemList = new ArrayList<>();
-            updatedItemList.addAll(mItemList);
+            mUpdatedItemList = new ArrayList<>();
+            mUpdatedItemList.addAll(mItemList);
             boolean foundBreak = false;
 
             // Combined pattern to search for subtotel, gst and service charge.
@@ -420,7 +417,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                         Log.d(TAG, "ProcessOCR: WRONG NUMBER FORMAT");
                     }
                 } else {
-                    updatedItemList.remove(mItemList.get(i));
+                    mUpdatedItemList.remove(mItemList.get(i));
                 }
             }
 
@@ -431,25 +428,39 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
             mServiceChargeAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.1);
             mGstAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.07);
 
-            receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
-
-            initReceipt();
-            initRecyclerView();
-
-            Log.d(TAG, "ProcessOCR: after setadapter");
+            receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, mUpdatedItemList);
         }
 
-        if (updatedItemList.isEmpty()){
-            AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
-            builder.setMessage("Unable to detect any item/price text, please enter your own item details")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            sendUserToEdit();
-                        }
-                    });
+        
+    }
 
-            AlertDialog alert = builder.create();
-            alert.show();
+    private class ProcessOcrAsync extends AsyncTask<Bitmap , Void, String> {
+
+        @Override
+        protected String doInBackground(Bitmap... bitmaps) {
+            Log.d(TAG, "doInBackground: START ASYNCTASK");
+            ProcessOCR();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (mUpdatedItemList.isEmpty()){
+                AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
+                builder.setMessage("Unable to detect any item/price text, please enter your own item details")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                sendUserToEdit();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            } else {
+                initReceipt();
+
+                Log.d(TAG, "ProcessOCR: after setadapter");
+            }
         }
     }
 
