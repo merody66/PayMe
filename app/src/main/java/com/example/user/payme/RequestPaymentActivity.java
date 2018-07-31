@@ -178,7 +178,11 @@ public class RequestPaymentActivity extends AppCompatActivity {
                                 builder.setMessage("Requested Successfully")
                                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-                                                startActivity(new Intent(RequestPaymentActivity.this, MainActivity.class));
+                                                Intent intent = new Intent(RequestPaymentActivity.this, MainActivity.class);
+                                                //Clear all previous activities and set MainActivity to be the root
+                                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                                startActivity(intent);
+
                                                 // End the activity
                                                 finish();
                                             }
