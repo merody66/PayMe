@@ -124,7 +124,6 @@ public class EditReceiptActivity extends AppCompatActivity {
 
                 Intent intent = new Intent(EditReceiptActivity.this, ShowActivity.class);
                 Receipt receipt = new Receipt(shopname, date, gstAmt, serviceChargeAmt, subtotalAmt, receiptItems);
-//                intent.putExtra("updatedReceipt")
                 intent.putExtra("from_activity", "EditReceiptActivity");
                 intent.putExtra("receipt", receipt);
                 intent.putExtra("Contacts",contacts);
