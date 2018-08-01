@@ -56,7 +56,6 @@ import java.util.regex.Pattern;
 public class ShowActivity extends AppCompatActivity implements OnImageClickListener {
     private static final String TAG = "ShowActivity";
     private static final int readPermissionID = 103;
-    private ArrayList<String[]> menuList = new ArrayList<>();
     private ListView mListView;
     private RecyclerView mRecyclerView;
     private HorizontalRecyclerViewAdapter contactAdapter;
@@ -309,39 +308,37 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
 
     private ArrayList<ReceiptItem> findLeftItem(SparseArray<TextBlock> items, ArrayList<Text> priceArray) {
         ArrayList<ReceiptItem> mItemList = new ArrayList<>();
-
-        String[] menuArray = new String[2];
-        ReceiptItem receiptItem;
-
         ArrayList<String> foundItem = new ArrayList<>();
+        ReceiptItem receiptItem;
+        String itemName;
+
+        OUTER_MOST_LOOP:
         for (int y = 0; y < priceArray.size(); y++) {
             Text priceItem = priceArray.get(y);
             float priceLeft = priceItem.getBoundingBox().left;
             float priceBottom = priceItem.getBoundingBox().bottom;
 
-//                    Log.d(TAG, "run: price "+ priceItem.getValue()+" bounding box: "+priceItem.getBoundingBox().toString());
             for (int i = 0; i < items.size(); i++) {
                 TextBlock item = items.valueAt(i);
                 List<? extends Text> textComponents = item.getComponents();
 
+//                Log.d(TAG, "run: price "+ priceItem.getValue()+" bounding box: "+priceItem.getBoundingBox().toString());
                 for (Text currentText : textComponents) {
                     float itemLeft = currentText.getBoundingBox().left;
                     float itemBottom = currentText.getBoundingBox().bottom;
 
 //                    Log.d(TAG, "run: item "+ currentText.getValue()+" bounding box "+ currentText.getBoundingBox().toString());
                     if (!currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}") && (priceLeft - itemLeft) > 0) { //skip all price item and those in roughly around the same column
-                        if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
-                            if (!foundItem.contains(currentText.getValue())) { // Skip those item that have already been found before
-                                Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
-                                menuArray[0] = currentText.getValue();
-                                menuArray[1] = priceItem.getValue();
-                                menuList.add(menuArray);
-                                menuArray = new String[2];
+                        if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom/1.035 <= itemBottom <= priceBottom*1.035
+                            itemName = currentText.getValue();
 
-                                receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
+                            if (!foundItem.contains(itemName)) { // Skip those item that have already been found before
+                                Log.d(TAG, "run again: " + itemName + "     " + priceItem.getValue() + "\n");
+
+                                receiptItem = new ReceiptItem(itemName, priceItem.getValue().replaceFirst("\\$", ""));
                                 mItemList.add(receiptItem);
-                                foundItem.add(currentText.getValue());
-                                break;
+                                foundItem.add(itemName);
+                                continue OUTER_MOST_LOOP;
                             }
                         }
                     }

@@ -7,9 +7,9 @@
 
     <EditText
         android:id="@+id/etItemName"
-        android:layout_width="230dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="12dp"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/nunito"
         android:hint="@string/item_name"
@@ -17,6 +17,8 @@
         android:textSize="12sp"
         android:typeface="normal"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/etItemPrice"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -24,23 +26,26 @@
         android:id="@+id/etItemPrice"
         android:layout_width="58dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
         android:fontFamily="@font/nunito"
         android:hint="@string/item_price"
         android:inputType="number|numberDecimal"
         android:textSize="12sp"
         android:typeface="normal"
         app:layout_constraintBaseline_toBaselineOf="@+id/etItemName"
+        app:layout_constraintEnd_toStartOf="@+id/delete_button"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/etItemName" />
 
     <Button
         android:id="@+id/delete_button"
         android:layout_width="26dp"
         android:layout_height="26dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="12dp"
         android:background="@mipmap/delete"
         android:onClick="onDelete"
         app:layout_constraintBaseline_toBaselineOf="@+id/etItemPrice"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/etItemPrice" />
 
 </android.support.constraint.ConstraintLayout>
