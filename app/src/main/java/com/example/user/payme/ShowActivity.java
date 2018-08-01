@@ -105,6 +105,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
                     intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
                     break;
             }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
             return true;
@@ -138,7 +139,7 @@ public class ShowActivity extends AppCompatActivity implements OnImageClickListe
         SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
         mDate = sdf.format(new Date());
         tvDate.setText(mDate);
-
+        mShopname = "";
         mSubtotalAmt = "";
         mServiceChargeAmt = "";
         mGstAmt = "";
