@@ -13,7 +13,6 @@ import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -61,9 +60,7 @@ public class AddReceiptActivity extends AppCompatActivity {
     private ImageButton mGallery;
     private SharedPreferences mSharedPreferences;
     private SharedPreferences.Editor mEditor;
-    private String imagePath;
-
-    private Fragment fragment;
+    private byte[] mBytes;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -87,6 +84,7 @@ public class AddReceiptActivity extends AppCompatActivity {
                     intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
                     break;
             }
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);
             finish();
             return true;
@@ -95,7 +93,6 @@ public class AddReceiptActivity extends AppCompatActivity {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Log.d(TAG, "onRequestPermissionsResult: "+grantResults);
         switch (requestCode) {
             case REQUEST_CAMERA_ID: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -108,21 +105,27 @@ public class AddReceiptActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+                break;
             }
             case WRITE_EXTERNAL_ID: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
+                    SavePhotoToGallery savePhotoToGallery = new SavePhotoToGallery(AddReceiptActivity.this);
+                    savePhotoToGallery.execute(mBytes);
                 }
+                break;
             }
             case READ_EXTERNAL_ID: {
+                Log.e(TAG, "onRequestPermissionsResult: COME IN WRONG PLACE READEXTERNAL" );
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
                     openGallery();
                 }
+                break;
             }
 
         }
@@ -198,6 +201,8 @@ public class AddReceiptActivity extends AppCompatActivity {
     CameraSource.PictureCallback pictureCallback = new CameraSource.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] bytes) {
+            mBytes = bytes;
+
             if (ActivityCompat.checkSelfPermission(getApplicationContext(),
                     Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
 
@@ -207,7 +212,6 @@ public class AddReceiptActivity extends AppCompatActivity {
                         WRITE_EXTERNAL_ID);
                 return;
             }
-
 
             SavePhotoToGallery savePhotoToGallery = new SavePhotoToGallery(AddReceiptActivity.this);
             savePhotoToGallery.execute(bytes);
