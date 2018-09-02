@@ -1,5 +1,6 @@
 package com.example.user.payme;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -22,6 +23,7 @@ import java.util.Random;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "MyFirebaseMessagingServ";
+    private static final String GROUP_KEY = "payme.GROUP_NOTIFICATION";
 
     public MyFirebaseMessagingService() {}
 
@@ -83,15 +85,28 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 PendingIntent.FLAG_ONE_SHOT);
 
         String channelId = getString(R.string.default_notification_channel_id);
+        int summaryId = Integer.parseInt(getString(R.string.default_summary_id));
         Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-        NotificationCompat.Builder notificationBuilder =
+        Notification notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(R.drawable.payme_launcher)
                         .setContentTitle(title)
                         .setContentText(messageBody)
+                        .setGroup(GROUP_KEY)
                         .setAutoCancel(true)
                         .setSound(defaultSoundUri)
-                        .setContentIntent(pendingIntent);
+                        .setContentIntent(pendingIntent)
+                        .build();
+
+        Notification summaryNotification =
+                new NotificationCompat.Builder(this, channelId)
+                        .setContentText("")
+                        .setSmallIcon(R.drawable.payme_launcher)
+                        .setStyle(new NotificationCompat.InboxStyle()
+                            .addLine(messageBody))
+                        .setGroup(GROUP_KEY)
+                        .setGroupSummary(true)
+                        .build();
 
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -99,7 +114,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // Since android Oreo notification channel is needed.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(channelId,
-                    "Channel human readable title",
+                    "Default channel",
                     NotificationManager.IMPORTANCE_DEFAULT);
             notificationManager.createNotificationChannel(channel);
         }
@@ -108,6 +123,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         int ran = random.nextInt(9999 - 1000) + 1000;
 
         // Must include a random number else it will override any existing notification.
-        notificationManager.notify(ran, notificationBuilder.build());
+        notificationManager.notify(ran, notificationBuilder); //single individual notification
+        notificationManager.notify(summaryId, summaryNotification);
     }
 }
