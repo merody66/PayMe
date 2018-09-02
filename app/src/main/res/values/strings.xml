@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">PayMe</string>
-    <string name="google_web_client_id">25682984659-bfdd88u7qpsvgskk4sgoss3lqn9toqti.apps.googleusercontent.com</string>
+    <string name="google_web_client_id">25682984659-5q5gc3mjsgqg5pq1tv16mc5k48re72gi.apps.googleusercontent.com</string>
 
     <!--MainActivity-->
     <string name="pending">Pending</string>
@@ -79,10 +79,13 @@
     <string name="log_out">Log out</string>
     <string name="total">Total</string>
 
-
     <!-- ChangePasswordFragment-->
     <string name="chng_password">Change Password</string>
     <string name="old_password">Old Password</string>
     <string name="new_password">New Password</string>
     <string name="confirm_password">Confirm Password</string>
+
+    <!--MyFirebaseMessagingService-->
+    <string name="default_notification_channel_id">default</string>
+    <string name="default_summary_id">123</string>
 </resources>

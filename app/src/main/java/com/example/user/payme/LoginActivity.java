@@ -31,6 +31,8 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -127,6 +129,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Check if user is signed in
         FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
+            saveToken();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }
@@ -148,6 +151,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                 if (task.isSuccessful()) {
                     FirebaseUser user = auth.getCurrentUser();
                     if (user.isEmailVerified()) {
+                        saveToken();
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
@@ -186,6 +190,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            Log.e(TAG, "onActivityResult: result "+result.getStatus());
             if (result.isSuccess()) {
                 // Google sign-in was successful, proceed to authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
@@ -259,6 +264,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                             // Save user details into Firebase
                             User newUser = new User(name, phone, email);
                             ref.child("users").child(userId).setValue(newUser);
+                            saveToken();
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
                             finish();
                         }
@@ -280,4 +286,22 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         dialogOn = true;
     }
 
+    private void saveToken() {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+
+                        Log.d(TAG, "token: "+token);
+                        new MyFirebaseMessagingService(token);
+                    }
+                });
+    }
 }
