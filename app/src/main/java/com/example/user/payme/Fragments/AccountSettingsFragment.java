@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -61,6 +63,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * to handle interaction events.
  */
 public class AccountSettingsFragment extends Fragment {
+
+    private static final String TAG = "AccountSettingsFragment";
 
     private OnFragmentInteractionListener mListener;
 
@@ -265,7 +269,23 @@ public class AccountSettingsFragment extends Fragment {
                 new OnCompleteListener<Void>() {  // Google auth sign out
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        // Remove token from user, to prevent 2 different user from sharing the same token
+                        FirebaseUser currentUser = auth.getCurrentUser();
+                        String userId = currentUser.getUid();
+                        dbRef.child("users").child(userId).child("token").removeValue();
+
                         FirebaseAuth.getInstance().signOut(); // Firebase auth sign out
+
+                        // Clear all sharedpreferences
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.clear();
+                        editor.commit();
+
+                        // Add back onboarding
+                        editor.putBoolean("OnBoarding", true);
+                        editor.commit();
+                        
                         Intent loginIntent = new Intent(getContext(), LoginActivity.class);
                         loginIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(loginIntent);

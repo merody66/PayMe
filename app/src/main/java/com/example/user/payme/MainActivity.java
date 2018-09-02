@@ -77,8 +77,6 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
                 });
     }
 
-
-
     private void startFragment(){
         int requestCode = getIntent().getIntExtra("startFragment", 0);
         Log.e(TAG, "startFragment: "+requestCode);
@@ -106,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnFragmentInterac
 
         // Check if user is signed in
         FirebaseUser currentUser = auth.getCurrentUser();
-        System.out.println(currentUser);
+        Log.d(TAG, "onStart: currentUser "+currentUser+" uid "+currentUser.getUid());
         if (currentUser == null) {
             Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
             startActivity(loginIntent);
