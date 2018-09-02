@@ -59,6 +59,8 @@ public class ResetPasswordActivity extends AppCompatActivity {
                                     });
                             AlertDialog alert = builder.create();
                             alert.show();
+                        } else {
+                            Log.e("Reset Password", task.getException().toString());
                         }
                     }
                 });
