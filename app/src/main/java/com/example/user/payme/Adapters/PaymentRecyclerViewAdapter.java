@@ -45,6 +45,7 @@ public class PaymentRecyclerViewAdapter extends RecyclerView.Adapter<PaymentRecy
         Payment p = mPayments.get(position);
 
         String name = p.getmName();
+        String number = p.getmNumber();
         String date = p.getmDate();
         Double amount = p.getmAmount();
         String receiptIDs = p.getmReceiptID();
@@ -64,6 +65,7 @@ public class PaymentRecyclerViewAdapter extends RecyclerView.Adapter<PaymentRecy
                 Fragment fragment = new SettlePaymentFragment();
                 Bundle bundle = new Bundle();
                 bundle.putString("NAME", name);
+                bundle.putString("NUMBER", number);
                 bundle.putString("DATE", date);
                 bundle.putDouble("TOTAL_AMOUNT", amount);
                 bundle.putString("PAYMENT_STATUS", p.getmStatus());

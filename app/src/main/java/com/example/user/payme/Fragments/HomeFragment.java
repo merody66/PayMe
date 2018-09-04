@@ -83,8 +83,6 @@ public class  HomeFragment extends Fragment {
         user = auth.getCurrentUser();
         userId = user.getUid();
 
-        pendingPayments = new ArrayList<>();
-        completedPayments = new ArrayList<>();
     }
 
     @Override
@@ -110,8 +108,6 @@ public class  HomeFragment extends Fragment {
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(parentContext,
                 llm.getOrientation());
         paymentsList.addItemDecoration(dividerItemDecoration);
-        pdgPaymentsAdapter = new PaymentRecyclerViewAdapter(parentContext, pendingPayments);
-        paymentsList.setAdapter(pdgPaymentsAdapter);
 
         // Retrieve the payments for this user from db into the respective array lists
         // and display pending payments
@@ -169,6 +165,7 @@ public class  HomeFragment extends Fragment {
 
 
     private void GetPendingPayments() {
+        pendingPayments = new ArrayList<>();
         ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -183,13 +180,16 @@ public class  HomeFragment extends Fragment {
                                 Iterable<DataSnapshot> payments = querySnapshot.getChildren();
                                 for (DataSnapshot payment : payments) {
                                     Payment p = payment.getValue(Payment.class);
+                                    if (p.getmType().equals("owe")) {  // if it is an owe amount
+                                        p.setmAmount(p.getmAmount() * -1);
+                                    }
                                     if (!pendingPayments.contains(p)) {
                                         pendingPayments.add(p);
                                     } else {  // if payment with same name & date is in arraylist
                                         int index = pendingPayments.indexOf(p);
                                         Payment p2 = pendingPayments.get(index);   // old payment
                                         pendingPayments.remove(index);
-                                        updatePayments(p2, p);
+                                        updatePayments(p2, p, pendingPayments);
                                     }
                                 }
                                 Collections.sort(pendingPayments, (p1, p2) ->
@@ -212,6 +212,7 @@ public class  HomeFragment extends Fragment {
     }
 
     private void GetCompletedPayments() {
+        completedPayments = new ArrayList<>();
         ref.child("users").child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
@@ -226,12 +227,22 @@ public class  HomeFragment extends Fragment {
                                 Iterable<DataSnapshot> payments = querySnapshot.getChildren();
                                 for (DataSnapshot payment : payments) {
                                     Payment p = payment.getValue(Payment.class);
-                                    completedPayments.add(p);
+
+                                    if (p.getmType().equals("owe")) {  // if it is an owe amount
+                                        p.setmAmount(p.getmAmount() * -1);
+                                    }
+                                    if (!completedPayments.contains(p)) {
+                                        completedPayments.add(p);
+                                    } else {  // if payment with same name & date is in arraylist
+                                        int index = completedPayments.indexOf(p);
+                                        Payment p2 = completedPayments.get(index);   // old payment
+                                        completedPayments.remove(index);
+                                        updatePayments(p2, p, completedPayments);
+                                    }
                                 }
                                 Collections.sort(completedPayments, (p1, p2) ->
                                         p1.getmAmount().compareTo(p2.getmAmount()));
                                 comPaymentsAdapter = new PaymentRecyclerViewAdapter(parentContext, completedPayments);
-                                paymentsList.setAdapter(comPaymentsAdapter);
                             }
                         }
 
@@ -258,14 +269,14 @@ public class  HomeFragment extends Fragment {
         paymentsList.setAdapter(comPaymentsAdapter);
     }
 
-    private void updatePayments(Payment p1, Payment p2) {
+    private void updatePayments(Payment p1, Payment p2, ArrayList<Payment> al) {
         // p1 is the old payment already in the list, p2 is to update into p1's amount.
         Double prevAmt = p1.getmAmount();
         Double newAmt = p2.getmAmount();
         String receiptIDs = p1.getmReceiptID();
         p1.setmAmount(prevAmt + newAmt);
         p1.setmReceiptID(receiptIDs + "," + p2.getmReceiptID());
-        pendingPayments.add(p1);  // add back to arraylist
+        al.add(p1);  // add back to arraylist
     }
 
 }

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.service.autofill.Dataset;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.res.ResourcesCompat;
@@ -33,6 +35,7 @@ import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Payment;
+import com.example.user.payme.Objects.User;
 import com.example.user.payme.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,9 +59,10 @@ import java.util.Map;
 public class SettlePaymentFragment extends Fragment {
 
     private static final String NAME = "NAME";
+    private static final String NUMBER = "NUMBER";
+    private static final String DATE = "DATE";
     private static final String TOTAL_AMOUNT = "TOTAL_AMOUNT";
     private static final String PAYMENT_STATUS = "PAYMENT_STATUS";
-    private static final String DATE = "DATE";
     private static final String RECEIPT_IDS = "RECEIPT_IDS";
 
     // TODO: Rename and change types of parameters
@@ -68,10 +72,12 @@ public class SettlePaymentFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private String arg_name;
+    private String arg_number;
     private String arg_date;
     private Double arg_totalAmt;
     private String arg_status;
     private String[] arg_receiptIDs;
+    private String user_number;
     private LinearLayout itemDetailsLayout;
     private TextView paymentDetails;
     private TextView nettAmount;
@@ -99,6 +105,7 @@ public class SettlePaymentFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             arg_name = getArguments().getString(NAME);
+            arg_number = getArguments().getString(NUMBER);
             arg_totalAmt = getArguments().getDouble(TOTAL_AMOUNT);
             arg_status = getArguments().getString(PAYMENT_STATUS);
             arg_date = getArguments().getString(DATE);
@@ -139,9 +146,7 @@ public class SettlePaymentFragment extends Fragment {
             payBtn.setVisibility(View.GONE);
         }
 
-        for (String id : arg_receiptIDs) {
-            processReceipt(id);
-        }
+        getUserNumberAndProcessReceipts();
 
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,6 +182,23 @@ public class SettlePaymentFragment extends Fragment {
         mListener = null;
     }
 
+    private void getUserNumberAndProcessReceipts() {
+        ref.child("users").child(userId).child("number").addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user_number = dataSnapshot.getValue().toString();
+
+                for (String id : arg_receiptIDs) {
+                    processReceipt(id);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
     private void processReceipt(String id) {
         Context context = getContext();
         Typeface fontFace = ResourcesCompat.getFont(context, R.font.nunito);
@@ -185,13 +207,13 @@ public class SettlePaymentFragment extends Fragment {
         receipt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT));
         receipt.setOrientation(LinearLayout.VERTICAL);
-        TextView receiptID = new TextView(context);
+        TextView receiptTxtView = new TextView(context);
 
         if (arg_totalAmt > 0.0) {  // search from own receipts (owed amount)
-            receiptID.setText(arg_name + "'s items for this payment:");
-            receiptID.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
-            receiptID.setTypeface(fontFace, Typeface.BOLD);
-            receipt.addView(receiptID);
+            receiptTxtView.setText(arg_name + "'s items for this payment:");
+            receiptTxtView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+            receiptTxtView.setTypeface(fontFace, Typeface.BOLD);
+            receipt.addView(receiptTxtView);
 
             ref.child("users").child(userId).child("receipts").child(id)
                     .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -224,10 +246,60 @@ public class SettlePaymentFragment extends Fragment {
             });
         } else {
             // to-do (owe amount)
-            receiptID.setText("Your items for this payment:");
-            receiptID.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
-            receiptID.setTypeface(fontFace, Typeface.BOLD);
-            receipt.addView(receiptID);
+            receiptTxtView.setText("Your items for this payment:");
+            receiptTxtView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+            receiptTxtView.setTypeface(fontFace, Typeface.BOLD);
+            receipt.addView(receiptTxtView);
+
+            Query userQuery = ref.child("users").orderByChild("number").equalTo(arg_number);
+            userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot querySnapshot) {   // query code for user
+                    if (querySnapshot.exists()) {
+                        Iterable<DataSnapshot> iterable = querySnapshot.getChildren();
+
+                        for (DataSnapshot user : iterable) {
+                            long numPayees = user.child("receipts").child(id).child("payees")
+                                    .getChildrenCount() + 1;  // num of payees
+                            Iterable<DataSnapshot> payees = user.child("receipts").child(id)
+                                    .child("payees").getChildren();
+                            Iterable<DataSnapshot> itemList = user.child("receipts").child(id)
+                                    .child("mItemList").getChildren();
+
+                            String payeeName = "";
+                            for (DataSnapshot p_ss : payees) {
+                                if (p_ss.child("mNumber").getValue().toString().equals(user_number)) {
+                                    payeeName = p_ss.child("mName").getValue().toString();
+                                }
+                            }
+
+                            for (DataSnapshot ss : itemList) {
+                                if (ss.hasChild("mBelongsTo")) {
+                                    if (ss.child("mBelongsTo").getValue().toString().equals(payeeName)) {
+                                        String itemName = ss.child("mName").getValue().toString();
+                                        String amt = ss.child("mPrice").getValue().toString();
+                                        setAddView(receipt, itemName, amt);
+                                    }
+                                } else {  // shared item
+                                    double sharedPrice = 0.0;
+                                    String itemName = ss.child("mName").getValue().toString();
+                                    itemName += " (shared)";
+                                    String amt = ss.child("mPrice").getValue().toString();
+                                    sharedPrice = Double.parseDouble(amt) / numPayees;
+                                    setAddView(receipt, itemName, String.format("%.2f", sharedPrice));
+                                }
+                            }
+                        }
+
+                        itemDetailsLayout.addView(receipt);
+
+                        //Log.d("ABC", querySnapshot.getValue().toString());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError queryError) {  }
+            });
         }
     }
 
@@ -287,9 +359,9 @@ public class SettlePaymentFragment extends Fragment {
                 @Override
                 public void onResponse(String response) {
                     if (response.contains("Successful")) {
-                        Toast.makeText(getContext(), "Payment successful.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Payment Successful.", Toast.LENGTH_LONG).show();
                     } else
-                        Toast.makeText(getContext(), "Payment failed", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Payment Failed", Toast.LENGTH_LONG).show();
                     Log.d("SEND PAYMENT DETAILS ", "Final Response: " + response.toString());
                 }
             }, new Response.ErrorListener() {
