@@ -20,7 +20,7 @@ The current trend among consumers is to use PayLah! to request payment from frie
 ### Target Audience
 
 Payer (person who paid the bill)
-Payee (person paying to someone else)
+Payee (person paying the bill footer)
 
-
-![](https://imgur.com/a/tPbOqLj)
+![alt text][screenshot]
+[screenshot]: https://imgur.com/a/tPbOqLj.png
