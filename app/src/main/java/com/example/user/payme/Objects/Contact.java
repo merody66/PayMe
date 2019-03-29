@@ -1,14 +1,35 @@
 package com.example.user.payme.Objects;
 
-public class Contact {
+import java.io.Serializable;
+
+/**
+ * Contact class to contain the following contact information:
+ *  - Name
+ *  - Profile Image Drawable
+ *  - Phone Number (From Phone Directory)
+ */
+public class Contact implements Serializable {
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;
+    private boolean isSelected;
 
+    public Contact() {
+        // Default constructor needed
+    }
+    
     public Contact(int mImageDrawable, String mName, String mPhoneNumber) {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
         this.mPhoneNumber = mPhoneNumber;
+        this.isSelected = false;
+    }
+
+    public boolean getIsSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
+
+    public void toggleSelected() {
+        this.isSelected = !isSelected;
     }
 
     public int getmImageDrawable() { return this.mImageDrawable; }
@@ -18,5 +39,23 @@ public class Contact {
     public void setmName(String mName) { this.mName = mName; }
 
     public String getmPhoneNumber() { return this.mPhoneNumber; }
-    public void setmPhoneNumber(String mPhoneNumber) { this.mPhoneNumber = mPhoneNumber; }
+    public void setmPhoneNumber(String mPhoneNumber) { this.mPhoneNumber = mPhoneNumber.trim(); }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Contact)) {
+            return false;
+        }
+
+        Contact con = (Contact) o;
+        return con.mName.equals(mName);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + mName.hashCode();
+        return hash;
+    }
 }

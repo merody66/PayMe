@@ -3,19 +3,94 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ContactsFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Fragments.ContactsFragment">
 
-
-    <TextView
-        android:id="@+id/text1"
+    <LinearLayout
+        android:id="@+id/parentLayout"
         android:layout_width="match_parent"
-        android:layout_height="381dp" />
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/contactList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:baselineAligned="false"
+            android:orientation="horizontal"
+            android:weightSum="2">
 
-    </ListView>
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
 
+                <Button
+                    android:id="@+id/contactsBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/button_tab"
+                    android:text="Contacts" />
+
+                <View
+                    android:id="@+id/contacts_selected"
+                    android:layout_width="match_parent"
+                    android:layout_height="2.5dp"
+                    android:background="@color/colorPrimary"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/groupsBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:background="@drawable/button_tab"
+                    android:text="Groups" />
+
+                <View
+                    android:id="@+id/groups_selected"
+                    android:layout_width="match_parent"
+                    android:layout_height="2.5dp"
+                    android:background="@color/colorPrimary"
+                    android:visibility="invisible" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <com.mancj.materialsearchbar.MaterialSearchBar
+            style="@style/MaterialSearchBarLight"
+            app:mt_hint="Search"
+            app:mt_placeholder="Search Contacts"
+            app:mt_maxSuggestionsCount="10"
+            app:mt_navIconEnabled="false"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Search Contacts"
+            android:id="@+id/searchBar" />
+
+
+        <!-- Apparently cannot use ScrollView with a RecyclerView within it as both views have their own scrolls,
+        conflicting each other, replacing it to NestedScrollView will work, together with setNestedScrollingEnabled(false) -->
+        <android.support.v4.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+                <LinearLayout
+                    android:id="@+id/groupContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                </LinearLayout>
+
+        </android.support.v4.widget.NestedScrollView>
+
+    </LinearLayout>
 </FrameLayout>

@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">PayMe</string>
+    <string name="google_web_client_id">25682984659-5q5gc3mjsgqg5pq1tv16mc5k48re72gi.apps.googleusercontent.com</string>
 
     <!--MainActivity-->
     <string name="pending">Pending</string>
@@ -9,6 +10,9 @@
     <string name="credit">Cr(+)</string>
     <string name="title_activity_add_receipt">AddReceipt</string>
 
+    <!--LoginActivity-->
+    <string name="dialog_title">Complete Registration</string>
+
     <!--BottonNavigationView-->
     <string name="title_home">Home</string>
     <string name="title_history">History</string>
@@ -16,12 +20,72 @@
     <string name="title_contacts">Contacts</string>
     <string name="title_account">Account</string>
 
-    <!--AddReceipt-->
+    <!--HomeFragment-->
+    <string name="col_1">Name</string>
+    <string name="col_2">Owe(-)</string>
+    <string name="col_3">Owed(+)</string>
+    <string name="col_4">Date</string>
+    <string name="home_info_msg">Great, you do not have any pending payments at the moment! \n\n
+        Keep it up! (ᵔᴥᵔ)</string>
+
+    <!-- SettlePaymentFragment-->
+    <string name="title_payment_details">Payment Details Between</string>
+    <string name="amount_owe">Total Amount Owe:</string>
+    <string name="amount_owed">Total Amount Owed:</string>
+    <string name="nett_amount">Nett Amount:</string>
+    <string name="date">Date:</string>
+
+    <!--AddReceiptActivity-->
     <string name="desc_camera">Camera</string>
     <string name="desc_gallery">Gallery</string>
+
+    <!--ShowReceipt-->
     <string name="title_activity_show_receipt">ShowReceipt</string>
+    <string name="_7_gst">7% GST</string>
+    <string name="_service_charge">10% Service Charge</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="done">Done</string>
+    <string name="defaultValue_shopname">Shopname</string>
+    <string name="defaultValue_money">0</string>
+
+    <!--Edit Receipt-->
+    <string name="item_name">Item name</string>
+    <string name="item_price">Price</string>
+    <string name="clear">Clear</string>
+    <string name="add">Add</string>
+
+    <!--AppBar-->
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="next">Next</string>
 
     <!--ContactsFragment-->
+    <string name="contacts_info_msg">Oops, it appears you do not have any groups created. \n\n
+        Groups are useful when the same contacts are often selected for receipts. \n\n
+        Tap on the options menu to start adding one!</string>
+
+    <!--AddFriendFragment & AddGroupFragment-->
     <string name="add_friend">Add Friend</string>
     <string name="add_group">Add Group</string>
+    <string name="contact_name">Contact Name</string>
+    <string name="text_hint_name">Name</string>
+    <string name="paylah_number">PayLah! Number</string>
+    <string name="group_members_msg">Add friends to the group</string>
+    <string name="add_group_btn">Done</string>
+
+    <!-- AccountSettingsFragment -->
+    <string name="chng_profile_pic">Change Profile Picture</string>
+    <string name="push_notify">Push notifications</string>
+    <string name="log_out">Log out</string>
+    <string name="total">Total</string>
+
+    <!-- ChangePasswordFragment-->
+    <string name="chng_password">Change Password</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="confirm_password">Confirm Password</string>
+
+    <!--MyFirebaseMessagingService-->
+    <string name="default_notification_channel_id">default</string>
+    <string name="default_summary_id">123</string>
 </resources>

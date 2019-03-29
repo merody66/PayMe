@@ -12,6 +12,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     android:background="@drawable/background"
     tools:context=".LoginActivity">
 
@@ -19,40 +21,32 @@
         android:id="@+id/loginBtn"
         android:layout_width="285dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="32dp"
         android:background="#19959F"
         android:text="Login"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.506"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/forgotPwdLink"
+        app:layout_constraintStart_toStartOf="@+id/forgotPwdLink"
         app:layout_constraintTop_toBottomOf="@+id/forgotPwdLink" />
 
     <Button
         android:id="@+id/signUpBtn"
         android:layout_width="285dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:background="#575555"
         android:text="Sign up for an account"
         android:textAllCaps="false"
         android:textColor="@android:color/white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/loginBtn"
+        app:layout_constraintStart_toStartOf="@+id/loginBtn"
         app:layout_constraintTop_toBottomOf="@+id/loginBtn" />
 
     <EditText
         android:id="@+id/emailTxtField"
         android:layout_width="285dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="52dp"
         android:background="@drawable/txtbackground"
         android:drawableLeft="@mipmap/mail_icon"
@@ -62,17 +56,15 @@
         android:inputType="textEmailAddress"
         android:paddingLeft="10dp"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/appLbl"
+        app:layout_constraintStart_toStartOf="@+id/appLbl"
         app:layout_constraintTop_toBottomOf="@+id/appLbl" />
 
     <EditText
         android:id="@+id/pwdTxtField"
         android:layout_width="285dp"
         android:layout_height="45dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/txtbackground"
         android:drawableLeft="@mipmap/key"
         android:drawablePadding="10dp"
@@ -81,9 +73,8 @@
         android:inputType="textPassword"
         android:paddingLeft="10dp"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.504"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/emailTxtField"
+        app:layout_constraintStart_toStartOf="@+id/emailTxtField"
         app:layout_constraintTop_toBottomOf="@+id/emailTxtField" />
 
     <TextView
@@ -92,7 +83,7 @@
         android:layout_height="80dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="92dp"
+        android:layout_marginTop="64dp"
         android:fontFamily="@font/lobstertwo"
         android:text="PayMe"
         android:textColor="@android:color/white"
@@ -108,24 +99,23 @@
         android:layout_height="18dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:text="Forgot your password?"
         android:textColor="@android:color/white"
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/pwdTxtField"
+        app:layout_constraintStart_toStartOf="@+id/pwdTxtField"
         app:layout_constraintTop_toBottomOf="@+id/pwdTxtField" />
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"
         android:layout_width="285dp"
         android:layout_height="60dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginTop="72dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.506"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/signUpBtn"
+        app:layout_constraintStart_toStartOf="@+id/signUpBtn"
         app:layout_constraintTop_toBottomOf="@+id/signUpBtn" />
 
 </android.support.constraint.ConstraintLayout>

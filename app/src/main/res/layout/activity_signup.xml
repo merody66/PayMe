@@ -15,101 +15,31 @@
         android:background="@drawable/background"
         tools:context=".SignupActivity">
 
-        <EditText
-            android:id="@+id/pwdTxtField"
-            android:layout_width="312dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:ems="10"
-            android:hint="8-16 alphanumeric with special symbols"
-            android:inputType="textPassword"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.303"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pwdLbl" />
-
-        <EditText
-            android:id="@+id/emailTxtField"
-            android:layout_width="312dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:ems="10"
-            android:hint="user@something.com"
-            android:inputType="textEmailAddress"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.303"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailLbl" />
-
         <TextView
-            android:id="@+id/emailLbl"
-            android:layout_width="113dp"
-            android:layout_height="23dp"
+            android:id="@+id/appLbl"
+            android:layout_width="177dp"
+            android:layout_height="80dp"
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            android:text="Email Address"
+            android:layout_marginTop="64dp"
+            android:fontFamily="@font/lobstertwo"
+            android:text="PayMe"
             android:textColor="@android:color/white"
-            android:textSize="18sp"
+            app:autoSizeTextType="uniform"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.109"
+            app:layout_constraintHorizontal_bias="0.502"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paylahTxtField" />
-
-        <TextView
-            android:id="@+id/pwdLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="12dp"
-            android:text="Password"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.097"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/emailTxtField" />
-
-        <TextView
-            android:id="@+id/confirmPwdLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:text="Confirm Password"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.127"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/pwdTxtField" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/nameLbl"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="32dp"
             android:layout_marginTop="36dp"
             android:text="Name"
             android:textColor="@android:color/white"
             android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.087"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/appLbl" />
 
@@ -117,8 +47,7 @@
             android:id="@+id/nameTxtField"
             android:layout_width="312dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="28dp"
             android:layout_marginTop="8dp"
             android:backgroundTint="@android:color/white"
             android:ems="10"
@@ -127,19 +56,121 @@
             android:textColor="@android:color/white"
             android:textColorHint="@android:color/white"
             android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.303"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/nameLbl" />
 
+        <TextView
+            android:id="@+id/paylahLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="PayLah! Number"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/nameLbl"
+            app:layout_constraintTop_toBottomOf="@+id/nameTxtField" />
+
+        <EditText
+            android:id="@+id/paylahTxtField"
+            android:layout_width="312dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/white"
+            android:ems="10"
+            android:hint="xxxxxxxx"
+            android:inputType="textPersonName"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/nameTxtField"
+            app:layout_constraintTop_toBottomOf="@+id/paylahLbl" />
+
+        <TextView
+            android:id="@+id/emailLbl"
+            android:layout_width="113dp"
+            android:layout_height="23dp"
+            android:layout_marginTop="16dp"
+            android:text="Email Address"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/paylahLbl"
+            app:layout_constraintTop_toBottomOf="@+id/paylahTxtField" />
+
+        <EditText
+            android:id="@+id/emailTxtField"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/white"
+            android:ems="10"
+            android:hint="user@something.com"
+            android:inputType="textEmailAddress"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/paylahTxtField"
+            app:layout_constraintTop_toBottomOf="@+id/emailLbl" />
+
+        <TextView
+            android:id="@+id/pwdLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Password"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/emailLbl"
+            app:layout_constraintTop_toBottomOf="@+id/emailTxtField" />
+
+        <EditText
+            android:id="@+id/pwdTxtField"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/white"
+            android:ems="10"
+            android:hint="8-16 alphanumeric with special symbols"
+            android:inputType="textPassword"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/emailTxtField"
+            app:layout_constraintTop_toBottomOf="@+id/pwdLbl" />
+
+        <TextView
+            android:id="@+id/confirmPwdLbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Confirm Password"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="@+id/pwdLbl"
+            app:layout_constraintTop_toBottomOf="@+id/pwdTxtField" />
+
+        <EditText
+            android:id="@+id/pwdTxtField2"
+            android:layout_width="312dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@android:color/white"
+            android:ems="10"
+            android:hint="8-16 alphanumeric with special symbols"
+            android:inputType="textPassword"
+            android:textColor="@android:color/white"
+            android:textColorHint="@android:color/white"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="@+id/pwdTxtField"
+            app:layout_constraintTop_toBottomOf="@+id/confirmPwdLbl" />
+
         <Button
             android:id="@+id/createAccBtn"
-            android:layout_width="312dp"
+            android:layout_width="0dp"
             android:layout_height="45dp"
-            android:layout_marginBottom="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="30dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="32dp"
             android:background="#575555"
             android:text="Create account"
             android:textAllCaps="false"
@@ -150,70 +181,5 @@
             app:layout_constraintTop_toBottomOf="@+id/pwdTxtField2"
             app:layout_constraintVertical_bias="0.0" />
 
-        <TextView
-            android:id="@+id/appLbl"
-            android:layout_width="177dp"
-            android:layout_height="80dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="92dp"
-            android:fontFamily="@font/lobstertwo"
-            android:text="PayMe"
-            android:textColor="@android:color/white"
-            app:autoSizeTextType="uniform"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.502"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <EditText
-            android:id="@+id/pwdTxtField2"
-            android:layout_width="312dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:ems="10"
-            android:hint="8-16 alphanumeric with special symbols"
-            android:inputType="textPassword"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.303"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/confirmPwdLbl" />
-
-        <TextView
-            android:id="@+id/paylahLbl"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:layout_marginTop="8dp"
-            android:text="PayLah! Number"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nameTxtField" />
-
-        <EditText
-            android:id="@+id/paylahTxtField"
-            android:layout_width="312dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:backgroundTint="@android:color/white"
-            android:ems="10"
-            android:hint="xxxx xxxx"
-            android:inputType="textPersonName"
-            android:textColor="@android:color/white"
-            android:textColorHint="@android:color/white"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.303"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paylahLbl" />
     </android.support.constraint.ConstraintLayout>
 </ScrollView>
