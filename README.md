@@ -1,6 +1,3 @@
-# PayMe (NUS Orbital 2018)
-
-
 ### The Proposed Level of Achievement: 
 
 Apollo 11
@@ -22,5 +19,7 @@ The current trend among consumers is to use PayLah! to request payment from frie
 
 ### Target Audience
 
-* Payer (person who paid the bill)
-* Payee (person paying to someone else)
+Payer (person who paid the bill)
+Payee (person paying to someone else)
+
+![PayMe Screenshot](https://imgur.com/a/tPbOqLj)
