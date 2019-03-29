@@ -22,4 +22,5 @@ The current trend among consumers is to use PayLah! to request payment from frie
 Payer (person who paid the bill)
 Payee (person paying to someone else)
 
-![PayMe Screenshot](https://imgur.com/a/tPbOqLj)
+
+![](https://imgur.com/a/tPbOqLj)
