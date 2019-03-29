@@ -28,7 +28,7 @@ public class ReceiptRecyclerViewAdapter extends RecyclerView.Adapter<ReceiptRecy
     @NonNull
     @Override
     public ReceiptViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.adapter_receipt_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.adapter_receipt_item, parent, false);
         return new ReceiptViewHolder(view);
     }
 
@@ -39,7 +39,7 @@ public class ReceiptRecyclerViewAdapter extends RecyclerView.Adapter<ReceiptRecy
         String shopName = receipt.getmShopname();
         String subtotalAmt = receipt.getmSubtotalAmt();
         String receiptDate = receipt.getmDate();
-        System.out.println(receiptDate + " --> " + shopName);
+        //System.out.println(receiptDate + " --> " + shopName);
 
         holder.receipt_name.setText(shopName);
         holder.receipt_subtotal.setText("$" + subtotalAmt);

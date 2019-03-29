@@ -1,5 +1,7 @@
 package com.example.user.payme.Objects;
 
+import java.util.Comparator;
+
 public class Payment {
     private Double mAmount;
     private String mName;
@@ -45,4 +47,25 @@ public class Payment {
 
     public String getmDate() { return this.mDate; }
     public void setmDate(String mDate) { this.mDate = mDate; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) return true;
+        if (!(o instanceof Payment)) {
+            return false;
+        }
+
+        Payment p = (Payment) o;
+        if (mName.equals(p.mName) && mDate.equals(p.mDate))
+            return true;
+        else
+            return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 17;
+        hash = 31 * hash + mName.hashCode();
+        return hash;
+    }
 }

@@ -12,7 +12,7 @@
 
         <android.support.constraint.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="300dp">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/lbl_5"
@@ -46,48 +46,6 @@
                 app:layout_constraintTop_toBottomOf="@+id/lbl_5" />
 
             <TextView
-                android:id="@+id/lbl_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="48dp"
-                android:fontFamily="@font/nunito"
-                android:text="@string/amount_owe"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="@+id/lbl_5"
-                app:layout_constraintTop_toBottomOf="@+id/paymentDetails" />
-
-            <TextView
-                android:id="@+id/amountOwe"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/nunito"
-                android:text="$ 0.00"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@+id/lbl_1"
-                app:layout_constraintEnd_toEndOf="@+id/lbl_5" />
-
-            <TextView
-                android:id="@+id/lbl_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:fontFamily="@font/nunito"
-                android:text="@string/amount_owed"
-                android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="@+id/lbl_1"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_1" />
-
-            <TextView
-                android:id="@+id/amountOwed"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/nunito"
-                android:text="$ 0.00"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="@+id/lbl_2"
-                app:layout_constraintEnd_toEndOf="@+id/amountOwe" />
-
-            <TextView
                 android:id="@+id/lbl_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -95,8 +53,8 @@
                 android:fontFamily="@font/nunito"
                 android:text="@string/nett_amount"
                 android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="@+id/lbl_2"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_2" />
+                app:layout_constraintStart_toStartOf="@+id/lbl_4"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_4" />
 
             <TextView
                 android:id="@+id/nettAmount"
@@ -106,18 +64,18 @@
                 android:text="$ 0.00"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/lbl_3"
-                app:layout_constraintEnd_toEndOf="@+id/amountOwed" />
+                app:layout_constraintEnd_toEndOf="@+id/date" />
 
             <TextView
                 android:id="@+id/lbl_4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="32dp"
                 android:fontFamily="@font/nunito"
                 android:text="@string/date"
                 android:textSize="16sp"
-                app:layout_constraintStart_toStartOf="@+id/lbl_3"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_3" />
+                app:layout_constraintStart_toStartOf="@+id/lbl_5"
+                app:layout_constraintTop_toBottomOf="@+id/paymentDetails" />
 
             <TextView
                 android:id="@+id/date"
@@ -127,7 +85,7 @@
                 android:text="DD/MM/YYYY"
                 android:textSize="16sp"
                 app:layout_constraintBottom_toBottomOf="@+id/lbl_4"
-                app:layout_constraintEnd_toEndOf="@+id/nettAmount" />
+                app:layout_constraintEnd_toEndOf="@+id/lbl_5" />
 
             <LinearLayout
                 android:id="@+id/itemDetailsLayout"
@@ -138,10 +96,11 @@
                 android:layout_marginTop="24dp"
                 android:minHeight="50dp"
                 android:orientation="vertical"
+                android:padding="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/lbl_4"></LinearLayout>
+                app:layout_constraintTop_toBottomOf="@+id/lbl_3"></LinearLayout>
 
             <Button
                 android:id="@+id/payBtn"

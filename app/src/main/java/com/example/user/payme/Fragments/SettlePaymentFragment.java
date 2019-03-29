@@ -3,11 +3,16 @@ package com.example.user.payme.Fragments;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
+import android.service.autofill.Dataset;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +35,7 @@ import com.braintreepayments.api.models.PaymentMethodNonce;
 import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Payment;
+import com.example.user.payme.Objects.User;
 import com.example.user.payme.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -40,6 +46,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,10 +59,10 @@ import java.util.Map;
 public class SettlePaymentFragment extends Fragment {
 
     private static final String NAME = "NAME";
-    private static final String AMOUNT_OWE = "AMOUNT_OWE";
-    private static final String AMOUNT_OWED = "AMOUNT_OWED";
-    private static final String PAYMENT_STATUS = "PAYMENT_STATUS";
+    private static final String NUMBER = "NUMBER";
     private static final String DATE = "DATE";
+    private static final String TOTAL_AMOUNT = "TOTAL_AMOUNT";
+    private static final String PAYMENT_STATUS = "PAYMENT_STATUS";
     private static final String RECEIPT_IDS = "RECEIPT_IDS";
 
     // TODO: Rename and change types of parameters
@@ -65,15 +72,14 @@ public class SettlePaymentFragment extends Fragment {
     private OnFragmentInteractionListener mListener;
 
     private String arg_name;
-    private String arg_amountOwe;
-    private String arg_amountOwed;
-    private String arg_status;
+    private String arg_number;
     private String arg_date;
+    private Double arg_totalAmt;
+    private String arg_status;
     private String[] arg_receiptIDs;
+    private String user_number;
     private LinearLayout itemDetailsLayout;
     private TextView paymentDetails;
-    private TextView amountOwe;
-    private TextView amountOwed;
     private TextView nettAmount;
     private TextView date;
     private Button payBtn;
@@ -81,9 +87,6 @@ public class SettlePaymentFragment extends Fragment {
     final int REQUEST_CODE = 1;
     final String mock_client_token = "eyJ2ZXJzaW9uIjoyLCJhdXRob3JpemF0aW9uRmluZ2VycHJpbnQiOiI4MzMzYmQzOTI2NTRmZDUzNmMyNjQ0MzliNTc0NmVkZGZkZWI0OWEzNDNjODA3MzU5Yjk4OTc2MjRjNThkMTA1fGNyZWF0ZWRfYXQ9MjAxOC0wNy0yNlQwMDo0MTo0Mi45ODkzNjMwNzcrMDAwMFx1MDAyNm1lcmNoYW50X2lkPTM0OHBrOWNnZjNiZ3l3MmJcdTAwMjZwdWJsaWNfa2V5PTJuMjQ3ZHY4OWJxOXZtcHIiLCJjb25maWdVcmwiOiJodHRwczovL2FwaS5zYW5kYm94LmJyYWludHJlZWdhdGV3YXkuY29tOjQ0My9tZXJjaGFudHMvMzQ4cGs5Y2dmM2JneXcyYi9jbGllbnRfYXBpL3YxL2NvbmZpZ3VyYXRpb24iLCJjaGFsbGVuZ2VzIjpbXSwiZW52aXJvbm1lbnQiOiJzYW5kYm94IiwiY2xpZW50QXBpVXJsIjoiaHR0cHM6Ly9hcGkuc2FuZGJveC5icmFpbnRyZWVnYXRld2F5LmNvbTo0NDMvbWVyY2hhbnRzLzM0OHBrOWNnZjNiZ3l3MmIvY2xpZW50X2FwaSIsImFzc2V0c1VybCI6Imh0dHBzOi8vYXNzZXRzLmJyYWludHJlZWdhdGV3YXkuY29tIiwiYXV0aFVybCI6Imh0dHBzOi8vYXV0aC52ZW5tby5zYW5kYm94LmJyYWludHJlZWdhdGV3YXkuY29tIiwiYW5hbHl0aWNzIjp7InVybCI6Imh0dHBzOi8vb3JpZ2luLWFuYWx5dGljcy1zYW5kLnNhbmRib3guYnJhaW50cmVlLWFwaS5jb20vMzQ4cGs5Y2dmM2JneXcyYiJ9LCJ0aHJlZURTZWN1cmVFbmFibGVkIjp0cnVlLCJwYXlwYWxFbmFibGVkIjp0cnVlLCJwYXlwYWwiOnsiZGlzcGxheU5hbWUiOiJBY21lIFdpZGdldHMsIEx0ZC4gKFNhbmRib3gpIiwiY2xpZW50SWQiOm51bGwsInByaXZhY3lVcmwiOiJodHRwOi8vZXhhbXBsZS5jb20vcHAiLCJ1c2VyQWdyZWVtZW50VXJsIjoiaHR0cDovL2V4YW1wbGUuY29tL3RvcyIsImJhc2VVcmwiOiJodHRwczovL2Fzc2V0cy5icmFpbnRyZWVnYXRld2F5LmNvbSIsImFzc2V0c1VybCI6Imh0dHBzOi8vY2hlY2tvdXQucGF5cGFsLmNvbSIsImRpcmVjdEJhc2VVcmwiOm51bGwsImFsbG93SHR0cCI6dHJ1ZSwiZW52aXJvbm1lbnROb05ldHdvcmsiOnRydWUsImVudmlyb25tZW50Ijoib2ZmbGluZSIsInVudmV0dGVkTWVyY2hhbnQiOmZhbHNlLCJicmFpbnRyZWVDbGllbnRJZCI6Im1hc3RlcmNsaWVudDMiLCJiaWxsaW5nQWdyZWVtZW50c0VuYWJsZWQiOnRydWUsIm1lcmNoYW50QWNjb3VudElkIjoiYWNtZXdpZGdldHNsdGRzYW5kYm94IiwiY3VycmVuY3lJc29Db2RlIjoiVVNEIn0sIm1lcmNoYW50SWQiOiIzNDhwazljZ2YzYmd5dzJiIiwidmVubW8iOiJvZmYifQ==";
     final String send_payment_details = "http://127.0.0.1/";
-    Double owe = 0.0;
-    Double owed = 0.0;
-    Double nett = 0.0;
     String amount;
     HashMap<String, String> paramHash;
 
@@ -102,8 +105,8 @@ public class SettlePaymentFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             arg_name = getArguments().getString(NAME);
-            arg_amountOwe = getArguments().getString(AMOUNT_OWE);
-            arg_amountOwed = getArguments().getString(AMOUNT_OWED);
+            arg_number = getArguments().getString(NUMBER);
+            arg_totalAmt = getArguments().getDouble(TOTAL_AMOUNT);
             arg_status = getArguments().getString(PAYMENT_STATUS);
             arg_date = getArguments().getString(DATE);
             arg_receiptIDs = getArguments().getString(RECEIPT_IDS).split(",");
@@ -128,36 +131,22 @@ public class SettlePaymentFragment extends Fragment {
 
         // Initialize widgets
         paymentDetails = view.findViewById(R.id.paymentDetails);
-        amountOwe = view.findViewById(R.id.amountOwe);
-        amountOwed = view.findViewById(R.id.amountOwed);
         nettAmount = view.findViewById(R.id.nettAmount);
         date = view.findViewById(R.id.date);
         itemDetailsLayout = view.findViewById(R.id.itemDetailsLayout);
         payBtn = view.findViewById(R.id.payBtn);
 
         paymentDetails.setText(arg_name + " & You");
-
-        if (arg_amountOwe.isEmpty()) {
-            amountOwe.setText("-");
-        } else {
-            owe = Double.parseDouble(arg_amountOwe) * -1;
-            amountOwe.setText("$ " + owe);
-        }
-        if (arg_amountOwed.isEmpty()) {
-            amountOwed.setText("-");
-        } else {
-            owed = Double.parseDouble(arg_amountOwed);
-            amountOwed.setText("$ " + owed);
-        }
-        nett = owe + owed;
-        nettAmount.setText("$ " + nett.toString());
+        nettAmount.setText("$ " + arg_totalAmt.toString());
         date.setText(arg_date);
 
-        if (nett > 0.0 || arg_status.equals("completed")) {
+        if (arg_totalAmt > 0.0 || arg_status.equals("completed")) {
             // Remove the payment button if the nett amt is positive (people owe you),
             // or when the payment status is already completed.
             payBtn.setVisibility(View.GONE);
         }
+
+        getUserNumberAndProcessReceipts();
 
         payBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -193,6 +182,140 @@ public class SettlePaymentFragment extends Fragment {
         mListener = null;
     }
 
+    private void getUserNumberAndProcessReceipts() {
+        ref.child("users").child(userId).child("number").addListenerForSingleValueEvent(new ValueEventListener() {
+
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user_number = dataSnapshot.getValue().toString();
+
+                for (String id : arg_receiptIDs) {
+                    processReceipt(id);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) { }
+        });
+    }
+
+    private void processReceipt(String id) {
+        Context context = getContext();
+        Typeface fontFace = ResourcesCompat.getFont(context, R.font.nunito);
+
+        LinearLayout receipt = new LinearLayout(context);
+        receipt.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        receipt.setOrientation(LinearLayout.VERTICAL);
+        TextView receiptTxtView = new TextView(context);
+
+        if (arg_totalAmt > 0.0) {  // search from own receipts (owed amount)
+            receiptTxtView.setText(arg_name + "'s items for this payment:");
+            receiptTxtView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+            receiptTxtView.setTypeface(fontFace, Typeface.BOLD);
+            receipt.addView(receiptTxtView);
+
+            ref.child("users").child(userId).child("receipts").child(id)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot snapshot) {
+                    long numPayees = snapshot.child("payees").getChildrenCount() + 1;  // num of payees
+                    Iterable<DataSnapshot> iterable = snapshot.child("mItemList").getChildren();
+                    for (DataSnapshot ss : iterable) {
+                        if (ss.hasChild("mBelongsTo")) {
+                            if (ss.child("mBelongsTo").getValue().toString().equals(arg_name)) {
+                                String itemName = ss.child("mName").getValue().toString();
+                                String amt = ss.child("mPrice").getValue().toString();
+                                setAddView(receipt, itemName, amt);
+                            }
+                        } else {  // shared item
+                            double sharedPrice = 0.0;
+                            String itemName = ss.child("mName").getValue().toString();
+                            itemName += " (shared)";
+                            String amt = ss.child("mPrice").getValue().toString();
+                            sharedPrice = Double.parseDouble(amt) / numPayees;
+                            setAddView(receipt, itemName, String.format("%.2f", sharedPrice));
+                        }
+                    }
+
+                    itemDetailsLayout.addView(receipt);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {  }
+            });
+        } else {
+            // to-do (owe amount)
+            receiptTxtView.setText("Your items for this payment:");
+            receiptTxtView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f);
+            receiptTxtView.setTypeface(fontFace, Typeface.BOLD);
+            receipt.addView(receiptTxtView);
+
+            Query userQuery = ref.child("users").orderByChild("number").equalTo(arg_number);
+            userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot querySnapshot) {   // query code for user
+                    if (querySnapshot.exists()) {
+                        Iterable<DataSnapshot> iterable = querySnapshot.getChildren();
+
+                        for (DataSnapshot user : iterable) {
+                            long numPayees = user.child("receipts").child(id).child("payees")
+                                    .getChildrenCount() + 1;  // num of payees
+                            Iterable<DataSnapshot> payees = user.child("receipts").child(id)
+                                    .child("payees").getChildren();
+                            Iterable<DataSnapshot> itemList = user.child("receipts").child(id)
+                                    .child("mItemList").getChildren();
+
+                            String payeeName = "";
+                            for (DataSnapshot p_ss : payees) {
+                                if (p_ss.child("mNumber").getValue().toString().equals(user_number)) {
+                                    payeeName = p_ss.child("mName").getValue().toString();
+                                }
+                            }
+
+                            for (DataSnapshot ss : itemList) {
+                                if (ss.hasChild("mBelongsTo")) {
+                                    if (ss.child("mBelongsTo").getValue().toString().equals(payeeName)) {
+                                        String itemName = ss.child("mName").getValue().toString();
+                                        String amt = ss.child("mPrice").getValue().toString();
+                                        setAddView(receipt, itemName, amt);
+                                    }
+                                } else {  // shared item
+                                    double sharedPrice = 0.0;
+                                    String itemName = ss.child("mName").getValue().toString();
+                                    itemName += " (shared)";
+                                    String amt = ss.child("mPrice").getValue().toString();
+                                    sharedPrice = Double.parseDouble(amt) / numPayees;
+                                    setAddView(receipt, itemName, String.format("%.2f", sharedPrice));
+                                }
+                            }
+                        }
+
+                        itemDetailsLayout.addView(receipt);
+
+                        //Log.d("ABC", querySnapshot.getValue().toString());
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError queryError) {  }
+            });
+        }
+    }
+
+    private void setAddView(LinearLayout layout, String itemName, String amt) {
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        final View receiptView = inflater.inflate(R.layout.settlepayment_receipt_item, null);
+        layout.addView(receiptView);
+
+        TextView mItemName = receiptView.findViewById(R.id.item_name);
+        TextView mItemAmt = receiptView.findViewById(R.id.item_amt);
+
+        mItemName.setText(itemName);
+        mItemAmt.setText(amt);
+
+    }
+
     public void onBraintreeSubmit() {
         DropInRequest dropInRequest = new DropInRequest().clientToken(mock_client_token);
         startActivityForResult(dropInRequest.getIntent(getContext()), REQUEST_CODE);
@@ -209,10 +332,10 @@ public class SettlePaymentFragment extends Fragment {
 
                 // Send payment price with the nonce
                 // use the result to update your UI and send the payment method nonce to your server
-                if (nett < 0.0)
+                if (arg_totalAmt < 0.0)
                     amount = nettAmount.getText().toString().substring(2);
-                 else
-                     amount = nettAmount.getText().toString().substring(1);
+                else
+                    amount = nettAmount.getText().toString().substring(1);
 
                 paramHash.put("amount", amount);
                 paramHash.put("nonce", stringNonce);
@@ -236,9 +359,9 @@ public class SettlePaymentFragment extends Fragment {
                 @Override
                 public void onResponse(String response) {
                     if (response.contains("Successful")) {
-                        Toast.makeText(getContext(), "Payment successful.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Payment Successful.", Toast.LENGTH_LONG).show();
                     } else
-                        Toast.makeText(getContext(), "Payment failed", Toast.LENGTH_LONG).show();
+                        Toast.makeText(getContext(), "Payment Failed", Toast.LENGTH_LONG).show();
                     Log.d("SEND PAYMENT DETAILS ", "Final Response: " + response.toString());
                 }
             }, new Response.ErrorListener() {
