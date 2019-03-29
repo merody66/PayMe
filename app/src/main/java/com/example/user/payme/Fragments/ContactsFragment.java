@@ -111,6 +111,7 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
         currentUser = auth.getCurrentUser();
         userId = currentUser.getUid();
 
+        contactsList = new ArrayList<>();
         setHasOptionsMenu(true);
 
         // Set title bar
@@ -136,12 +137,20 @@ public class ContactsFragment extends Fragment implements ContactClickListener, 
 
         String[] PERMISSIONS = { Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS };
 
-        // Request for permission to read or write to user's contacts
-        if (!hasPermissions(getActivity(), PERMISSIONS)) {  // if permission is not granted
+        listView = view.findViewById(R.id.contactList);
+        searchContact = view.findViewById(R.id.searchContact);
+
+        if (!hasPermissions(getActivity(), PERMISSIONS)) { // if permission is not granted
+            // Request for permission to read or write to user's contacts
             requestPermissions(PERMISSIONS, PERMISSION_ALL);
         } else {  // if granted
             initEverything();
         }
+
+
+            GetContactsIntoArrayList();
+            mAdapter = new ContactAdapter(getActivity(), contactsList);
+            listView.setAdapter(mAdapter);
 
         return view;
     }
