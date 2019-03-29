@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/edit_scroll_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:scrollbars="vertical">
+
+    <LinearLayout
+        android:id="@+id/parent_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/editViewShopname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/nunito"
+                android:text="Shop name"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <EditText
+                android:id="@+id/editShopname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:ems="10"
+                android:fontFamily="@font/nunito"
+                android:hint="Shopname"
+                android:inputType="textCapSentences|textAutoCorrect|textAutoComplete"
+                android:textSize="12sp"
+                android:typeface="normal"
+                app:layout_constraintBaseline_toBaselineOf="@+id/editViewShopname"
+                app:layout_constraintStart_toEndOf="@+id/editViewShopname" />
+
+            <TextView
+                android:id="@+id/editViewDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="@font/nunito"
+                android:text="Date"
+                app:layout_constraintStart_toStartOf="@+id/editViewShopname"
+                app:layout_constraintTop_toBottomOf="@+id/editViewShopname" />
+
+            <EditText
+                android:id="@+id/editDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:ems="10"
+                android:fontFamily="@font/nunito"
+                android:hint="DD/MM/YYYY"
+                android:inputType="date"
+                android:textSize="12sp"
+                android:typeface="normal"
+                app:layout_constraintBaseline_toBaselineOf="@+id/editViewDate"
+                app:layout_constraintStart_toStartOf="@+id/editShopname" />
+        </android.support.constraint.ConstraintLayout>
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/clear_field_button"
+                android:layout_width="wrap_content"
+                android:layout_height="29dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/button_dark"
+                android:fontFamily="@font/nunito"
+                android:gravity="center"
+                android:onClick="onClear"
+                android:text="@string/clear"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/add_field_button"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="parent" />
+
+            <Button
+                android:id="@+id/add_field_button"
+                android:layout_width="wrap_content"
+                android:layout_height="29dp"
+                android:background="@drawable/button"
+                android:fontFamily="@font/nunito"
+                android:gravity="center"
+                android:onClick="onAddField"
+                android:text="@string/add"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                app:layout_constraintBaseline_toBaselineOf="@+id/clear_field_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toEndOf="@+id/clear_field_button" />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </LinearLayout>
+</ScrollView>

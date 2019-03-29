@@ -1,83 +1,113 @@
 package com.example.user.payme;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
+import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.media.ExifInterface;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.user.payme.Adapters.HorizontalRecyclerViewAdapter;
+import com.example.user.payme.Adapters.ReceiptArrayAdapter;
+import com.example.user.payme.Interfaces.OnImageClickListener;
+import com.example.user.payme.Objects.Contact;
+import com.example.user.payme.Objects.Image;
+import com.example.user.payme.Objects.Receipt;
+import com.example.user.payme.Objects.ReceiptItem;
 import com.google.android.gms.vision.Frame;
 import com.google.android.gms.vision.text.Text;
 import com.google.android.gms.vision.text.TextBlock;
 import com.google.android.gms.vision.text.TextRecognizer;
 
-import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.example.user.payme.Objects.ReceiptItem;
-import com.example.user.payme.Objects.Receipt;
 
-
-
-public class ShowActivity extends AppCompatActivity {
+public class ShowActivity extends AppCompatActivity implements OnImageClickListener {
     private static final String TAG = "ShowActivity";
     private static final int readPermissionID = 103;
-    private ArrayList<String[]> menuList = new ArrayList<>();
     private ListView mListView;
+    private RecyclerView mRecyclerView;
+    private HorizontalRecyclerViewAdapter contactAdapter;
     private TextView tvShopname;
     private TextView tvDate;
     private TextView tvGstAmt;
     private TextView tvServiceChargeAmt;
     private TextView tvSubtotalAmt;
-
+    private Button mDone_button;
     private String mShopname;
     private String mDate;
     private String mGstAmt;
     private String mServiceChargeAmt;
     private String mSubtotalAmt;
 
+    private SharedPreferences mSharedPreferences;
+    private SharedPreferences.Editor mEditor;
+    private Bitmap myBitmap;
+    private ArrayList<ReceiptItem> mUpdatedItemList;
+
+    private ReceiptArrayAdapter adapter;
+    private Receipt receipt;
+
+    private ArrayList<Contact> mContacts = new ArrayList<>();
+
+
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            Intent intent = new Intent(ShowActivity.this, MainActivity.class);
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    Intent intent = new Intent(ShowActivity.this, MainActivity.class);
                     startActivity(intent);
-                    return true;
+                    break;
                 case R.id.navigation_history:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_HISTORY_FRAGMENT);
+                    break;
                 case R.id.navigation_addNewReceipt:
                     return true;
                 case R.id.navigation_contacts:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_CONTACTS_FRAGMENT);
+                    break;
                 case R.id.navigation_account:
-                    return true;
+                    intent.putExtra("startFragment", MainActivity.REQUEST_ACCOUNT_SETTING_FRAGMENT);
+                    break;
             }
-            return false;
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+            return true;
         }
     };
 
@@ -88,6 +118,7 @@ public class ShowActivity extends AppCompatActivity {
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.toolbarTop);
         setSupportActionBar(myToolbar);
+        myToolbar.setTitleTextColor(Color.WHITE);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setSelectedItemId(R.id.navigation_addNewReceipt);
@@ -101,95 +132,230 @@ public class ShowActivity extends AppCompatActivity {
         tvGstAmt = (TextView) findViewById(R.id.gstAmt);
         tvServiceChargeAmt = (TextView) findViewById(R.id.serviceChargeAmt);
         tvSubtotalAmt = (TextView) findViewById(R.id.subtotalAmt);
+        mDone_button = (Button) findViewById(R.id.done_button);
 
-        // taken from previous activity
-        String imagePath = getIntent().getStringExtra("imagePath");
+        // initialise all basic values
+        SimpleDateFormat sdf=new SimpleDateFormat("dd/MM/yyyy");
+        mDate = sdf.format(new Date());
+        tvDate.setText(mDate);
+        mShopname = "";
+        mSubtotalAmt = "";
+        mServiceChargeAmt = "";
+        mGstAmt = "";
+        mUpdatedItemList = new ArrayList<>();
 
-        if (ActivityCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+        // Get contacts from intent
+        ArrayList<Contact> contacts = (ArrayList<Contact>) getIntent().getSerializableExtra("Contacts");
+        mContacts.addAll(contacts);
 
-            ActivityCompat.requestPermissions(ShowActivity.this,
-                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
-                    readPermissionID);
-            return;
+        // Check if coming from ChooseContactActivity or EditReceiptActivity
+        if (getIntent().getStringExtra("from_activity").equals("ChooseContactActivity")) {
+            // TODO retrieve current logged in user
+            mContacts.add(0, new Contact(0, "You", "99999999"));
+            resetContactSelected();
+
+            // Data taken from shared preferences
+            mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+            mEditor = mSharedPreferences.edit();
+            String imagePath = mSharedPreferences.getString("imagePath", "default nothing");
+            Log.d(TAG, "onCreate: from sp "+imagePath);
+            myBitmap = new Image(this, imagePath).getmBitmap();
+
+            if (ActivityCompat.checkSelfPermission(getApplicationContext(),
+                    Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(ShowActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        readPermissionID);
+                return;
+            }
+
+            initRecyclerView();
+
+            Log.d(TAG, "onCreate: started ProcessOCR");
+            new ProcessOcrAsync().execute();
+        } else {
+            Log.d(TAG, "onCreate: CAME BACK FROM EDITRECEIPT");
+            resetContactSelected();
+            receipt = (Receipt) getIntent().getSerializableExtra("receipt");
+            mShopname = receipt.getmShopname();
+            mSubtotalAmt = receipt.getmSubtotalAmt();
+            mServiceChargeAmt = receipt.getmServiceChargeAmt();
+            mGstAmt = receipt.getmGstAmt();
+            mDate = receipt.getmDate();
+            mUpdatedItemList = receipt.getmItemList();
+
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    initReceipt();
+                    initRecyclerView();
+
+                }
+            });
+
+
         }
+    }
 
-//        set imagepath and image
-//        textView = findViewById(R.id.textView5);
-//        textView.setText(imagePath);
-//        mShowPicture = (ImageView) findViewById(R.id.galleryView);
+    private void resetContactSelected(){
+        for (int i = 1; i < mContacts.size(); i++) {
+            mContacts.get(i).setSelected(false);
+        }
+        mContacts.get(0).setSelected(true);
+    }
 
-//        Bitmap myBitmap = rotateImage(imagePath);
-//        mShowPicture.setImageBitmap(myBitmap);
+    // todo can do the same for receiptadapter
+    private void initRecyclerView() {
+        Log.d(TAG, "initRecyclerView: started");
 
-        Log.d(TAG, "onCreate: started ProcessOCR");
-        ProcessOCR();
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView = findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(layoutManager);
+        contactAdapter = new HorizontalRecyclerViewAdapter(this, mContacts, this);
+        mRecyclerView.setAdapter(contactAdapter);
+    }
 
+    private void initReceipt() {
+        tvShopname.setText(mShopname);
+        tvDate.setText(mDate);
+        tvSubtotalAmt.setText(mSubtotalAmt);
+        tvServiceChargeAmt.setText(mServiceChargeAmt);
+        tvGstAmt.setText(mGstAmt);
+
+        adapter = new ReceiptArrayAdapter(this, mUpdatedItemList);
+
+        // Set user as the first user.
+        adapter.setCurrentChooseUser("You");
+        mListView.setAdapter(adapter);
+
+        mDone_button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowActivity.this, RequestPaymentActivity.class);
+                HashMap<String, ArrayList<ReceiptItem>> result = adapter.calculateAmount();
+                intent.putExtra("Contact", mContacts);
+                intent.putExtra("result", result);
+                intent.putExtra("receiptItemList", adapter.getReceiptItems());
+                intent.putExtra("receipt",receipt);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.back_appbar, menu);
-//        super.onCreateOptionsMenu(menu);
+        inflater.inflate(R.menu.show_activity_bar, menu);
+        super.onCreateOptionsMenu(menu);
         return true;
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.edit_redirect_button:
+                sendUserToEdit();
             case R.id.action_back:
                 // User chose the "Settings" item, show the app settings UI...
                 return true;
-
             default:
-                // If we got here, the user's action was not recognized.
-                // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
 
         }
     }
 
-    private Bitmap rotateImage(String imagePath) {
-        Bitmap myBitmap = null;
-        try {
-            ExifInterface exif = new ExifInterface(imagePath);
-            int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-            Log.d(TAG, "onCreate: orientation "+orientation);
-
-            Matrix matrix = new Matrix();
-            switch (orientation){
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    matrix.postRotate(90);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    matrix.postRotate(180);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    matrix.postRotate(270);
-                    break;
-                default:
-                    break;
-            }
-
-            Log.d(TAG, "onCreate: matrix "+ matrix);
-            myBitmap = BitmapFactory.decodeFile(imagePath);
-            myBitmap = Bitmap.createBitmap(myBitmap, 0 ,0, myBitmap.getWidth(), myBitmap.getHeight(), matrix, true);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return myBitmap;
+    private void sendUserToEdit(){
+        Intent intent = new Intent(ShowActivity.this, EditReceiptActivity.class);
+        intent.putExtra("shopname", mShopname);
+        intent.putExtra("date", mDate);
+        intent.putExtra("itemList", mUpdatedItemList);
+        intent.putExtra("Contacts", mContacts);
+        startActivity(intent);
+        finish();
     }
 
+    private ArrayList<Text> findPrice(SparseArray<TextBlock> items) {
+        ArrayList<Text> priceArray = new ArrayList<>();
+        Pattern datePattern = Pattern.compile("(0[1-9]|[12][0-9]|3[01])[- /.](0[1-9]|1[012])[- /.](19|20)\\d\\d");
+
+        int leastTop = Integer.MAX_VALUE;
+
+        for (int i = 0; i < items.size(); i++) {
+            TextBlock item = items.valueAt(i);
+            List<? extends Text> textComponents = item.getComponents();
+            for (Text currentText : textComponents) {
+                Log.d(TAG, "run: item "+ currentText.getValue());
+                Matcher dateMatcher = datePattern.matcher(currentText.getValue());
+                int currentTop = currentText.getBoundingBox().top;
+
+                // Find shopname which is located at the top row
+                if (currentTop < leastTop) {
+                    leastTop = currentTop;
+                    mShopname = currentText.getValue();
+                }
+
+                // Find and add all price format [Text]
+                if (currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}")) {
+                    Log.d(TAG, "run: found "+currentText.getValue());
+                    priceArray.add(currentText);
+                } else if (dateMatcher.find()) {
+                    mDate = dateMatcher.group(0);
+                }
+            }
+        }
+
+        return priceArray;
+    }
+
+    private ArrayList<ReceiptItem> findLeftItem(SparseArray<TextBlock> items, ArrayList<Text> priceArray) {
+        ArrayList<ReceiptItem> mItemList = new ArrayList<>();
+        ArrayList<String> foundItem = new ArrayList<>();
+        ReceiptItem receiptItem;
+        String itemName;
+
+        OUTER_MOST_LOOP:
+        for (int y = 0; y < priceArray.size(); y++) {
+            Text priceItem = priceArray.get(y);
+            float priceLeft = priceItem.getBoundingBox().left;
+            float priceBottom = priceItem.getBoundingBox().bottom;
+
+            for (int i = 0; i < items.size(); i++) {
+                TextBlock item = items.valueAt(i);
+                List<? extends Text> textComponents = item.getComponents();
+
+//                Log.d(TAG, "run: price "+ priceItem.getValue()+" bounding box: "+priceItem.getBoundingBox().toString());
+                for (Text currentText : textComponents) {
+                    float itemLeft = currentText.getBoundingBox().left;
+                    float itemBottom = currentText.getBoundingBox().bottom;
+
+//                    Log.d(TAG, "run: item "+ currentText.getValue()+" bounding box "+ currentText.getBoundingBox().toString());
+                    if (!currentText.getValue().matches("\\$?[o0-9]{1,2}[.,]+[o0-9]{1,2}") && (priceLeft - itemLeft) > 0) { //skip all price item and those in roughly around the same column
+                        if (priceBottom / 1.035 <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom/1.035 <= itemBottom <= priceBottom*1.035
+                            itemName = currentText.getValue();
+
+                            if (!foundItem.contains(itemName)) { // Skip those item that have already been found before
+                                Log.d(TAG, "run again: " + itemName + "     " + priceItem.getValue() + "\n");
+
+                                receiptItem = new ReceiptItem(itemName, priceItem.getValue().replaceFirst("\\$", ""));
+                                mItemList.add(receiptItem);
+                                foundItem.add(itemName);
+                                continue OUTER_MOST_LOOP;
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        return mItemList;
+    }
 
     private void ProcessOCR () {
+        Log.d(TAG, "ProcessOCR: within");
+        
         Context context = getApplicationContext();
-
-        // TODO: REMOVE SAMPLE IMAGE LATER
-        String imagePath = Environment.getExternalStorageDirectory() + "/" + Environment.DIRECTORY_DCIM + "/PayMe/sample_bakkutteh.jpg";
-        Bitmap myBitmap = rotateImage(imagePath);
         Frame frame = new Frame.Builder().setBitmap(myBitmap).build();
+
         // Create the TextRecognizer
         TextRecognizer textRecognizer = new TextRecognizer.Builder(context).build();
 
@@ -208,130 +374,118 @@ public class ShowActivity extends AppCompatActivity {
             }
         }
 
+        Log.d(TAG, "ProcessOCR: start detction");
         SparseArray<TextBlock> items = textRecognizer.detect(frame);
-        ArrayList<Text> priceArray = new ArrayList<>();
-        String[] menuArray = new String[2];
+        ArrayList<Text> priceArray;
 
-        ArrayList<ReceiptItem> mItemList = new ArrayList<>();
-        ReceiptItem receiptItem;
-
-        Pattern datePattern = Pattern.compile("(0[1-9]|[12][0-9]|3[01])[- \\/.](0[1-9]|1[012])[- \\/.](19|20)\\d\\d");
-        final Text[] resturantText = new Text[1];
-        String dateText = "";
-
+        // Check if there is item
+        // todo else what happen
         if (items.size() != 0) {
-            resturantText[0] = items.valueAt(0).getComponents().get(0); // get the first line in the item.
-            for (int i = 0; i < items.size(); i++) {
-                TextBlock item = items.valueAt(i);
-//                Log.d(TAG, "run: individual item " + item.getValue());
+            // get the first line in the item.
+            Log.d(TAG, "ProcessOCR: finding xx.xx");
+            priceArray = findPrice(items);
 
-                List<? extends Text> textComponents = item.getComponents();
-                for (Text currentText : textComponents) {
-                    Matcher dateMatcher = datePattern.matcher(currentText.getValue());
+            Log.d(TAG, "ProcessOCR: finding matching item on the left");
+            ArrayList<ReceiptItem> mItemList = findLeftItem(items, priceArray);
 
-                    // Find and add all price format [Text]
-                    if (currentText.getValue().matches("[o0-9]{1,2}.[o0-9]{2}")) {
-//                        Log.d(TAG, "ProcessOCR: found a price match "+currentText.getValue());
-                        priceArray.add(currentText);
-                    } else if (dateMatcher.find()) {
-//                        Log.d(TAG, "run: time " + currentText.getValue());
-                        dateText = dateMatcher.group(0);
-                    }
-                }
-            }
+            Log.d(TAG, "ProcessOCR: finding those 3 values");
+            mUpdatedItemList = new ArrayList<>();
+            mUpdatedItemList.addAll(mItemList);
+            boolean foundBreak = false;
 
-            for (int y = 0; y < priceArray.size(); y++) {
-                Text priceItem = priceArray.get(y);
-                float priceLeft = priceItem.getBoundingBox().left;
-                float priceBottom = priceItem.getBoundingBox().bottom;
-
-                for (int i = 0; i < items.size(); i++) {
-                    TextBlock item = items.valueAt(i);
-                    List<? extends Text> textComponents = item.getComponents();
-
-                    for (Text currentText : textComponents) {
-                        float itemLeft = currentText.getBoundingBox().left;
-                        float itemBottom = currentText.getBoundingBox().bottom;
-
-
-                        if (priceItem != currentText && (priceLeft - itemLeft) > 0) { //skip itself and those in roughly around the same column
-                            if (priceBottom <= itemBottom && itemBottom <= priceBottom * 1.035) { // priceBottom <= itemBottom <= priceBottom*1.035
-                                Log.d(TAG, "run again: " + currentText.getValue() + "     " + priceItem.getValue() + "\n");
-                                menuArray[0] = currentText.getValue();
-                                menuArray[1] = priceItem.getValue();
-                                menuList.add(menuArray);
-                                menuArray = new String[2];
-                                
-                                receiptItem = new ReceiptItem(currentText.getValue(), priceItem.getValue());
-                                mItemList.add(receiptItem);
-                                break;
-                            }
-                        }
-
-                    }
-                }
-            }
-
-//            textView.setText(stringBuilder.toString());
-//            Log.d(TAG, "ProcessOCR: everything matched " + stringBuilder.toString());
-
-            ArrayList<ReceiptItem> updatedItemList = new ArrayList<>();
-            boolean foundGST = false;
-            Pattern gstPattern = Pattern.compile("(GST).+", Pattern.CASE_INSENSITIVE);
-            Pattern serviceChargePattern = Pattern.compile("(service charge).+", Pattern.CASE_INSENSITIVE);
+            // Combined pattern to search for subtotel, gst and service charge.
+            Pattern breakPattern = Pattern.compile("(sub ?to?ta?l)|((GST).*)|(service ?charge.*)", Pattern.CASE_INSENSITIVE);
+            double subtotal = 0;
 
             for (int i = 0; i < mItemList.size(); i++) {
                 String mName = mItemList.get(i).getmName();
 
-                // TODO to a non hardcoded way
-                switch (mName) {
-                    case "SUBTTL":
-                        mSubtotalAmt = mItemList.get(i).getmPrice();
-                        tvSubtotalAmt.setText(mSubtotalAmt);
-                        continue;
+                if (breakPattern.matcher(mName).find()) {
+                    foundBreak = true;
                 }
 
-                if (gstPattern.matcher(mName).find()) {
-                    foundGST = true;
-                    mGstAmt = mItemList.get(i).getmPrice();
-                    tvGstAmt.setText(mGstAmt);
-                    continue;
-                } else if (serviceChargePattern.matcher(mName).find()) {
-                    mServiceChargeAmt = mItemList.get(i).getmPrice();
-                    tvServiceChargeAmt.setText(mServiceChargeAmt);
-                    continue;
-                }
+                if (!foundBreak) {
+                    String price = mItemList.get(i).getmPrice();
+                    price = price.replace("$", "");
+                    price = price.replace(",", "");
 
-                if (!foundGST ) {
-                    updatedItemList.add(mItemList.get(i));
+                    try {
+                        subtotal += Double.parseDouble(price);
+                    } catch (NumberFormatException e ){
+                        Log.d(TAG, "ProcessOCR: WRONG NUMBER FORMAT");
+                    }
+                } else {
+                    mUpdatedItemList.remove(mItemList.get(i));
                 }
             }
 
             Log.d(TAG, "ProcessOCR: set all the information and adapter");
-            mShopname = resturantText[0].getValue().replaceAll("\\s+","").toUpperCase();
-            tvShopname.setText(mShopname);
-            mDate = dateText;
-            tvDate.setText(mDate);
 
-//            TODO REMOVE HARDCODED VALUE
-            mShopname = "YA HUA BAK KUT TEH";
-            tvShopname.setText(mShopname);
-            mDate = "17/05/2018";
-            tvDate.setText(mDate);
-            updatedItemList = new ArrayList<>();
-            updatedItemList.add(new ReceiptItem("3 RICE", "2.40"));
-            updatedItemList.add(new ReceiptItem("1 CHINESE TEA (GLASS)", "1.80"));
-            updatedItemList.add(new ReceiptItem("1 COKE", "1.80"));
-            updatedItemList.add(new ReceiptItem("1 PRIME CUT RIBS", "11.50"));
-            updatedItemList.add(new ReceiptItem("1 RIBS", "8.50"));
-            updatedItemList.add(new ReceiptItem("2 WET TOWEL", "0.60"));
-            updatedItemList.add(new ReceiptItem("1 FRAGRANT FRIED CHICKEN WI", "6.80"));
+            // To fit more receipts with any arrangement, we are doing the calculation
+            mSubtotalAmt = String.format(Locale.ENGLISH, "%.2f", subtotal);
+            mServiceChargeAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.1);
+            mGstAmt = String.format(Locale.ENGLISH, "%.2f", subtotal * 0.07);
 
-
-            Receipt receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, updatedItemList);
-
-            ReceiptArrayAdapter adapter = new ReceiptArrayAdapter(this, updatedItemList);
-            mListView.setAdapter(adapter);
+            receipt = new Receipt(mShopname, mDate, mGstAmt, mServiceChargeAmt, mSubtotalAmt, mUpdatedItemList);
         }
+
+        
+    }
+
+    private class ProcessOcrAsync extends AsyncTask<Bitmap , Void, String> {
+
+        @Override
+        protected String doInBackground(Bitmap... bitmaps) {
+            Log.d(TAG, "doInBackground: START ASYNCTASK");
+            ProcessOCR();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            if (mUpdatedItemList.isEmpty()){
+                AlertDialog.Builder builder = new AlertDialog.Builder(ShowActivity.this);
+                builder.setMessage("Unable to detect any item/price text, please enter your own item details")
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                sendUserToEdit();
+                            }
+                        });
+
+                AlertDialog alert = builder.create();
+                alert.show();
+            } else {
+                initReceipt();
+
+                Log.d(TAG, "ProcessOCR: after setadapter");
+            }
+        }
+    }
+
+    @Override
+    public void onImageClick(String name) {
+        boolean isUserSelected;
+        View userView;
+        for (int i = 0; i < contactAdapter.getItemCount(); i++) {
+            userView = mRecyclerView.getChildAt(i);
+            isUserSelected = contactAdapter.isUserSelected(i);
+            contactAdapter.setSelectedStyle(userView, isUserSelected);
+        }
+
+        adapter.setCurrentChooseUser(name);
+        boolean isChildEnabled;
+        View childView;
+
+        for (int i = 0; i < mListView.getChildCount(); i++) {
+            childView = mListView.getChildAt(i);
+            isChildEnabled = adapter.isItemEnabled(i);
+            childView.setEnabled(isChildEnabled);
+            adapter.setSelectedStyle(childView, isChildEnabled);
+        }
+    }
+
+    @Override
+    public ArrayList<String> getItemIsEnabled() {
+        return null;
     }
 }

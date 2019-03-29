@@ -36,6 +36,10 @@ android {
     }
     productFlavors {
     }
+    lintOptions {
+        checkReleaseBuilds false // Add this
+        abortOnError false
+    }
 }
 
 
@@ -46,6 +50,7 @@ dependencies {
     implementation 'com.android.support:support-vector-drawable:27.1.1'
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.google.firebase:firebase-messaging:17.1.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
@@ -53,18 +58,35 @@ dependencies {
     implementation 'com.google.firebase:firebase-core:16.0.0'
     implementation 'com.google.firebase:firebase-auth:16.0.1'
     implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.google.firebase:firebase-storage:16.0.1'
     implementation 'com.google.cloud:google-cloud-vision:1.31.0'
     implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
     implementation 'com.google.android.gms:play-services-vision:15.0.2'
     implementation 'com.google.android.gms:play-services-auth:15.0.1'
-    //mobile vision
+
+    // mobile vision
     implementation 'commons-io:commons-io:2.5'
     implementation 'io.grpc:grpc-okhttp:1.0.1'
     implementation 'com.android.support:multidex:1.0.3'
     implementation 'com.android.support:exifinterface:27.1.1'
-    //circular image view
+    // circular image view
     implementation 'de.hdodenhof:circleimageview:2.2.0'
 
+    // sharedperference save object
+    implementation 'com.google.code.gson:gson:2.7'
+
+    // recyclerview
+    implementation "com.android.support:recyclerview-v7:27.1.1"
+
+    // card view
+    implementation 'com.android.support:cardview-v7:27.1.1'
+
+    // material design search bar
+    implementation 'com.github.mancj:MaterialSearchBar:0.7.6'
+
+    // paypal integration
+    implementation 'com.braintreepayments.api:drop-in:3.+'
+    implementation 'com.android.volley:volley:1.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

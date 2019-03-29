@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.SettlePaymentFragment">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.constraint.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:id="@+id/lbl_5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="32dp"
+                android:fontFamily="@font/nunito"
+                android:text="@string/title_payment_details"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.504"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/paymentDetails"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nunito"
+                android:text="xxxxxxxxx and You"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="@+id/lbl_5"
+                app:layout_constraintStart_toStartOf="@+id/lbl_5"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_5" />
+
+            <TextView
+                android:id="@+id/lbl_3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="@font/nunito"
+                android:text="@string/nett_amount"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/lbl_4"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_4" />
+
+            <TextView
+                android:id="@+id/nettAmount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito"
+                android:text="$ 0.00"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@+id/lbl_3"
+                app:layout_constraintEnd_toEndOf="@+id/date" />
+
+            <TextView
+                android:id="@+id/lbl_4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:fontFamily="@font/nunito"
+                android:text="@string/date"
+                android:textSize="16sp"
+                app:layout_constraintStart_toStartOf="@+id/lbl_5"
+                app:layout_constraintTop_toBottomOf="@+id/paymentDetails" />
+
+            <TextView
+                android:id="@+id/date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/nunito"
+                android:text="DD/MM/YYYY"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@+id/lbl_4"
+                app:layout_constraintEnd_toEndOf="@+id/lbl_5" />
+
+            <LinearLayout
+                android:id="@+id/itemDetailsLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="24dp"
+                android:minHeight="50dp"
+                android:orientation="vertical"
+                android:padding="20dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/lbl_3"></LinearLayout>
+
+            <Button
+                android:id="@+id/payBtn"
+                android:layout_width="140dp"
+                android:layout_height="37dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/button"
+                android:text="Make Payment"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/itemDetailsLayout" />
+
+        </android.support.constraint.ConstraintLayout>
+
+    </ScrollView>
+
+</FrameLayout>

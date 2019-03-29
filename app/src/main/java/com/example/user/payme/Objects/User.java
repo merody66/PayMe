@@ -27,8 +27,11 @@ public class User {
 
     public User(String name, String number, String email) {
         this.name = name;
+        this.profileURL = "";
         this.email = email;
         this.number = number;
+        this.notificationSetting = false;
+        this.groupList = new HashMap<>();
     }
 
     // Getters & Setters
@@ -59,6 +62,7 @@ public class User {
             this.groupList.put(grpName, contacts);
         }
     }
+    
     public void getGroupNames() {
         Iterator iterator = groupList.keySet().iterator();
 

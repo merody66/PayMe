@@ -1,64 +1,63 @@
 package com.example.user.payme.Fragments;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.user.payme.Adapters.ContactAdapter;
+import com.example.user.payme.Adapters.VerticalRecyclerViewAdapter;
+import com.example.user.payme.Interfaces.ContactClickListener;
+import com.example.user.payme.Interfaces.OnFragmentInteractionListener;
 import com.example.user.payme.MainActivity;
 import com.example.user.payme.Objects.Contact;
 import com.example.user.payme.Objects.User;
 import com.example.user.payme.R;
-import com.example.user.payme.SignupActivity;
-import com.google.android.gms.vision.text.Line;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.grpc.netty.shaded.io.netty.util.internal.SocketUtils;
+import static android.support.v7.widget.DividerItemDecoration.VERTICAL;
 
 /**
  * A simple {@link Fragment} subclass.
  * Activities that contain this fragment must implement the
- * {@link AddGroupFragment.OnFragmentInteractionListener} interface
+ * {@link OnFragmentInteractionListener} interface
  * to handle interaction events.
  * Use the {@link AddGroupFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
 public class AddGroupFragment extends Fragment {
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -69,21 +68,23 @@ public class AddGroupFragment extends Fragment {
     private String mParam2;
 
     private OnFragmentInteractionListener mListener;
+    private Menu mMenu;
 
+    Cursor cursor;
     private Button addMembersBtn;
     private EditText grpNameTxt;
-    private EditText searchContact;
     private TextView membersList;
-    private ListView contactsListView;
-    private LinearLayout groupListContainer;
+    private VerticalRecyclerViewAdapter mAdapter;
+    private RecyclerView contactsRecyclerView;
+    private LinearLayout contactsListContainer;
     private FirebaseAuth auth;
     private FirebaseDatabase db;
     private DatabaseReference ref;
 
     private ArrayList<Contact> contactsList;
     private ArrayList<Contact> selectedContacts;
-    private ContactAdapter mAdapter;
-    Cursor cursor;
+    private MaterialSearchBar searchBar;
+
 
     public AddGroupFragment() {
         // Required empty public constructor
@@ -129,10 +130,10 @@ public class AddGroupFragment extends Fragment {
         // Initialize widgets
         addMembersBtn = view.findViewById(R.id.addMembersBtn);
         grpNameTxt = view.findViewById(R.id.grpNameTxtField);
-        searchContact = view.findViewById(R.id.searchContact);
         membersList = view.findViewById(R.id.membersList);
-        contactsListView = view.findViewById(R.id.contactList);
-        groupListContainer = view.findViewById(R.id.groupListContainer);
+        searchBar = view.findViewById(R.id.searchBar);
+        contactsRecyclerView = view.findViewById(R.id.contactList);
+        contactsListContainer = view.findViewById(R.id.contactsListContainer);
 
         auth = FirebaseAuth.getInstance();
         db = FirebaseDatabase.getInstance();
@@ -140,75 +141,122 @@ public class AddGroupFragment extends Fragment {
 
         contactsList = new ArrayList<>();
         selectedContacts = new ArrayList<>();
-
         GetContactsIntoArrayList();
-        mAdapter = new ContactAdapter(getActivity(), contactsList);
-        contactsListView.setAdapter(mAdapter);
+
+        ContactClickListener listener = new ContactClickListener()
+        {
+            String msg = "";
+            @Override
+            public void onContactClick(Contact contact)
+            {
+                Toast.makeText(getActivity(), "Contact clicked: " + contact.getmName(), Toast.LENGTH_SHORT).show();
+                if (!selectedContacts.contains(contact)) {
+                    selectedContacts.add(contact);
+                    showOption(R.id.done_btn);
+                } else {
+                    selectedContacts.remove(contact);
+
+                    if (selectedContacts.size() == 0) {
+                        membersList.setText(R.string.group_members_msg);
+                        hideOption(R.id.done_btn);
+                    }
+                }
+
+                if (selectedContacts.size() != 0 ) {
+                    msg = "Selected "+String.valueOf(selectedContacts.size())+" contact(s)";
+                    membersList.setText(msg);
+                }
+            }
+        };
+
+        mAdapter = new VerticalRecyclerViewAdapter(getActivity(), contactsList, listener);
+        contactsRecyclerView.setAdapter(mAdapter);
+        contactsRecyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), VERTICAL);
+        contactsRecyclerView.addItemDecoration(decoration);
+
 
         addMembersBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                groupListContainer.setVisibility(View.VISIBLE);
+                contactsListContainer.setVisibility(View.VISIBLE);
                 setHasOptionsMenu(true);
             }
         });
 
-        searchContact.addTextChangedListener(new TextWatcher() {
+
+        searchBar.addTextChangeListener(new TextWatcher() {
             @Override
-            public void onTextChanged(CharSequence cs, int arg1, int arg2, int arg3) {
-                // When user changed the Text
-                mAdapter.getFilter().filter(cs);
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {  }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String searchText = searchBar.getText();
+                //Log.d("LOG_TAG", getClass().getSimpleName() + " text changed " + searchText);
+                mAdapter.getFilter().filter(searchText);
             }
 
             @Override
-            public void beforeTextChanged(CharSequence cs, int arg1, int arg2, int arg3) { }
+            public void afterTextChanged(Editable editable) {  }
 
-            @Override
-            public void afterTextChanged(Editable arg0) { }
         });
 
-        contactsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            String msg = "";
-
-            @Override
-            public void onItemClick(AdapterView<?> adapter, View v, int position, long id) {
-                Contact c = (Contact) adapter.getItemAtPosition(position);
-                if (!selectedContacts.contains(c)) {
-                    selectedContacts.add(c);
-                    //System.out.println(c.getmName());
-                    msg += c.getmName() + ",";
-                }
-                membersList.setText(msg);
-            }
-        });
 
         return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        this.mMenu = menu;
         inflater.inflate(R.menu.add_group_bar, menu);
+        hideOption(R.id.done_btn);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         String grpName = grpNameTxt.getText().toString().trim();
+        if (grpName.isEmpty()) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setMessage("Group name cannot be empty!")
+                    .setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            dialog.cancel();
+                        }
+                    });
+            AlertDialog alert = builder.create();
+            alert.show();
+            return false;
+        }
 
         // Handle item selection
         switch (item.getItemId()) {
             case R.id.done_btn:
                 addGroup(grpName, selectedContacts);
-                FragmentManager manager = getFragmentManager();
-                manager.popBackStack();
+                contactsListContainer.setVisibility(View.GONE);
+                grpNameTxt.setText("");
+                grpNameTxt.setFocusable(false);
+                item.setVisible(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    private void hideOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        item.setVisible(false);
+    }
+
+    private void showOption(int id) {
+        MenuItem item = mMenu.findItem(id);
+        setHasOptionsMenu(true);
+        item.setVisible(true);
+    }
+
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
         if (mListener != null) {
-            mListener.onFragmentInteraction();
+            mListener.onFragmentMessage("AddGroupFragment");
         }
     }
 
@@ -229,25 +277,10 @@ public class AddGroupFragment extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction();
-    }
 
     public void GetContactsIntoArrayList() {
 
         cursor = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null,null, null, null);
-
         while (cursor.moveToNext()) {
             String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
             String phoneNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
@@ -283,7 +316,7 @@ public class AddGroupFragment extends Fragment {
             public void onCancelled(DatabaseError databaseError) {  }
         });
 
-        Toast.makeText(getActivity(), grpName + " group added.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), grpName + " group added.", Toast.LENGTH_LONG).show();
     }
 
 }

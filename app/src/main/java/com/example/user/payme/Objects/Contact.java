@@ -1,15 +1,18 @@
 package com.example.user.payme.Objects;
 
+import java.io.Serializable;
+
 /**
  * Contact class to contain the following contact information:
  *  - Name
  *  - Profile Image Drawable
  *  - Phone Number (From Phone Directory)
  */
-public class Contact {
+public class Contact implements Serializable {
     private int mImageDrawable;
     private String mName;
     private String mPhoneNumber;
+    private boolean isSelected;
 
     public Contact() {
         // Default constructor needed
@@ -19,6 +22,14 @@ public class Contact {
         this.mImageDrawable = mImageDrawable;
         this.mName = mName;
         this.mPhoneNumber = mPhoneNumber;
+        this.isSelected = false;
+    }
+
+    public boolean getIsSelected() { return isSelected; }
+    public void setSelected(boolean selected) { isSelected = selected; }
+
+    public void toggleSelected() {
+        this.isSelected = !isSelected;
     }
 
     public int getmImageDrawable() { return this.mImageDrawable; }
